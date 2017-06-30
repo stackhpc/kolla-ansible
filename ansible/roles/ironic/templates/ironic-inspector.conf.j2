@@ -38,6 +38,9 @@ memcached_servers = {% for host in groups['memcached'] %}{{ hostvars[host]['ansi
 policy_file = {{ ironic_policy_file }}
 {% endif %}
 
+[processing]
+ramdisk_logs_dir = /var/log/kolla/ironic-inspector
+
 [iptables]
 dnsmasq_interface = {{ ironic_dnsmasq_interface }}
 
