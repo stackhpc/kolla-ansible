@@ -68,9 +68,10 @@
             "owner": "td-agent",
             "perm": "0600"
         },{% endif %}
+        {# Copy entire contents of output/ directory to include custom output configs. #}
         {
-            "source": "{{ container_config_directory }}/output/00-local.conf",
-            "dest": "/etc/td-agent/output/00-local.conf",
+            "source": "{{ container_config_directory }}/output/",
+            "dest": "/etc/td-agent/output",
             "owner": "td-agent",
             "perm": "0600"
         }
