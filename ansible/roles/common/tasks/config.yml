@@ -44,12 +44,18 @@
     - name: "01-es"
       enabled: "{{ enable_elasticsearch }}"
 
+- name: Find custom fluentd output config files
+  local_action:
+    module: find
+    path: "{{ node_custom_config }}/fluentd/output"
+    pattern: "*.conf"
+  register: fluentd_custom_outputs
+
 - name: Copying over custom fluentd output config files
   template:
     src: "{{ item }}"
     dest: "{{ node_config_directory }}/fluentd/output/{{ item | basename }}"
-  with_fileglob:
-    - "{{ node_custom_config }}/fluentd/output/*.conf"
+  with_items: "{{ fluentd_custom_outputs.files }}"
 
 - name: Copying over fluentd format config files
   template:
