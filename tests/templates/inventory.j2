@@ -164,6 +164,9 @@ control
 [influxdb:children]
 monitoring
 
+[prometheus:children]
+monitoring
+
 [magnum:children]
 control
 
@@ -630,3 +633,17 @@ vitrage
 
 [vitrage-ml:children]
 vitrage
+
+# Prometheus
+[prometheus-node-exporter:children]
+monitoring
+control
+compute
+network
+storage
+
+[prometheus-mysqld-exporter:children]
+mariadb
+
+[prometheus-haproxy-exporter:children]
+haproxy
