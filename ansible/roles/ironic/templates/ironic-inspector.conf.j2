@@ -21,6 +21,7 @@ user_domain_id = default
 project_name = service
 username = {{ ironic_inspector_keystone_user }}
 password = {{ ironic_inspector_keystone_password }}
+os_endpoint_type = internalURL
 
 [keystone_authtoken]
 {% if orchestration_engine == 'KUBERNETES' %}
