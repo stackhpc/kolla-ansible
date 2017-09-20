@@ -58,8 +58,6 @@
     dest: "{{ node_config_directory }}/fluentd/output/{{ item.path | basename }}"
   register: fluentd_output_custom
   with_items: "{{ find_custom_fluentd_outputs.files }}"
-  notify:
-    - Restart fluentd container
 
 - name: Copying over fluentd format config files
   template:
