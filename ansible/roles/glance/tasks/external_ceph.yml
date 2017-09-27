@@ -12,3 +12,5 @@
   with_fileglob:
     - "{{ node_custom_config }}/glance/ceph*"
   when: inventory_hostname in groups['glance-api']
+  notify:
+    - Restart glance-api container
