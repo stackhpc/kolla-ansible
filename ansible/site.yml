@@ -716,3 +716,13 @@
     - { role: skydive,
         tags: skydive,
         when: enable_skydive | bool }
+
+- name: Apply role monasca
+  gather_facts: false
+  hosts:
+    - monasca-api
+  serial: '{{ serial|default("0") }}'
+  roles:
+    - { role: monasca,
+        tags: monasca,
+        when: enable_monasca | bool }

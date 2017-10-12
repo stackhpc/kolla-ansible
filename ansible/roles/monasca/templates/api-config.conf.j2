@@ -1,0 +1,180 @@
+[DEFAULT]
+debug = {{ monasca_logging_debug }}
+
+log_dir = /var/log/kolla/monasca/monasca-api.log
+use_forwarded_for = true
+
+bind_host = {{ api_interface_address }}
+bind_port = {{ monasca_api_port }}
+
+log_config_append=/etc/monasca/api-logging.conf
+
+# Identifies the region that the Monasca API is running in.
+region = {{ openstack_region_name }}
+
+# Dispatchers to be loaded to serve restful APIs
+[dispatcher]
+versions = monasca_api.v2.reference.versions:Versions
+version_2_0 = monasca_api.v2.reference.version_2_0:Version2
+metrics = monasca_api.v2.reference.metrics:Metrics
+metrics_measurements = monasca_api.v2.reference.metrics:MetricsMeasurements
+metrics_statistics = monasca_api.v2.reference.metrics:MetricsStatistics
+metrics_names = monasca_api.v2.reference.metrics:MetricsNames
+alarm_definitions = monasca_api.v2.reference.alarm_definitions:AlarmDefinitions
+alarms = monasca_api.v2.reference.alarms:Alarms
+alarms_count = monasca_api.v2.reference.alarms:AlarmsCount
+alarms_state_history = monasca_api.v2.reference.alarms:AlarmsStateHistory
+notification_methods = monasca_api.v2.reference.notifications:Notifications
+dimension_values = monasca_api.v2.reference.metrics:DimensionValues
+dimension_names = monasca_api.v2.reference.metrics:DimensionNames
+notification_method_types = monasca_api.v2.reference.notificationstype:NotificationsType
+
+[security]
+# The roles that are allowed full access to the API.
+default_authorized_roles = user, domainuser, domainadmin, monasca-user
+
+# The roles that are allowed to only POST metrics to the API. This role would be used by the Monasca Agent.
+agent_authorized_roles = monasca-agent
+
+# The roles that are allowed to only GET metrics from the API.
+read_only_authorized_roles = monasca-read-only-user
+
+# The roles that are allowed to access the API on behalf of another tenant.
+# For example, a service can POST metrics to another tenant if they are a member of the "delegate" role.
+#delegate_authorized_roles = admin
+delegate_authorized_roles = admin, monasca-delegate
+
+[messaging]
+# The message queue driver to use
+driver = monasca_api.common.messaging.kafka_publisher:KafkaPublisher
+
+[repositories]
+# The driver to use for the metrics repository
+# Switches depending on backend database in use. Influxdb or Cassandra.
+metrics_driver = monasca_api.common.repositories.influxdb.metrics_repository:MetricsRepository
+#metrics_driver = monasca_api.common.repositories.cassandra.metrics_repository:MetricsRepository
+
+# The driver to use for the alarm definitions repository
+#alarm_definitions_driver = monasca_api.common.repositories.mysql.alarm_definitions_repository:AlarmDefinitionsRepository
+alarm_definitions_driver = monasca_api.common.repositories.sqla.alarm_definitions_repository:AlarmDefinitionsRepository
+
+# The driver to use for the alarms repository
+#alarms_driver = monasca_api.common.repositories.mysql.alarms_repository:AlarmsRepository
+alarms_driver = monasca_api.common.repositories.sqla.alarms_repository:AlarmsRepository
+
+# The driver to use for the notifications repository
+#notifications_driver = monasca_api.common.repositories.mysql.notifications_repository:NotificationsRepository
+notifications_driver = monasca_api.common.repositories.sqla.notifications_repository:NotificationsRepository
+
+# The driver to use for the notification  method type repository
+notification_method_type_driver = monasca_api.common.repositories.sqla.notification_method_type_repository:NotificationMethodTypeRepository
+
+
+[dispatcher]
+driver = v2_reference
+
+[kafka]
+# The endpoint to the kafka server
+uri = {{ monasca_kafka_host }}:{{ monasca_kafka_port }}
+
+# The topic that metrics will be published too
+metrics_topic = metrics
+
+# consumer group name
+group = api
+
+# how many times to try when error occurs
+max_retry = 1
+
+# wait time between tries when kafka goes down
+wait_time = 1
+
+# use synchronous or asynchronous connection to kafka
+async = False
+
+# send messages in bulk or send messages one by one.
+compact = False
+
+# How many partitions this connection should listen messages on, this
+# parameter is for reading from kafka. If listens on multiple partitions,
+# For example, if the client should listen on partitions 1 and 3, then the
+# configuration should look like the following:
+#   partitions = 1
+#   partitions = 3
+# default to listen on partition 0.
+partitions = 0
+
+[influxdb]
+# Only needed if Influxdb database is used for backend.
+# The IP address of the InfluxDB service.
+ip_address = {{ monasca_influxdb_database_host }}
+
+# The port number that the InfluxDB service is listening on.
+port = {{ monasca_influxdb_database_port }}
+
+# The username to authenticate with.
+user = {{ monasca_influxdb_database_user }}
+
+# The password to authenticate with.
+password = {{ monasca_influxdb_database_password }}
+
+# The name of the InfluxDB database to use.
+database_name = {{ monasca_influxdb_database_name }}
+
+#[cassandra]
+# Only needed if Cassandra database is used for backend.
+# Comma separated list of Cassandra node IP addresses. No spaces.
+#cluster_ip_addresses: 192.168.10.6
+#keyspace: monasca
+
+# Below is configuration for database.
+# The order of reading configuration for database is:
+# 1) [mysql] section
+# 2) [database]
+#    url
+# 3) [database]
+#    host = 127.0.0.1
+#    username = monapi
+#    password = password
+#    drivername = mysq+pymysql
+#    port = 3306
+#    database = mon
+#    query = ""
+
+# Seems to be a bug in using this method, prefer [database]
+#[mysql]
+#database_name = {{ monasca_api_mysql_db }}
+#hostname = {{ monasca_api_mysql_host }}
+#username = {{ monasca_api_mysql_user }}
+#password = {{ monasca_api_mysql_pw }}
+
+[database]
+# If this is not set, then an url is constructed from components below.
+# url = "mysql+pymysql://monapi:password@127.0.0.1/mon"
+host = {{ monasca_database_host }}
+username = {{ monasca_database_user }}
+password = {{ monasca_database_password }}
+drivername = mysql+pymysql
+port = {{ monasca_database_port }}
+database = {{ monasca_database_name }}
+query = ""
+
+[keystone_authtoken]
+# monasca-deploy uses this and no auth_url:
+# identity_uri = {{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_public_port }}
+auth_uri = {{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_public_port }}
+auth_url = {{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_admin_port }}
+auth_type = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = {{ monasca_keystone_user }}
+password = {{ monasca_keystone_password }}
+# monasca-deploy uses these:
+#admin_password = {{ monasca_api_os_admin_password }}
+#admin_user = {{ monasca_api_os_admin_user }}
+#admin_tenant_name = {{ monasca_api_os_admin_tenant_name }}
+
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = {{ memcache_secret_key }}
+memcached_servers = {% for host in groups['memcached'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}

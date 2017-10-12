@@ -1,0 +1,46 @@
+{
+    "command": "/usr/local/bin/gunicorn -k eventlet --worker-connections=2000 --backlog=1000 --paste /etc/monasca/api-config.ini",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/api-config.conf",
+            "dest": "/etc/monasca/api-config.conf",
+            "owner": "monasca",
+            "perm": "0600"
+        },
+        {
+            "source": "{{ container_config_directory }}/api-logging.conf",
+            "dest": "/etc/monasca/api-logging.conf",
+            "owner": "monasca",
+            "perm": "0600"
+        },
+        {
+            "source": "{{ container_config_directory }}/api-config.ini",
+            "dest": "/etc/monasca/api-config.ini",
+            "owner": "monasca",
+            "perm": "0600"
+        }
+{#,
+        {
+            "source": "{{ container_config_directory }}/policy.json",
+            "dest": "/etc/monasca/policy.json",
+            "owner": "monasca",
+            "perm": "0600",
+            "optional": true
+        }
+#}
+    ],
+    "permissions": [
+{#
+        {
+            "path": "/var/lib/monasca",
+            "owner": "monasca:monasca",
+            "recurse": true
+        },
+#}
+        {
+            "path": "/var/log/kolla/monasca",
+            "owner": "monasca:monasca",
+            "recurse": true
+        }
+    ]
+}
