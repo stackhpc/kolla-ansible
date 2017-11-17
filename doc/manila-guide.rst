@@ -360,3 +360,26 @@ CephFS Native Backend
 =====================
 
 For details, please see :ref:`external-ceph-guide`.
+
+GlusterFS
+=========
+
+Things to note when using this manila backend:
+
+* To enable this driver: ``enable_manila_backend_glusterfs_native: "yes"``
+
+* ``manila_glusterfs_pattern`` should match predefined GlusterFS volumes
+
+* passwordless ssh to via the entry in the variable
+  ``manila_glusterfs_servers`` (e.g. root@192.168.1.3)
+
+* Inside the container you must be able to mount glusterfs (it is needed for
+  delete share). This includes being able to reach (and if needed resolve)
+  the address for all Gluster bricks.
+
+* Note that the glusterfs backend requires that certificate authenticate be
+  configured, such as note `glusterfs_path_to_private_key`. This is a big
+  TODO, using a hacked version of gluster driver that turns off the auth.
+
+For more details on this backend, please see:
+https://docs.openstack.org/manila/latest/admin/glusterfs_native_driver.html
