@@ -13,7 +13,13 @@
             "owner": "manila",
             "perm": "0600",
             "optional": true
-        }
+        }{% if enable_manila_backend_ceph_native | bool %},
+        {
+            "source": "{{ container_config_directory }}/ceph.*",
+            "dest": "/etc/ceph/",
+            "owner": "manila",
+            "perm": "0700"
+        }{% endif %}
     ],
     "permissions": [
         {

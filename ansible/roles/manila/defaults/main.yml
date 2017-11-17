@@ -101,8 +101,26 @@ manila_backends:
   - name: "generic"
     driver: "generic"
     enabled: "{{ enable_manila_backend_generic | bool }}"
+    protocols:
+      - "NFS"
+      - "CIFS"
   - name: "hnas1"
     driver: "hnas"
     enabled: "{{ enable_manila_backend_hnas | bool }}"
+    protocols:
+      - "NFS"
+      - "CIFS"
+  - name: "cephfsnative1"
+    driver: "cephfs"
+    enabled: "{{ enable_manila_backend_ceph_native | bool }}"
+    protocols:
+      - "CEPHFS"
 
 manila_enabled_backends: "{{ manila_backends|selectattr('enabled', 'equalto', true)|list }}"
+
+####################
+# CephFS Native
+####################
+
+manila_cephfs_auth_id: "manila"
+manila_cephfs_cluster_name: "ceph"

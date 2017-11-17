@@ -1,6 +1,11 @@
 ---
 - include: config.yml
 
+- include: external_ceph.yml
+  when:
+    - (enable_manila_backend_ceph_native | bool)
+    - inventory_hostname in groups['manila-share']
+
 - include: bootstrap_service.yml
 
 - name: Flush handlers

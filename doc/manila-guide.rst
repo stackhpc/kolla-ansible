@@ -355,3 +355,8 @@ migration process
 For more information about how to manage shares, see the
 `OpenStack User Guide
 <http://docs.openstack.org/user-guide/index.html>`__.
+
+CephFS Native Backend
+=====================
+
+For details, please see :ref:`external-ceph-guide`.

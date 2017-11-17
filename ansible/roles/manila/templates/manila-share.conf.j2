@@ -84,3 +84,15 @@ hitachi_hnas_evs_id = {{ hnas_evs_id }}
 hitachi_hnas_evs_ip = {{ hnas_evs_ip }}
 hitachi_hnas_file_system_name = {{ hnas_file_system_name }}
 {% endif %}
+
+{% if enable_manila_backend_ceph_native | bool %}
+[cephfsnative1]
+share_backend_name = CEPHFSNATIVE1
+share_driver = manila.share.drivers.cephfs.driver.CephFSDriver
+driver_handles_share_servers = False
+cephfs_protocol_helper_type = CEPHFS
+cephfs_conf_path = /etc/ceph/ceph.conf
+cephfs_auth_id = {{ manila_cephfs_auth_id }}
+cephfs_cluster_name = {{ manila_cephfs_cluster_name }}
+cephfs_enable_snapshots = false
+{% endif %}

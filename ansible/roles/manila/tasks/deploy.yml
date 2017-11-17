@@ -8,6 +8,11 @@
         inventory_hostname in groups['manila-share'] or
         inventory_hostname in groups['manila-scheduler']
 
+- include: external_ceph.yml
+  when:
+    - (enable_manila_backend_ceph_native | bool)
+    - inventory_hostname in groups['manila-share']
+
 - include: bootstrap.yml
   when: inventory_hostname in groups['manila-api']
 
