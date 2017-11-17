@@ -121,5 +121,25 @@ manila_backends:
     protocols:
       - "NFS"
       - "CIFS"
+  - name: "glusterfsnative1"
+    driver: "glusterfs"
+    enabled: "{{ enable_manila_backend_glusterfs_native | bool }}"
+    protocols:
+      - "GLUSTERFS"
 
 manila_enabled_backends: "{{ manila_backends|selectattr('enabled', 'equalto', true)|list }}"
+
+####################
+# CephFS Native
+####################
+
+manila_cephfs_auth_id: "manila"
+manila_cephfs_cluster_name: "ceph"
+
+####################
+# GlusterFS Native
+####################
+
+manila_glusterfs_pattern: "manila-share-volume-\\d+$"
+manila_glusterfs_servers:
+  - root@localhost
