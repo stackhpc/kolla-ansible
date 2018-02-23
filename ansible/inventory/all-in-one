@@ -209,6 +209,9 @@ control
 [bifrost:children]
 deployment
 
+[zookeeper:children]
+monitoring
+
 [zun:children]
 control
 
@@ -561,6 +564,10 @@ designate
 # Placement
 [placement-api:children]
 placement
+
+# Zookeeper
+[zookeeper:children]
+zookeeper
 
 # Zun
 [zun-api:children]
