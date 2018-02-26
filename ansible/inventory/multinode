@@ -74,6 +74,9 @@ compute
 [influxdb:children]
 monitoring
 
+[kafka:children]
+control
+
 [karbor:children]
 control
 
