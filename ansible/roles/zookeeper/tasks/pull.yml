@@ -1,5 +1,5 @@
 ---
-- name: Pulling zookeeper image
+- name: Pulling zookeeper images
   kolla_docker:
     action: "pull_image"
     common_options: "{{ docker_common_options }}"
