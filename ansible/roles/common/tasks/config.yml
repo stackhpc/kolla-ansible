@@ -177,6 +177,7 @@
     - { name: "tempest", enabled: "{{ enable_tempest }}" }
     - { name: "trove", enabled: "{{ enable_trove }}" }
     - { name: "watcher", enabled: "{{ enable_watcher }}" }
+    - { name: "zookeeper", enabled: "{{ enable_zookeeper }}" }
     - { name: "zun", enabled: "{{ enable_zun }}" }
   notify:
     - Restart cron container
