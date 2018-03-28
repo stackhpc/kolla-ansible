@@ -1,0 +1,6 @@
+---
+features:
+  - Add a role for deploying Monasca, a distributed monitoring and logging as
+    a service platform. Currently this deploys the Monasca API. Other Monasca
+    services will be added in later changes.
+    See https://wiki.openstack.org/wiki/Monasca for more details.
