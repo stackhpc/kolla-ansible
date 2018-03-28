@@ -96,6 +96,9 @@ control
 [qdrouterd:children]
 control
 
+[monasca:children]
+monitoring
+
 [mongodb:children]
 control
 
@@ -425,6 +428,10 @@ murano
 
 [murano-engine:children]
 murano
+
+# Monasca
+[monasca-api:children]
+monasca
 
 # Ironic
 [ironic-api:children]
