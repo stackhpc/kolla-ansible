@@ -1,0 +1,34 @@
+---
+- name: Creating the Monasca service and endpoint
+  kolla_toolbox:
+    module_name: "kolla_keystone_service"
+    module_args:
+      service_name: "monasca"
+      service_type: "image"
+      description: "Openstack Image"
+      endpoint_region: "{{ openstack_region_name }}"
+      url: "{{ item.url }}"
+      interface: "{{ item.interface }}"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_monasca_auth }}' }}"
+    module_extra_vars:
+      openstack_monasca_auth: "{{ openstack_monasca_auth }}"
+  run_once: True
+  with_items:
+    - {'interface': 'admin', 'url': '{{ monasca_admin_endpoint }}'}
+    - {'interface': 'internal', 'url': '{{ monasca_internal_endpoint }}'}
+    - {'interface': 'public', 'url': '{{ monasca_public_endpoint }}'}
+
+- name: Creating the Monasca project, user, and role
+  kolla_toolbox:
+    module_name: "kolla_keystone_user"
+    module_args:
+      project: "service"
+      user: "{{ monasca_keystone_user }}"
+      password: "{{ monasca_keystone_password }}"
+      role: "admin"
+      region_name: "{{ openstack_region_name }}"
+      auth: "{{ '{{ openstack_monasca_auth }}' }}"
+    module_extra_vars:
+      openstack_monasca_auth: "{{ openstack_monasca_auth }}"
+  run_once: True

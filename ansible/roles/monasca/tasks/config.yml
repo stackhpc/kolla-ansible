@@ -1,0 +1,76 @@
+---
+- name: Ensuring config directories exist
+  file:
+    path: "{{ node_config_directory }}/{{ item.key }}"
+    state: "directory"
+    recurse: yes
+  when:
+    - inventory_hostname in groups[item.value.group]
+    - item.value.enabled | bool
+  with_dict: "{{ monasca_services }}"
+
+- name: Copying over config.json files for services
+  template:
+    src: "{{ item.key }}.json.j2"
+    dest: "{{ node_config_directory }}/{{ item.key }}/config.json"
+  register: monasca_config_jsons
+  when:
+    - item.value.enabled | bool
+    - inventory_hostname in groups[item.value.group]
+  with_dict: "{{ monasca_services }}"
+  notify:
+    - Restart monasca-api container
+
+- name: Copying over monasca-api configs
+  merge_configs:
+    vars:
+      service_name: "{{ item.key }}"
+    sources:
+      - "{{ role_path }}/templates/api-config.conf.j2"
+      - "{{ node_custom_config }}/global.conf"
+      - "{{ node_custom_config }}/database.conf"
+      - "{{ node_custom_config }}/messaging.conf"
+      - "{{ node_custom_config }}/api-config.conf"
+      - "{{ node_custom_config }}/monasca/api-config.conf"
+      - "{{ node_custom_config }}/monasca/{{ inventory_hostname }}/api-config.conf"
+    dest: "{{ node_config_directory }}/{{ item.key }}/api-config.conf"
+  register: monasca_confs
+  when:
+    - item.value.enabled | bool
+    - inventory_hostname in groups[item.value.group]
+    - item.key == 'monasca-api'
+  with_dict: "{{ monasca_services }}"
+  notify:
+    - Restart monasca-api container
+
+- name: Check if policies shall be overwritten
+  local_action: stat path="{{ node_custom_config }}/monasca/policy.json"
+  register: monasca_policy
+
+- name: Copying over existing policy.json
+  template:
+    src: "{{ node_custom_config }}/monasca/policy.json"
+    dest: "{{ node_config_directory }}/{{ item.key }}/policy.json"
+  register: monasca_policy_jsons
+  when:
+    - monasca_policy.stat.exists
+    - inventory_hostname in groups[item.value.group]
+  with_dict: "{{ monasca_services }}"
+  notify:
+    - Restart monasca-api container
+
+- name: Check monasca containers
+  kolla_docker:
+    action: "compare_container"
+    common_options: "{{ docker_common_options }}"
+    name: "{{ item.value.container_name }}"
+    image: "{{ item.value.image }}"
+    volumes: "{{ item.value.volumes }}"
+  register: check_monasca_containers
+  when:
+    - action != "config"
+    - inventory_hostname in groups[item.value.group]
+    - item.value.enabled | bool
+  with_dict: "{{ monasca_services }}"
+  notify:
+    - Restart monasca-api container

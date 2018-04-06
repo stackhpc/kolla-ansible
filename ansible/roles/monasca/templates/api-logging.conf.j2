@@ -1,0 +1,46 @@
+[loggers]
+keys = root, sqlalchemy, kafka
+
+[handlers]
+keys = console, file
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = {% if monasca_logging_debug %}DEBUG{% else %}INFO{% endif %}
+formatter = default
+handlers = console, file
+
+[logger_sqlalchemy]
+qualname = sqlalchemy.engine
+# "level = INFO" logs SQL queries.
+# "level = DEBUG" logs SQL queries and results.
+# "level = WARN" logs neither.  (Recommended for production systems.)
+level = {% if monasca_logging_debug %}DEBUG{% else %}INFO{% endif %}
+formatter = default
+handlers = console, file
+propagate=0
+
+[logger_kafka]
+qualname = kafka
+level = {% if monasca_logging_debug %}DEBUG{% else %}INFO{% endif %}
+formatter = default
+handlers = console, file
+propagate = 0
+
+[handler_console]
+class = logging.StreamHandler
+args = (sys.stderr,)
+level = {% if monasca_logging_debug %}DEBUG{% else %}INFO{% endif %}
+formatter = generic
+
+[handler_file]
+class = logging.handlers.RotatingFileHandler
+level = {% if monasca_logging_debug %}DEBUG{% else %}INFO{% endif %}
+formatter = generic
+# store up to 5*100MB of logs
+args = ('/var/log/kolla/monasca/monasca-api.log', 'a', 104857600, 5)
+
+[formatter_generic]
+format = %(asctime)s %(levelname)s [%(name)s][%(threadName)s] %(message)s
