@@ -11,8 +11,6 @@
   register: database
   run_once: True
   delegate_to: "{{ groups['monasca-api'][0] }}"
-  when:
-    - not use_preconfigured_databases | bool
 
 - name: Creating monasca database user and setting permissions
   kolla_toolbox:
@@ -30,11 +28,10 @@
   run_once: True
   delegate_to: "{{ groups['monasca-api'][0] }}"
   when:
-    - not use_preconfigured_databases | bool
     - database.changed
 
 - include: bootstrap_service.yml
-  when: database.changed or use_preconfigured_databases | bool
+  when: database.changed
 
 - name: Creating monasca influxdb database
   kolla_toolbox:
