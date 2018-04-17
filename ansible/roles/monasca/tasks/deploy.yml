@@ -1,0 +1,18 @@
+---
+- include: register.yml
+  when: inventory_hostname in groups['monasca-api'] or
+        inventory_hostname in groups['monasca-log-api']
+
+- include: config.yml
+  when: inventory_hostname in groups['monasca-api'] or
+        inventory_hostname in groups['monasca-log-api']
+
+- include: bootstrap.yml
+  when: inventory_hostname in groups['monasca-api']
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- include: check.yml
+  when: inventory_hostname in groups['monasca-api'] or
+        inventory_hostname in groups['monasca-log-api']
