@@ -31,6 +31,8 @@ ironic_pxe_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ dock
 ironic_pxe_tag: "{{ ironic_tag }}"
 ironic_pxe_image_full: "{{ ironic_pxe_image }}:{{ ironic_pxe_tag }}"
 
+ironic_ipxe_url_full: http://{{ api_interface_address }}:{{ ironic_ipxe_port }}
+
 ironic_inspector_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ ironic_install_type }}-ironic-inspector"
 ironic_inspector_tag: "{{ ironic_tag }}"
 ironic_inspector_image_full: "{{ ironic_inspector_image }}:{{ ironic_inspector_tag }}"

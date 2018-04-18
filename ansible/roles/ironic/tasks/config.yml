@@ -9,6 +9,7 @@
     - "ironic-conductor"
     - "ironic-inspector"
     - "ironic-pxe"
+    - "ironic-ipxe"
     - "ironic-dnsmasq"
 
 - name: Copying over config.json files for services
@@ -20,6 +21,7 @@
     - "ironic-conductor"
     - "ironic-inspector"
     - "ironic-pxe"
+    - "ironic-ipxe"
     - "ironic-dnsmasq"
 
 - name: Copying over ironic.conf
@@ -89,6 +91,17 @@
     - groups['ironic-inspector'] | length > 0
     - inventory_hostname in groups['ironic-pxe']
 
+- name: Copying httpd config
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/ironic-ipxe/httpd.conf"
+  with_first_found:
+    - "{{ node_custom_config }}/ironic/ironic-ipxe-httpd.conf"
+    - "ironic-ipxe-httpd.conf.j2"
+  when:
+    - enable_ironic_ipxe | bool
+    - inventory_hostname in groups['ironic-ipxe']
+
 - name: Check if policies shall be overwritten
   local_action: stat path="{{ node_custom_config }}/ironic/policy.json"
   run_once: True
@@ -103,5 +116,6 @@
     - "ironic-conductor"
     - "ironic-inspector"
     - "ironic-pxe"
+    - "ironic-ipxe"
   when:
     ironic_policy.stat.exists

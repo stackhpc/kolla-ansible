@@ -13,6 +13,7 @@
   when: inventory_hostname in groups[item.group]
   with_items:
     - { name: ironic_pxe, group: ironic-pxe }
+    - { name: ironic_ipxe, group: ironic-ipxe }
     - { name: ironic_api, group: ironic-api }
     - { name: ironic_conductor, group: ironic-conductor }
     - { name: ironic_inspector, group: ironic-inspector }
@@ -28,6 +29,7 @@
   when: inventory_hostname in groups[item.group]
   with_items:
     - { name: ironic_pxe, group: ironic-pxe }
+    - { name: ironic_ipxe, group: ironic-ipxe }
     - { name: ironic_api, group: ironic-api }
     - { name: ironic_conductor, group: ironic-conductor }
     - { name: ironic_inspector, group: ironic-inspector }
@@ -41,6 +43,7 @@
   when: inventory_hostname in groups[item.group]
   with_items:
     - { name: ironic_pxe, group: ironic-pxe }
+    - { name: ironic_ipxe, group: ironic-ipxe }
     - { name: ironic_api, group: ironic-api }
     - { name: ironic_conductor, group: ironic-conductor }
     - { name: ironic_inspector, group: ironic-inspector }
@@ -57,6 +60,7 @@
     - item[2]['rc'] == 1
   with_together:
     - [{ name: ironic_pxe, group: ironic-pxe },
+       { name: ironic_ipxe, group: ironic-ipxe }
        { name: ironic_api, group: ironic-api },
        { name: ironic_conductor, group: ironic-conductor },
        { name: ironic_inspector, group: ironic-inspector },
@@ -78,6 +82,7 @@
     - item[2]['rc'] == 1
   with_together:
     - [{ name: ironic_pxe, group: ironic-pxe },
+       { name: ironic_ipxe, group: ironic-ipxe },
        { name: ironic_api, group: ironic-api },
        { name: ironic_conductor, group: ironic-conductor },
        { name: ironic_inspector, group: ironic-inspector },

@@ -11,6 +11,20 @@
       - "ironic_pxe:/tftpboot/"
   when: inventory_hostname in groups['ironic-pxe']
 
+- name: Starting ironic-ipxe container
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    name: "ironic_ipxe"
+    image: "{{ ironic_pxe_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/ironic-ipxe/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "ironic_ipxe:/var/www/html"
+  when:
+    - enable_ironic_ipxe | bool
+    - inventory_hostname in groups['ironic-ipxe']
+
 - name: Starting ironic-api container
   kolla_docker:
     action: "start_container"
@@ -40,6 +54,7 @@
       - "kolla_logs:/var/log/kolla"
       - "ironic:/var/lib/ironic"
       - "ironic_pxe:/tftpboot/"
+      - "ironic_ipxe:/httpboot/"
   when: inventory_hostname in groups['ironic-conductor']
 
 - name: Starting ironic-inspector container

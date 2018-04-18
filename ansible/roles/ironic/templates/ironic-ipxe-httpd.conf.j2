@@ -1,0 +1,45 @@
+{% set server_root = '/etc/apache2' if kolla_base_distro in ['ubuntu', 'debian'] else '/etc/httpd' %}
+{% set user = 'www-data' if kolla_base_distro in ['ubuntu', 'debian'] else 'apache' %}
+
+# Apache httpd v2.4 minimal configuration
+# This can be reduced further if you remove the access log and mod_log_config
+ServerRoot "{{ server_root }}"
+ServerName {{ api_interface_address }}
+
+# Minimum modules needed
+LoadModule mpm_event_module modules/mod_mpm_event.so
+LoadModule log_config_module modules/mod_log_config.so
+LoadModule dir_module modules/mod_dir.so
+LoadModule authz_core_module modules/mod_authz_core.so
+LoadModule unixd_module modules/mod_unixd.so
+
+PidFile /tmp/httpd.pid
+
+# Comment this out if running httpd as a non root user
+User {{ user }}
+Group {{ user }}
+
+# Port to Listen on
+Listen {{ ironic_ipxe_port }}
+
+# In a basic setup httpd can only serve files from its document root
+DocumentRoot "/var/www/html"
+
+# Default file to serve
+DirectoryIndex index.html
+
+LogLevel info
+ErrorLog "|/bin/cat"
+LogFormat "%h %l %u %t \"%r\" %>s %b" common
+CustomLog "|/bin/cat" common
+
+# Never change this block
+<Directory />
+  AllowOverride None
+  Require all denied
+</Directory>
+
+# Allow documents to be served from the DocumentRoot
+<Directory "/var/www/html">
+  Require all granted
+</Directory>

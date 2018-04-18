@@ -65,3 +65,26 @@
       - "/etc/localtime:/etc/localtime:ro"
       - "ironic_pxe:/tftpboot/"
   when: inventory_hostname in groups['ironic-pxe']
+
+- name: Running Ironic-iPXE bootstrap container
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_BOOTSTRAP_IPXE:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ ironic_pxe_image_full }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_ironic_ipxe"
+    restart_policy: "never"
+    volumes:
+      - "{{ node_config_directory }}/ironic-ipxe/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "ironic_ipxe:/var/www/html/"
+      - "ironic_pxe:/tftpboot/"
+  when:
+    - enable_ironic_ipxe | bool
+    - inventory_hostname in groups['ironic-ipxe']
