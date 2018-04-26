@@ -22,7 +22,7 @@ Group {{ user }}
 Listen {{ ironic_ipxe_port }}
 
 # In a basic setup httpd can only serve files from its document root
-DocumentRoot "/var/www/html"
+DocumentRoot "/httpboot"
 
 # Default file to serve
 DirectoryIndex index.html
@@ -39,6 +39,6 @@ CustomLog "|/bin/cat" common
 </Directory>
 
 # Allow documents to be served from the DocumentRoot
-<Directory "/var/www/html">
+<Directory "/httpboot">
   Require all granted
 </Directory>

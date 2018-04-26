@@ -20,7 +20,7 @@
     volumes:
       - "{{ node_config_directory }}/ironic-ipxe/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
-      - "ironic_ipxe:/var/www/html/:ro"
+      - "ironic_ipxe:/httpboot/:ro"
   when:
     - enable_ironic_ipxe | bool
     - inventory_hostname in groups['ironic-ipxe']
