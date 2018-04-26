@@ -10,6 +10,7 @@ ServerName {{ api_interface_address }}
 LoadModule mpm_event_module modules/mod_mpm_event.so
 LoadModule log_config_module modules/mod_log_config.so
 LoadModule dir_module modules/mod_dir.so
+LoadModule authz_core_module modules/mod_authz_core.so
 LoadModule unixd_module modules/mod_unixd.so
 
 PidFile /tmp/httpd.pid
