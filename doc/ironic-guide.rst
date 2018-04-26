@@ -59,18 +59,18 @@ To enable iPXE support, set enable_ironic_ipxe in ``/etc/kolla/globals.yml``:
 
     enable_ironic_ipxe: "yes"
 
-This will create a docker container called ironic_ipxe, running the web
-server which iPXE uses to obtain it's boot images.
+This will enable deployment of a docker container called ironic_ipxe, running
+the web server which iPXE uses to obtain it's boot images.
 
 The port used for the iPXE webserver is controlled via ironic_ipxe_port in
 ``/etc/kolla/globals.yml``:
 
 ::
 
-    ironic_ipxe_port: "1234"
+    ironic_ipxe_port: "8089"
 
 Ironic will configure the DHCP settings to enable chainloading iPXE from an
-exisiting PXE environment.
+existing PXE environment.
 
 Post-deployment configuration
 =============================
