@@ -116,6 +116,5 @@
     - "ironic-conductor"
     - "ironic-inspector"
     - "ironic-pxe"
-    - "ironic-ipxe"
   when:
     ironic_policy.stat.exists
