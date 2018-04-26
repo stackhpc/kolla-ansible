@@ -172,7 +172,7 @@ influxdb_http_port: "8086"
 
 ironic_api_port: "6385"
 ironic_inspector_port: "5050"
-ironic_ipxe_port: "1234"
+ironic_ipxe_port: "8089"
 
 iscsi_port: "3260"
 
