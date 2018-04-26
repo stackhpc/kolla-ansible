@@ -103,5 +103,5 @@ tftp_master_path = /httpboot/master_images
 
 {% if enable_ironic_ipxe | bool %}
 [deploy]
-http_url = {{ ironic_ipxe_url_full }}
+http_url = {{ ironic_ipxe_url }}
 {% endif %}
