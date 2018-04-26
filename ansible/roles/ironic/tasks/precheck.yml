@@ -28,6 +28,17 @@
     - container_facts['ironic_inspector'] is not defined
     - inventory_hostname in groups['ironic-inspector']
 
+- name: Checking free port for Ironic iPXE
+  wait_for:
+    host: "{{ api_interface_address }}"
+    port: "{{ ironic_ipxe_port }}"
+    connect_timeout: 1
+    timeout: 1
+    state: stopped
+  when:
+    - container_facts['ironic_ipxe'] is not defined
+    - inventory_hostname in groups['ironic-ipxe']
+
 - name: Checking ironic-agent files exist for Ironic
   local_action: stat path="{{ node_custom_config }}/ironic/{{ item }}"
   run_once: True
