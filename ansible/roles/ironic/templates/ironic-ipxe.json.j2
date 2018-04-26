@@ -1,7 +1,7 @@
 {% set apache_conf_dir = '/etc/apache2' if kolla_base_distro in ['ubuntu', 'debian'] else '/etc/httpd' %}
 {% set apache_cmd = 'apache2' if kolla_base_distro in ['ubuntu', 'debian'] else 'httpd' %}
 {
-    "command": "{{ apache_cmd }} -DFOREGROUND -f {{ apache_conf_dir }}/httpboot.conf"
+    "command": "{{ apache_cmd }} -DFOREGROUND -f {{ apache_conf_dir }}/httpboot.conf",
     "config_files": [
         {
             "source": "{{ container_config_directory }}/httpd.conf",
