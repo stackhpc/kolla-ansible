@@ -3,6 +3,26 @@
 {
     "command": "{{ apache_cmd }} -DFOREGROUND -f {{ apache_conf_dir }}/httpboot.conf",
     "config_files": [
+{% if groups['ironic-inspector'] | length > 0 %}
+        {
+            "source": "{{ container_config_directory }}/ironic-agent.kernel",
+            "dest": "/httpboot/ironic-agent.kernel",
+            "owner": "root",
+            "perm": "0644"
+        },
+        {
+            "source": "{{ container_config_directory }}/ironic-agent.initramfs",
+            "dest": "/httpboot/ironic-agent.initramfs",
+            "owner": "root",
+            "perm": "0644"
+        },
+        {
+            "source": "{{ container_config_directory }}/inspector.ipxe",
+            "dest": "/httpboot/inspector.ipxe",
+            "owner": "root",
+            "perm": "0644"
+        },
+{% endif %}
         {
             "source": "{{ container_config_directory }}/httpd.conf",
             "dest": "{{ apache_conf_dir }}/httpboot.conf",

@@ -79,7 +79,7 @@
     - groups['ironic-inspector'] | length > 0
     - inventory_hostname in groups['ironic-pxe']
 
-- name: Copying ironic-agent kernel and initramfs
+- name: Copying ironic-agent kernel and initramfs (PXE)
   copy:
     src: "{{ node_custom_config }}/ironic/{{ item }}"
     dest: "{{ node_config_directory }}/ironic-pxe/{{ item }}"
@@ -90,6 +90,34 @@
     # Only required when Ironic inspector is in use.
     - groups['ironic-inspector'] | length > 0
     - inventory_hostname in groups['ironic-pxe']
+    - not enable_ironic_ipxe
+
+- name: Copying ironic-agent kernel and initramfs (iPXE)
+  copy:
+    src: "{{ node_custom_config }}/ironic/{{ item }}"
+    dest: "{{ node_config_directory }}/ironic-ipxe/{{ item }}"
+  with_items:
+    - "ironic-agent.kernel"
+    - "ironic-agent.initramfs"
+  when:
+    # Only required when Ironic inspector is in use.
+    - groups['ironic-inspector'] | length > 0
+    - inventory_hostname in groups['ironic-ipxe']
+    - enable_ironic_ipxe
+
+- name: Copying inspector.ipxe
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/ironic-ipxe/inspector.ipxe"
+  with_first_found:
+    - "{{ node_custom_config }}/ironic/inspector.ipxe"
+    - "{{ node_custom_config }}/ironic/{{ inventory_hostname }}/inspector.ipxe"
+    - "inspector.ipxe.j2"
+  when:
+    # Only required when Ironic inspector is in use.
+    - groups['ironic-inspector'] | length > 0
+    - inventory_hostname in groups['ironic-ipxe']
+    - enable_ironic_ipxe
 
 - name: Copying httpd config
   template:
