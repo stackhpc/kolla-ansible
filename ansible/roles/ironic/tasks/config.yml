@@ -110,8 +110,8 @@
     src: "{{ item }}"
     dest: "{{ node_config_directory }}/ironic-ipxe/inspector.ipxe"
   with_first_found:
-    - "{{ node_custom_config }}/ironic/inspector.ipxe"
     - "{{ node_custom_config }}/ironic/{{ inventory_hostname }}/inspector.ipxe"
+    - "{{ node_custom_config }}/ironic/inspector.ipxe"
     - "inspector.ipxe.j2"
   when:
     # Only required when Ironic inspector is in use.
