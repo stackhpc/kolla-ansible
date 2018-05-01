@@ -90,7 +90,7 @@
     # Only required when Ironic inspector is in use.
     - groups['ironic-inspector'] | length > 0
     - inventory_hostname in groups['ironic-pxe']
-    - not enable_ironic_ipxe
+    - not enable_ironic_ipxe | bool
 
 - name: Copying ironic-agent kernel and initramfs (iPXE)
   copy:
@@ -103,7 +103,7 @@
     # Only required when Ironic inspector is in use.
     - groups['ironic-inspector'] | length > 0
     - inventory_hostname in groups['ironic-ipxe']
-    - enable_ironic_ipxe
+    - enable_ironic_ipxe | bool
 
 - name: Copying inspector.ipxe
   template:
@@ -117,7 +117,7 @@
     # Only required when Ironic inspector is in use.
     - groups['ironic-inspector'] | length > 0
     - inventory_hostname in groups['ironic-ipxe']
-    - enable_ironic_ipxe
+    - enable_ironic_ipxe | bool
 
 - name: Copying httpd config
   template:
