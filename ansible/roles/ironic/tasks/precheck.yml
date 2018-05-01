@@ -49,7 +49,8 @@
   when:
     # Only required when Ironic inspector is in use.
     - groups['ironic-inspector'] | length > 0
-    - inventory_hostname in groups['ironic-pxe'] or inventory_hostname in groups['ironic-ipxe']
+    - (not enable_ironic_ipxe | bool and inventory_hostname in groups['ironic-pxe']) or
+        (enable_ironic_ipxe | bool and inventory_hostname in groups['ironic-ipxe'])
   with_items:
     - "ironic-agent.kernel"
     - "ironic-agent.initramfs"
