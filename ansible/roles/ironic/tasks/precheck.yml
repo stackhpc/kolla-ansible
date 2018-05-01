@@ -4,6 +4,7 @@
     name:
       - ironic_api
       - ironic_inspector
+      - ironic_ipxe
   register: container_facts
 
 - name: Checking free port for Ironic API
