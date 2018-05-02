@@ -1,7 +1,7 @@
-{% set apache_conf_dir = '/etc/apache2' if kolla_base_distro in ['ubuntu', 'debian'] else '/etc/httpd' %}
+{% set apache_conf_dir = 'apache2/conf-enabled' if kolla_base_distro in ['ubuntu', 'debian'] else 'httpd/conf.d' %}
 {% set apache_cmd = 'apache2' if kolla_base_distro in ['ubuntu', 'debian'] else 'httpd' %}
 {
-    "command": "{{ apache_cmd }} -DFOREGROUND -f {{ apache_conf_dir }}/httpboot.conf",
+    "command": "{{ apache_cmd }} -DFOREGROUND",
     "config_files": [
 {% if groups['ironic-inspector'] | length > 0 %}
         {
@@ -25,7 +25,7 @@
 {% endif %}
         {
             "source": "{{ container_config_directory }}/httpd.conf",
-            "dest": "{{ apache_conf_dir }}/httpboot.conf",
+            "dest": "/etc/{{ apache_conf_dir }}/httpboot.conf",
             "owner": "root",
             "perm": "0644"
         }

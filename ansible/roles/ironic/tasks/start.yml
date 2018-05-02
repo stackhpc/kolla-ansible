@@ -20,6 +20,7 @@
     volumes:
       - "{{ node_config_directory }}/ironic-ipxe/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
       - "ironic_ipxe:/httpboot/"
   when:
     - enable_ironic_ipxe | bool
