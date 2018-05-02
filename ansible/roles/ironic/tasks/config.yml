@@ -78,6 +78,7 @@
     # Only required when Ironic inspector is in use.
     - groups['ironic-inspector'] | length > 0
     - inventory_hostname in groups['ironic-pxe']
+    - not enable_ironic_ipxe | bool
 
 - name: Copying ironic-agent kernel and initramfs (PXE)
   copy:
