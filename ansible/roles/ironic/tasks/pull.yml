@@ -32,4 +32,4 @@
     action: "pull_image"
     common_options: "{{ docker_common_options }}"
     image: "{{ ironic_pxe_image_full }}"
-  when: inventory_hostname in groups['ironic-pxe']
+  when: inventory_hostname in groups['ironic-pxe'] or inventory_hostname in groups['ironic-ipxe']

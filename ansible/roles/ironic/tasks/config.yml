@@ -9,6 +9,7 @@
     - "ironic-conductor"
     - "ironic-inspector"
     - "ironic-pxe"
+    - "ironic-ipxe"
     - "ironic-dnsmasq"
 
 - name: Check if policies shall be overwritten
@@ -37,6 +38,7 @@
     - "ironic-conductor"
     - "ironic-inspector"
     - "ironic-pxe"
+    - "ironic-ipxe"
     - "ironic-dnsmasq"
 
 - name: Copying over ironic.conf
@@ -90,6 +92,7 @@
     - groups['ironic-inspector'] | length > 0
     - inventory_hostname in groups['ironic-pxe']
     - not enable_ironic_pxe_uefi | bool
+    - not enable_ironic_ipxe | bool
 
 - name: Copying ironic_pxe_uefi.cfg default
   template:
@@ -103,7 +106,7 @@
     - inventory_hostname in groups['ironic-pxe']
     - enable_ironic_pxe_uefi | bool
 
-- name: Copying ironic-agent kernel and initramfs
+- name: Copying ironic-agent kernel and initramfs (PXE)
   copy:
     src: "{{ node_custom_config }}/ironic/{{ item }}"
     dest: "{{ node_config_directory }}/ironic-pxe/{{ item }}"
@@ -115,6 +118,45 @@
     - groups['ironic-inspector'] | length > 0
     - inventory_hostname in groups['ironic-pxe']
     - not enable_ironic_pxe_uefi | bool
+    - not enable_ironic_ipxe | bool
+
+- name: Copying ironic-agent kernel and initramfs (iPXE)
+  copy:
+    src: "{{ node_custom_config }}/ironic/{{ item }}"
+    dest: "{{ node_config_directory }}/ironic-ipxe/{{ item }}"
+  with_items:
+    - "ironic-agent.kernel"
+    - "ironic-agent.initramfs"
+  when:
+    # Only required when Ironic inspector is in use.
+    - groups['ironic-inspector'] | length > 0
+    - inventory_hostname in groups['ironic-ipxe']
+    - enable_ironic_ipxe | bool
+
+- name: Copying inspector.ipxe
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/ironic-ipxe/inspector.ipxe"
+  with_first_found:
+    - "{{ node_custom_config }}/ironic/{{ inventory_hostname }}/inspector.ipxe"
+    - "{{ node_custom_config }}/ironic/inspector.ipxe"
+    - "inspector.ipxe.j2"
+  when:
+    # Only required when Ironic inspector is in use.
+    - groups['ironic-inspector'] | length > 0
+    - inventory_hostname in groups['ironic-ipxe']
+    - enable_ironic_ipxe | bool
+
+- name: Copying httpd config
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/ironic-ipxe/httpd.conf"
+  with_first_found:
+    - "{{ node_custom_config }}/ironic/ironic-ipxe-httpd.conf"
+    - "ironic-ipxe-httpd.conf.j2"
+  when:
+    - enable_ironic_ipxe | bool
+    - inventory_hostname in groups['ironic-ipxe']
 
 - name: Copying over existing policy file
   template:
