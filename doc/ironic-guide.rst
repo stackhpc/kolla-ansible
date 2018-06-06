@@ -51,6 +51,27 @@ Set ironic_console_serial_speed in ``/etc/kolla/globals.yml``:
 
 .. _web_console_documentation: https://docs.openstack.org/ironic/latest/admin/console.html#node-web-console
 
+Booting with iPXE
+=================
+To enable iPXE support, set enable_ironic_ipxe in ``/etc/kolla/globals.yml``:
+
+::
+
+    enable_ironic_ipxe: "yes"
+
+This will enable deployment of a docker container called ironic_ipxe, running
+the web server which iPXE uses to obtain it's boot images.
+
+The port used for the iPXE webserver is controlled via ironic_ipxe_port in
+``/etc/kolla/globals.yml``:
+
+::
+
+    ironic_ipxe_port: "8089"
+
+Ironic will configure the DHCP settings to enable chainloading iPXE from an
+existing PXE environment.
+
 Post-deployment configuration
 =============================
 Configuration based off upstream documentation_.
