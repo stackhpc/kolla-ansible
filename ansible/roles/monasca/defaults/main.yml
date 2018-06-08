@@ -37,6 +37,8 @@ monasca_kafka: "{% for host in groups['kafka'] %}{{ hostvars[host]['ansible_' + 
 monasca_memcached_servers: "{% for host in groups['memcached'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}"
 monasca_elasticsearch_servers: "{% for host in groups['elasticsearch'] %}{{ internal_protocol }}://{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ elasticsearch_port }}{% if not loop.last %},{% endif %}{% endfor %}"
 
+monasca_metrics_topic: "metrics"
+
 ####################
 # Docker
 ####################
