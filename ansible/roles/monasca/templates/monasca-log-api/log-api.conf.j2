@@ -8,9 +8,11 @@ region = {{ openstack_region_name }}
 
 [kafka_healthcheck]
 kafka_url = {{ monasca_kafka }}
+kafka_topics = {{ monasca_raw_logs_topic }}
 
 [log_publisher]
 kafka_url = {{ monasca_kafka }}
+topics = {{ monasca_raw_logs_topic }}
 
 [monitoring]
 # TODO(dszumski): Deploy statsd to use this
