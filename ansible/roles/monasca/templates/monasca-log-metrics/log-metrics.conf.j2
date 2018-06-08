@@ -1,0 +1,57 @@
+# Generate metrics from logs. WIP - needs polishing.
+
+input {
+    kafka {
+        zk_connect => "{{ monasca_zookeeper_servers }}"
+        topic_id => "{{ monasca_raw_logs_topic }}"
+        group_id => "transformer-logstash-consumer"
+        consumer_id => "monasca_log_metrics"
+        consumer_threads => "1"
+    }
+}
+
+filter {
+    # Drop everything we don't want to create metrics for.
+    if ![log][dimensions][log_level] or [log][dimensions][log_level] in [ "debug", "trace", "info" ] {
+        drop {
+        }
+    }
+
+    mutate {
+        add_field => { "[metric][name]" => "log.%{[log][dimensions][programname]}.%{[log][dimensions][log_level]}" }
+    }
+
+    # Create a metric structure from the log dimensions
+    mutate {
+        rename => { "[log][dimensions]" => "[metric][dimensions]" }
+        rename => { "[metric][nodes]" => "[metric][dimensions][slurm_node_name]" }
+        rename => { "[metric][dimensions][Hostname]" => "[metric][dimensions][hostname]" }
+        rename => { "[metric][dimensions][programname]" => "[metric][dimensions][component]" }
+        # FIXME - required by mthresh for alarms to work?
+        add_field => { "[metric][dimensions][service]" => 2 }
+    }
+
+
+    # Remove dimensions which we chose to form the metric name to avoid duplication.
+    mutate {
+        remove_field => [ "[metric][dimensions][type]", "[metric][dimensions][log_level]", "[metric][meta]" ]
+    }
+
+    # Convert the timestamp of the event to milliseconds since epoch.
+    ruby {
+        code => "event['metric']['timestamp'] = event['@timestamp'].to_i * 1000"
+    }
+
+    # Clean up anything in the event which is not needed (including the original log).
+    mutate {
+        remove_field => [ "creation_time", "log", "@version", "@timestamp", "tags" ]
+    }
+}
+
+output {
+  kafka {
+    bootstrap_servers => "{{ monasca_kafka_servers }}"
+    topic_id => "{{ monasca_metrics_topic }}"
+    client_id => "monasca_log_metrics"
+  }
+}
