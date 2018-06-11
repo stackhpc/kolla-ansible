@@ -263,6 +263,8 @@ swift_account_server_port: "6001"
 swift_container_server_port: "6002"
 swift_rsync_port: "10873"
 
+#storm ports
+
 tacker_server_port: "9890"
 
 trove_api_port: "8779"
@@ -419,6 +421,7 @@ enable_searchlight: "no"
 enable_senlin: "no"
 enable_skydive: "no"
 enable_solum: "no"
+enable_storm: "{{ enable_monasca | bool }}"
 enable_swift: "no"
 enable_tacker: "no"
 enable_telegraf: "no"
