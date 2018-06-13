@@ -45,6 +45,16 @@ monasca_services:
       - "{{ node_config_directory }}/monasca-log-metrics/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
       - "kolla_logs:/var/log/kolla"
+  monasca-thresh:
+    container_name: monasca_thresh
+    group: monasca-thresh
+    enabled: true
+    image: "{{ monasca_thresh_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-thresh/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "monasca-thresh:/var/lib/monasca-thresh/"
+      - "kolla_logs:/var/log/kolla"
 
 ####################
 # Databases
@@ -74,9 +84,18 @@ monasca_zookeeper_servers: "{% for host in groups['zookeeper'] %}{{ hostvars[hos
 monasca_memcached_servers: "{% for host in groups['memcached'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}"
 monasca_elasticsearch_servers: "{% for host in groups['elasticsearch'] %}'{{ internal_protocol }}://{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ elasticsearch_port }}'{% if not loop.last %},{% endif %}{% endfor %}"
 
+# Kafka topics used by Monasca services
 monasca_metrics_topic: "metrics"
 monasca_raw_logs_topic: "logs"
 monasca_transformed_logs_topic: "transformed-logs"
+monasca_events_topic: "events"
+monasca_alarm_state_transitions_topic: "alarm-state-transitions"
+monasca_alarm_notifications_topic: "alarm-notifications"
+monasca_alarm_notifications_retry_topic: "retry-notifications"
+monasca_periodic_notifications_topic: "60-seconds-notifications"
+
+# TODO: exted to support many values
+monasca_periodic_notifications_period: 60
 
 ####################
 # Docker
@@ -97,6 +116,10 @@ monasca_log_api_image_full: "{{ monasca_log_api_image }}:{{ monasca_log_api_tag 
 monasca_logstash_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.logstash | default(monasca_install_type.default) }}-logstash"
 monasca_logstash_tag: "{{ monasca_tag }}"
 monasca_logstash_image_full: "{{ monasca_logstash_image }}:{{ monasca_logstash_tag }}"
+
+monasca_thresh_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.thresh | default(monasca_install_type.default) }}-monasca-thresh"
+monasca_thresh_tag: "{{ monasca_tag }}"
+monasca_thresh_image_full: "{{ monasca_thresh_image }}:{{ monasca_thresh_tag }}"
 
 ####################
 # OpenStack
