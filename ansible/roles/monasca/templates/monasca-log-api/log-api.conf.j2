@@ -7,11 +7,11 @@ debug = {{ monasca_logging_debug }}
 region = {{ openstack_region_name }}
 
 [kafka_healthcheck]
-kafka_url = {{ monasca_kafka }}
+kafka_url = {{ monasca_kafka_servers }}
 kafka_topics = {{ monasca_raw_logs_topic }}
 
 [log_publisher]
-kafka_url = {{ monasca_kafka }}
+kafka_url = {{ monasca_kafka_servers }}
 topics = {{ monasca_raw_logs_topic }}
 
 [monitoring]
