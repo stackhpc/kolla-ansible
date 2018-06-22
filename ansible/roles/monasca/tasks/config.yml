@@ -197,6 +197,25 @@
   notify:
     - Restart monasca-thresh container
 
+- name: Copying over monasca-thresh storm config
+  vars:
+    service: "{{ monasca_services['monasca-thresh'] }}"
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/monasca-thresh/storm.yml"
+    mode: "0660"
+  become: true
+  register: monasca_thresh_storm_conf
+  with_first_found:
+    - "{{ node_custom_config }}/monasca/{{ inventory_hostname }}/storm.yml"
+    - "{{ node_custom_config }}/monasca/storm.yml"
+    - "{{ role_path }}/templates/monasca-thresh/storm.yml.j2"
+  when:
+    - inventory_hostname in groups[service['group']]
+    - service.enabled | bool
+  notify:
+    - Restart monasca-thresh container
+
 - name: Copying over monasca-notification config
   vars:
     service: "{{ monasca_services['monasca-notification'] }}"

@@ -120,6 +120,7 @@
     - service.enabled | bool
     - config_json.changed | bool
       or monasca_thresh_confs.changed | bool
+      or monasca_thresh_storm_conf.changed | bool
       or monasca_thresh_container.changed | bool
 
 - name: Restart monasca-notification container
