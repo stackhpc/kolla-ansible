@@ -101,6 +101,7 @@ monasca_kafka_servers: "{% for host in groups['kafka'] %}{{ hostvars[host]['ansi
 monasca_zookeeper_servers: "{% for host in groups['zookeeper'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ zookeeper_client_port }}{% if not loop.last %},{% endif %}{% endfor %}"
 monasca_memcached_servers: "{% for host in groups['memcached'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}"
 monasca_elasticsearch_servers: "{% for host in groups['elasticsearch'] %}'{{ internal_protocol }}://{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ elasticsearch_port }}'{% if not loop.last %},{% endif %}{% endfor %}"
+monasca_storm_nimbus_servers: "{% for host in groups['storm-nimbus'] %}'{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}'{% if not loop.last %},{% endif %}{% endfor %}"
 
 # Kafka topics used by Monasca services
 monasca_metrics_topic: "metrics"
