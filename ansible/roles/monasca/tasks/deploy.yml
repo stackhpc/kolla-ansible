@@ -4,7 +4,8 @@
         inventory_hostname in groups['monasca-log-api']
 
 - include: config.yml
-  when: inventory_hostname in groups['monasca-api'] or
+  when: inventory_hostname in groups['monasca-agent'] or
+        inventory_hostname in groups['monasca-api'] or
         inventory_hostname in groups['monasca-log-api'] or
         inventory_hostname in groups['monasca-log-transformer'] or
         inventory_hostname in groups['monasca-log-persister'] or
@@ -20,7 +21,8 @@
   meta: flush_handlers
 
 - include: check.yml
-  when: inventory_hostname in groups['monasca-api'] or
+  when: inventory_hostname in groups['monasca-agent'] or
+        inventory_hostname in groups['monasca-api'] or
         inventory_hostname in groups['monasca-log-api'] or
         inventory_hostname in groups['monasca-log-transformer'] or
         inventory_hostname in groups['monasca-log-persister'] or

@@ -445,6 +445,13 @@ murano
 murano
 
 # Monasca
+[monasca-agent:children]
+compute
+control
+monitoring
+network
+storage
+
 [monasca-api:children]
 monasca
 

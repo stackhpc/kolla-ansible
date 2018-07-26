@@ -73,6 +73,38 @@ monasca_services:
       - "{{ node_config_directory }}/monasca-persister/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
       - "kolla_logs:/var/log/kolla"
+  monasca-agent-collector:
+    container_name: monasca_agent_collector
+    group: monasca-agent
+    enabled: true
+    image: "{{ monasca_agent_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-agent-collector/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/:/rootfs"
+      - "/var/run:/var/run:rw"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker/:/var/lib/docker:ro"
+      - "/dev/disk/:/dev/disk:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-agent-statsd:
+    container_name: monasca_agent_statsd
+    group: monasca-agent
+    enabled: true
+    image: "{{ monasca_agent_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-agent-statsd/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-agent-forwarder:
+    container_name: monasca_agent_forwarder
+    group: monasca-agent
+    enabled: true
+    image: "{{ monasca_agent_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-agent-forwarder/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
 
 ####################
 # Databases
@@ -116,6 +148,12 @@ monasca_periodic_notifications_topic: "60-seconds-notifications"
 # TODO: exted to support many values
 monasca_periodic_notifications_period: 60
 
+# Agent settings
+monasca_agent_max_buffer_size: 1000
+monasca_agent_backlog_send_rate: 1000
+monasca_agent_max_batch_size: 1000
+monasca_agent_check_frequency: 30
+
 ####################
 # Docker
 ####################
@@ -148,16 +186,24 @@ monasca_persister_image: "{{ docker_registry ~ '/' if docker_registry else '' }}
 monasca_persister_tag: "{{ monasca_tag }}"
 monasca_persister_image_full: "{{ monasca_persister_image }}:{{ monasca_persister_tag }}"
 
+monasca_agent_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-agent"
+monasca_agent_tag: "{{ monasca_tag }}"
+monasca_agent_image_full: "{{ monasca_agent_image }}:{{ monasca_agent_tag }}"
+
 ####################
 # OpenStack
 ####################
 monasca_openstack_auth: "{{ openstack_auth }}"
 
+monasca_metrics_project: "monasca"
+monasca_agent_user: "monasca-agent"
 monasca_keystone_user: "monasca"
 monasca_default_authorized_roles:
   - admin
 monasca_read_only_authorized_roles:
   - monasca-read-only-user
+# NOTE(dszumski): The first role in this list is assigned to the monasca-agent
+# user for monitoring the OpenStack deployment.
 monasca_agent_authorized_roles:
   - agent
 monasca_delegate_authorized_roles:

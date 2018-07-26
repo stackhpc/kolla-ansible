@@ -27,6 +27,66 @@
   notify:
     - "Restart {{ item.key }} container"
 
+- name: Copying over monasca-agent-collector config
+  vars:
+    service: "{{ monasca_services['monasca-agent-collector'] }}"
+  merge_yaml:
+    sources:
+      - "{{ role_path }}/templates/monasca-agent/{{ item }}.j2"
+      - "{{ node_custom_config }}/monasca/{{ item }}"
+      - "{{ node_custom_config }}/monasca/{{ inventory_hostname }}/{{ item }}"
+    dest: "{{ node_config_directory }}/monasca-agent/{{ item }}"
+    mode: "0660"
+  become: true
+  register: monasca_agent_collector_confs
+  with_items:
+    - agent-collector.yml
+  when:
+    - inventory_hostname in groups[service['group']]
+    - service.enabled | bool
+  notify:
+    - Restart monasca-agent-collector container
+
+- name: Copying over monasca-agent-forwarder config
+  vars:
+    service: "{{ monasca_services['monasca-agent-forwarder'] }}"
+  merge_yaml:
+    sources:
+      - "{{ role_path }}/templates/monasca-agent/{{ item }}.j2"
+      - "{{ node_custom_config }}/monasca/{{ item }}"
+      - "{{ node_custom_config }}/monasca/{{ inventory_hostname }}/{{ item }}"
+    dest: "{{ node_config_directory }}/monasca-agent/{{ item }}"
+    mode: "0660"
+  become: true
+  register: monasca_agent_forwarder_confs
+  with_items:
+    - agent-forwarder.yml
+  when:
+    - inventory_hostname in groups[service['group']]
+    - service.enabled | bool
+  notify:
+    - Restart monasca-agent-forwarder container
+
+- name: Copying over monasca-agent-statsd config
+  vars:
+    service: "{{ monasca_services['monasca-agent-statsd'] }}"
+  merge_yaml:
+    sources:
+      - "{{ role_path }}/templates/monasca-agent/{{ item }}.j2"
+      - "{{ node_custom_config }}/monasca/{{ item }}"
+      - "{{ node_custom_config }}/monasca/{{ inventory_hostname }}/{{ item }}"
+    dest: "{{ node_config_directory }}/monasca-agent/{{ item }}"
+    mode: "0660"
+  become: true
+  register: monasca_agent_statsd_confs
+  with_items:
+    - agent-statsd.yml
+  when:
+    - inventory_hostname in groups[service['group']]
+    - service.enabled | bool
+  notify:
+    - Restart monasca-agent-statsd container
+
 - name: Copying over monasca-api config
   vars:
     service: "{{ monasca_services['monasca-api'] }}"
