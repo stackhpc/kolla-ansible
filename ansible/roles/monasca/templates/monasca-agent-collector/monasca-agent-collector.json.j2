@@ -1,0 +1,18 @@
+{
+    "command": "./monasca-collector --config-file /etc/monasca/agent-collector.yml",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/agent-collector.yml",
+            "dest": "/etc/monasca/agent-collector.yml",
+            "owner": "monasca",
+            "perm": "0600"
+        }
+    ],
+    "permissions": [
+        {
+            "path": "/var/log/kolla/monasca",
+            "owner": "monasca:kolla",
+            "recurse": true
+        }
+    ]
+}
