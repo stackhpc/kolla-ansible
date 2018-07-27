@@ -30,7 +30,7 @@
   register: check_results
   when:
     - inventory_hostname in groups[item.group]
-    - item.enabled | default(true)]
+    - item.enabled | default(true)
   with_items:
     - { name: ironic_pxe, group: ironic-pxe }
     - { name: ironic_ipxe, group: ironic-ipxe, enabled: "{{ enable_ironic_ipxe | bool }}" }
