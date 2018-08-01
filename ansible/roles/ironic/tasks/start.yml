@@ -69,6 +69,7 @@
       - "{{ node_config_directory }}/ironic-inspector/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
       - "kolla_logs:/var/log/kolla"
+      - "ironic_inspector_dhcp_hosts:/var/lib/ironic-inspector/dhcp-hostsdir"
   when: inventory_hostname in groups['ironic-inspector']
 
 - name: Starting ironic-dnsmasq container
@@ -80,4 +81,5 @@
     volumes:
       - "{{ node_config_directory }}/ironic-dnsmasq/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
+      - "ironic_inspector_dhcp_hosts:/etc/dnsmasq/dhcp-hostsdir:ro"
   when: inventory_hostname in groups['ironic-inspector']

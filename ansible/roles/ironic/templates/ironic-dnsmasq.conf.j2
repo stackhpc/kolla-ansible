@@ -24,3 +24,7 @@ dhcp-option=option:bootfile-name,undionly.kpxe
 dhcp-option=option:bootfile-name,pxelinux.0
 
 {% endif %}
+
+{% if ironic_inspector_pxe_filter == 'dnsmasq' %}
+dhcp-hostsdir=/etc/dnsmasq/dhcp-hostsdir
+{% endif %}
