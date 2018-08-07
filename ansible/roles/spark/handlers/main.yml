@@ -1,0 +1,42 @@
+---
+- name: Restart spark-master container
+  vars:
+    service_name: "spark-master"
+    service: "{{ spark_services[service_name] }}"
+    config_json: "{{ spark_config_jsons.results|selectattr('item.key', 'equalto', service_name)|first }}"
+    master_container: "{{ check_spark_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+  kolla_docker:
+    action: "recreate_or_restart_container"
+    common_options: "{{ docker_common_options }}"
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    environment: "{{ service.environment }}"
+    volumes: "{{ service.volumes }}"
+  when:
+    - action != "config"
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - config_json.changed | bool
+      or spark_master_conf.changed | bool
+      or master_container.changed | bool
+
+- name: Restart spark-slave container
+  vars:
+    service_name: "spark-slave"
+    service: "{{ spark_services[service_name] }}"
+    config_json: "{{ spark_config_jsons.results|selectattr('item.key', 'equalto', service_name)|first }}"
+    slave_container: "{{ check_spark_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+  kolla_docker:
+    action: "recreate_or_restart_container"
+    common_options: "{{ docker_common_options }}"
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    environment: "{{ service.environment }}"
+    volumes: "{{ service.volumes }}"
+  when:
+    - action != "config"
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - config_json.changed | bool
+      or spark_slave_conf.changed | bool
+      or slave_container.changed | bool

@@ -1,0 +1,55 @@
+---
+spark_services:
+  spark-master:
+    container_name: spark_master
+    group: spark-master
+    enabled: true
+    image: "{{ spark_image_full }}"
+    environment:
+      # TODO: Set in dockerfile
+      SPARK_HOME: /opt/spark
+      SPARK_LOG_DIR: /var/log/kolla/spark
+      SPARK_MASTER_HOST: "{{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}"
+      SPARK_MASTER_PORT: "{{ spark_master_port }}"
+      SPARK_MASTER_WEBUI_PORT: "{{ spark_master_webui_port }}"
+      SPARK_LOCAL_DIRS: /var/lib/spark/data
+    volumes:
+      - "{{ node_config_directory }}/spark-master/:{{ container_config_directory }}/"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "spark:/var/lib/spark/data"
+      - "kolla_logs:/var/log/kolla/"
+  spark-slave:
+    container_name: spark_slave
+    group: spark-slave
+    enabled: true
+    image: "{{ spark_image_full }}"
+    environment:
+      # TODO: Set in dockerfile
+      SPARK_HOME: /opt/spark
+      SPARK_WORKER_CORES: "{{ spark_worker_cores }}"
+      SPARK_WORKER_MEMORY: "{{ spark_worker_memory }}"
+      SPARK_LOG_DIR: /var/log/kolla/spark
+      SPARK_WORKER_DIR: /var/lib/spark/data
+      #SPARK_WORKER_WEBUI_PORT: What to do? this automatically sets itself if port is used
+    volumes:
+      - "{{ node_config_directory }}/spark-slave/:{{ container_config_directory }}/"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "spark:/var/lib/spark/data"
+      - "kolla_logs:/var/log/kolla/"
+
+####################
+# Spark
+####################
+spark_worker_memory: 1g
+spark_worker_cores: 2
+# TODO: Template ENV VARS above, logging
+#spark_log_settings: 'INFO,ROLLINGFILE'
+#spark_slave_servers: "{% for host in groups['spark-slave'] %}'{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}'{% if not loop.last %},{% endif %}{% endfor %}"
+
+####################
+# Docker
+####################
+spark_install_type: "{{ kolla_install_type }}"
+spark_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ spark_install_type }}-spark"
+spark_tag: "{{ openstack_release }}"
+spark_image_full: "{{ spark_image }}:{{ spark_tag }}"

@@ -176,6 +176,7 @@
     - { name: "senlin", enabled: "{{ enable_senlin }}" }
     - { name: "skydive", enabled: "{{ enable_skydive }}" }
     - { name: "solum", enabled: "{{ enable_solum }}" }
+    - { name: "spark", enabled: "{{ enable_spark }}" }
     - { name: "storm", enabled: "{{ enable_storm }}" }
     - { name: "swift", enabled: "{{ enable_swift }}" }
     - { name: "tacker", enabled: "{{ enable_tacker }}" }

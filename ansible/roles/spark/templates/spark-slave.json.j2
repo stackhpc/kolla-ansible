@@ -1,0 +1,15 @@
+{
+    "command": "/opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://{{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}:{{ spark_master_port }}",
+    "permissions": [
+        {
+            "path": "/var/lib/spark",
+            "owner": "spark:spark",
+            "recurse": true
+        },
+        {
+            "path": "/var/log/kolla/spark",
+            "owner": "spark:spark",
+            "recurse": true
+        }
+    ]
+}

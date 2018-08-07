@@ -89,6 +89,9 @@ control
 [monasca:children]
 monitoring
 
+[spark:children]
+monitoring
+
 [storm:children]
 monitoring
 
@@ -431,6 +434,13 @@ monasca
 
 [monasca-persister:children]
 monasca
+
+# Spark
+[sparm-master:children]
+spark
+
+[sparm-slave:children]
+spark
 
 # Storm
 [storm-worker:children]
