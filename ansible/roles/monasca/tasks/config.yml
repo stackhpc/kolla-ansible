@@ -197,6 +197,26 @@
   notify:
     - Restart monasca-thresh container
 
+- name: Copying over monasca-transform config
+  vars:
+    service: "{{ monasca_services['monasca-transform'] }}"
+  merge_configs:
+    sources:
+      - "{{ role_path }}/templates/monasca-transform/{{ item }}.j2"
+      - "{{ node_custom_config }}/monasca/{{ item }}"
+      - "{{ node_custom_config }}/monasca/{{ inventory_hostname }}/{{ item }}"
+    dest: "{{ node_config_directory }}/monasca-transform/{{ item }}"
+    mode: "0660"
+  become: true
+  register: monasca_transform_confs
+  with_items:
+    - transform.conf
+  when:
+    - inventory_hostname in groups[service['group']]
+    - service.enabled | bool
+  notify:
+    - Restart monasca-transform container
+
 - name: Copying over monasca-thresh storm config
   vars:
     service: "{{ monasca_services['monasca-thresh'] }}"

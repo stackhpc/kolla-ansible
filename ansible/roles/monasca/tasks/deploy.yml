@@ -10,6 +10,7 @@
         inventory_hostname in groups['monasca-log-persister'] or
         inventory_hostname in groups['monasca-log-metrics'] or
         inventory_hostname in groups['monasca-thresh'] or
+        inventory_hostname in groups['monasca-transform'] or
         inventory_hostname in groups['monasca-notification'] or
         inventory_hostname in groups['monasca-persister']
 
@@ -26,5 +27,6 @@
         inventory_hostname in groups['monasca-log-persister'] or
         inventory_hostname in groups['monasca-log-metrics'] or
         inventory_hostname in groups['monasca-thresh'] or
+        inventory_hostname in groups['monasca-transform'] or
         inventory_hostname in groups['monasca-notification'] or
         inventory_hostname in groups['monasca-persister']

@@ -1,0 +1,18 @@
+{
+    "command": "monasca-transform /etc/monasca/transform.conf",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/transform.conf",
+            "dest": "/etc/monasca/transform.conf",
+            "owner": "monasca",
+            "perm": "0600"
+        }
+    ],
+    "permissions": [
+        {
+            "path": "/var/log/kolla/monasca",
+            "owner": "monasca:kolla",
+            "recurse": true
+        }
+    ]
+}

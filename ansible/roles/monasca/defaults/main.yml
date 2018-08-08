@@ -55,6 +55,16 @@ monasca_services:
       - "/etc/localtime:/etc/localtime:ro"
       - "monasca-thresh:/var/lib/monasca-thresh/"
       - "kolla_logs:/var/log/kolla"
+  monasca-transform:
+    container_name: monasca_transform
+    group: monasca-transform
+    enabled: true
+    image: "{{ monasca_transform_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-transform/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "monasca-transform:/var/lib/monasca-transform/"
+      - "kolla_logs:/var/log/kolla"
   monasca-notification:
     container_name: monasca_notification
     group: monasca-notification
@@ -137,6 +147,10 @@ monasca_logstash_image_full: "{{ monasca_logstash_image }}:{{ monasca_logstash_t
 monasca_thresh_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-thresh"
 monasca_thresh_tag: "{{ monasca_tag }}"
 monasca_thresh_image_full: "{{ monasca_thresh_image }}:{{ monasca_thresh_tag }}"
+
+monasca_transform_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-transform"
+monasca_transform_tag: "{{ monasca_tag }}"
+monasca_transform_image_full: "{{ monasca_transform_image }}:{{ monasca_transform_tag }}"
 
 monasca_notification_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-notification"
 monasca_notification_tag: "{{ monasca_tag }}"

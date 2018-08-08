@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add support for Monasca Transform, a metric aggregation and processing
+    service.
