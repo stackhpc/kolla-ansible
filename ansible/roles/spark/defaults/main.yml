@@ -8,10 +8,10 @@ spark_services:
     environment:
       # TODO: Set in dockerfile
       SPARK_HOME: /opt/spark
+      PYTHONPATH: ${SPARK_HOME}/python:${PYTHONPATH}
+      PYTHONPATH: ${SPARK_HOME}/python/lib/py4j-0.10.4-src.zip:${PYTHONPATH}
+      SPARK_SCALA_VERSION: "2.10"
       SPARK_LOG_DIR: /var/log/kolla/spark
-      SPARK_MASTER_HOST: "{{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}"
-      SPARK_MASTER_PORT: "{{ spark_master_port }}"
-      SPARK_MASTER_WEBUI_PORT: "{{ spark_master_webui_port }}"
       SPARK_LOCAL_DIRS: /var/lib/spark/data
     volumes:
       - "{{ node_config_directory }}/spark-master/:{{ container_config_directory }}/"
@@ -26,11 +26,11 @@ spark_services:
     environment:
       # TODO: Set in dockerfile
       SPARK_HOME: /opt/spark
-      SPARK_WORKER_CORES: "{{ spark_worker_cores }}"
-      SPARK_WORKER_MEMORY: "{{ spark_worker_memory }}"
+      PYTHONPATH: ${SPARK_HOME}/python:${PYTHONPATH}
+      PYTHONPATH: ${SPARK_HOME}/python/lib/py4j-0.10.4-src.zip:${PYTHONPATH}
+      SPARK_SCALA_VERSION: "2.10"
       SPARK_LOG_DIR: /var/log/kolla/spark
       SPARK_WORKER_DIR: /var/lib/spark/data
-      #SPARK_WORKER_WEBUI_PORT: What to do? this automatically sets itself if port is used
     volumes:
       - "{{ node_config_directory }}/spark-slave/:{{ container_config_directory }}/"
       - "/etc/localtime:/etc/localtime:ro"
@@ -40,8 +40,18 @@ spark_services:
 ####################
 # Spark
 ####################
-spark_worker_memory: 1g
-spark_worker_cores: 2
+#TODO: Set JAVA_OPTS to use zookeeper for masters - see spark-env.sh in spark devstack.
+spark_master_ip: "{{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}"
+
+spark_slave_ip: "{{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}"
+spark_slave_cores: 2
+spark_slave_memory: 1g
+# Use more sensible numbers and define in globals
+spark_slave_port: 35072
+spark_slave_webui_port: 8085
+# TODO: Extend to multi-master
+spark_masters: 'spark://{{ spark_master_ip }}:{{ spark_master_port }}'
+
 # TODO: Template ENV VARS above, logging
 #spark_log_settings: 'INFO,ROLLINGFILE'
 #spark_slave_servers: "{% for host in groups['spark-slave'] %}'{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}'{% if not loop.last %},{% endif %}{% endfor %}"

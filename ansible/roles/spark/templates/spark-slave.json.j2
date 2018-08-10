@@ -1,5 +1,13 @@
 {
-    "command": "/opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://{{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}:{{ spark_master_port }}",
+    "command": "/usr/bin/java -cp $SPARK_CLASSPATH -Xms1g -Xmx1g org.apache.spark.deploy.worker.Worker --host {{ spark_slave_ip }} --cores {{ spark_slave_cores }} --memory {{ spark_slave_memory }} --port {{ spark_slave_port }} -d /var/lib/spark --webui-port {{ spark_slave_webui_port }} --properties-file /etc/spark/spark-defaults.conf {{ spark_masters }}",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/spark-defaults.conf",
+            "dest": "/etc/spark/spark-defaults.conf",
+            "owner": "spark",
+            "perm": "0600"
+        }
+    ],
     "permissions": [
         {
             "path": "/var/lib/spark",

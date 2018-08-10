@@ -27,6 +27,45 @@
   notify:
     - "Restart {{ item.key }} container"
 
+- name: Copying over spark master config
+  vars:
+    service: "{{ spark_services['spark-master'] }}"
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/spark-master/spark-defaults.conf"
+    mode: "0660"
+  become: true
+  register: spark_master_conf
+  with_first_found:
+    - "{{ node_custom_config }}/spark/{{ inventory_hostname }}/spark-defaults.conf"
+    - "{{ node_custom_config }}/spark-defaults.conf"
+    - "spark-defaults.conf.j2"
+  when:
+    - inventory_hostname in groups[service['group']]
+    - service.enabled | bool
+  notify:
+    - Restart spark-master container
+
+# TODO: Could merge with above? Same for storm
+- name: Copying over spark slave config
+  vars:
+    service: "{{ spark_services['spark-slave'] }}"
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/spark-slave/spark-defaults.conf"
+    mode: "0660"
+  become: true
+  register: spark_slave_conf
+  with_first_found:
+    - "{{ node_custom_config }}/spark/{{ inventory_hostname }}/spark-defaults.conf"
+    - "{{ node_custom_config }}/spark-defaults.conf"
+    - "spark-defaults.conf.j2"
+  when:
+    - inventory_hostname in groups[service['group']]
+    - service.enabled | bool
+  notify:
+    - Restart spark-slave container
+
 - name: Check spark containers
   kolla_docker:
     action: "compare_container"

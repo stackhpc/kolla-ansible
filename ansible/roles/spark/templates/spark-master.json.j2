@@ -1,5 +1,13 @@
 {
-    "command": "/opt/spark/bin/spark-class org.apache.spark.deploy.master.Master",
+    "command": "/usr/bin/java -cp $SPARK_CLASSPATH -Xms1g -Xmx1g org.apache.spark.deploy.master.Master --ip {{ spark_master_ip }} --port {{ spark_master_port }} --webui-port {{ spark_master_webui_port }} --properties-file /etc/spark/spark-defaults.conf",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/spark-defaults.conf",
+            "dest": "/etc/spark/spark-defaults.conf",
+            "owner": "spark",
+            "perm": "0600"
+        }
+    ],
     "permissions": [
         {
             "path": "/var/lib/spark",
