@@ -1,0 +1,14 @@
+---
+- name: Ensuring config directory exists
+  file:
+    path: "{{ node_config_directory }}/manila-share"
+    state: "directory"
+
+- name: Copy over ceph files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/manila-share/"
+  with_fileglob:
+    - "{{ node_custom_config }}/manila/ceph*"
+  notify:
+    - Restart manila-share container
