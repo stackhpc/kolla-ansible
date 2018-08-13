@@ -8,7 +8,7 @@ offsets_max_revisions = 10
 [database]
 server_type = mysql:thin
 host = {{ database_address }}
-database_name = {{ monasca_database_name }}
+database_name = {{ monasca_transform_database_name }}
 username = {{ monasca_database_user }}
 password = {{ monasca_database_password }}
 
@@ -25,9 +25,11 @@ topic_pre_hourly = metrics_pre_hourly
 enable_pre_hourly_processor = True
 
 [pre_hourly_processor]
+late_metric_slack_time = 600
 enable_instance_usage_df_cache = True
 instance_usage_df_cache_storage_level = MEMORY_ONLY_SER_2
 enable_batch_time_filtering = True
+data_provider=monasca_transform.processor.pre_hourly_processor:PreHourlyProcessorDataProvider
 effective_batch_revision=2
 
 [service]
@@ -38,14 +40,15 @@ election_polling_frequency = 15
 enable_debug_log_entries = {{ monasca_logging_debug }}
 setup_file = /monasca-transform/setup.py
 setup_target = bdist_egg
-spark_driver = /opt/stack/monasca-transform/monasca_transform/driver/mon_metrics_kafka.py
+spark_driver = /monasca-transform-source/monasca_transform-0.15.1.dev12/devstack/files/monasca-transform/driver.py
 service_log_path=/var/log/kolla/monasca/
 service_log_filename=transform.log
 spark_event_logging_enabled = true
-spark_jars_list = /opt/spark/current/assembly/target/scala-2.10/jars/spark-streaming-kafka-0-8_2.10-2.1.1.jar,/opt/spark/current/assembly/target/scala-2.10/jars/scala-library-2.10.6.jar,/opt/spark/current/assembly/target/scala-2.10/jars/kafka_2.10-0.8.1.1.jar,/opt/spark/current/assembly/target/scala-2.10/jars/metrics-core-2.2.0.jar,/opt/spark/current/assembly/target/scala-2.10/jars/drizzle-jdbc-1.3.jar
+spark_jars_list = /opt/spark/external/kafka-0-8/target/spark-streaming-kafka-0-8_2.10-2.2.0.jar,/opt/spark/assembly/target/scala-2.10/jars/scala-library-2.10.6.jar,/opt/spark/assembly/target/scala-2.10/jars/kafka_2.10-0.8.1.1.jar,/opt/spark/assembly/target/scala-2.10/jars/metrics-core-2.2.0.jar,/opt/spark/assembly/target/scala-2.10/jars/drizzle-jdbc-1.3.jar
 # TODO: Don't assume local
 spark_master_list = spark://localhost:7077
-spark_home = /var/lib/spark/current
+spark_home = /var/lib/kolla/venv/lib/python2.7/site-packages/pyspark/
+spark_python_files = /monasca-transform-source/monasca_transform-0.15.1.dev12/scripts/monasca-transform.zip
 stream_interval = 600
 work_dir = /var/lib/monasca-transform
 enable_record_store_df_cache = True

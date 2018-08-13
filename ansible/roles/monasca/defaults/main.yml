@@ -88,6 +88,7 @@ monasca_services:
 # Databases
 ####################
 monasca_database_name: "monasca"
+monasca_transform_database_name: "monasca_transform"
 monasca_database_user: "monasca"
 monasca_database_address: "{{ database_address }}:{{ database_port }}"
 
