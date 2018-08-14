@@ -158,6 +158,9 @@ control
 [influxdb:children]
 monitoring
 
+[prometheus:children]
+monitoring
+
 [magnum:children]
 control
 
@@ -647,3 +650,30 @@ blazar
 
 [blazar-manager:children]
 blazar
+
+# Prometheus
+[prometheus-node-exporter:children]
+monitoring
+control
+compute
+network
+storage
+
+[prometheus-mysqld-exporter:children]
+mariadb
+
+[prometheus-haproxy-exporter:children]
+haproxy
+
+[prometheus-memcached-exporter:children]
+memcached
+
+[prometheus-cadvisor:children]
+monitoring
+control
+compute
+network
+storage
+
+[prometheus-alertmanager:children]
+monitoring
