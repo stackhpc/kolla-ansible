@@ -6,7 +6,7 @@ spark.broadcast.port 7105
 spark.cores.max 1
 spark.driver.memory 512m
 spark.driver.port 7110
-spark.eventLog.dir /var/log/kolla_spark
+spark.eventLog.dir /var/log/kolla/spark
 spark.executor.cores 1
 spark.executor.memory 512m
 spark.executor.port 7115
@@ -23,5 +23,5 @@ spark.worker.ui.retainedExecutors 10
 spark.worker.ui.retainedDrivers 10
 spark.ui.retainedJobs 10
 spark.ui.retainedStages 10
-spark.driver.extraJavaOptions -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:/var/log/kolla_spark/gc_driver.log
-spark.executor.extraJavaOptions -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:/var/log/kolla_spark/gc_executor.log
+spark.driver.extraJavaOptions -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:/var/log/kolla/spark/gc_driver.log
+spark.executor.extraJavaOptions -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:/var/log/kolla/spark/gc_executor.log
