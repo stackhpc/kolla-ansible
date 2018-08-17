@@ -157,32 +157,30 @@ monasca_agent_check_frequency: 30
 ####################
 # Docker
 ####################
-#FIXME: We need some sensible defaults here if anyone is ever to build these..
-monasca_install_type:
-    default: "{{ kolla_install_type }}"
+monasca_install_type: "{{ kolla_install_type }}"
 monasca_tag: "{{ openstack_release }}"
 
-monasca_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.monasca_api | default(monasca_install_type.default) }}-monasca-api"
+monasca_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-api"
 monasca_api_tag: "{{ monasca_tag }}"
 monasca_api_image_full: "{{ monasca_api_image }}:{{ monasca_api_tag }}"
 
-monasca_log_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.monasca_log_api | default(monasca_install_type.default) }}-monasca-log-api"
+monasca_log_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-log-api"
 monasca_log_api_tag: "{{ monasca_tag }}"
 monasca_log_api_image_full: "{{ monasca_log_api_image }}:{{ monasca_log_api_tag }}"
 
-monasca_logstash_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.logstash | default(monasca_install_type.default) }}-logstash"
+monasca_logstash_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-logstash"
 monasca_logstash_tag: "{{ monasca_tag }}"
 monasca_logstash_image_full: "{{ monasca_logstash_image }}:{{ monasca_logstash_tag }}"
 
-monasca_thresh_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.thresh | default(monasca_install_type.default) }}-monasca-thresh"
+monasca_thresh_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-thresh"
 monasca_thresh_tag: "{{ monasca_tag }}"
 monasca_thresh_image_full: "{{ monasca_thresh_image }}:{{ monasca_thresh_tag }}"
 
-monasca_notification_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.monasca_notification | default(monasca_install_type.default) }}-monasca-notification"
+monasca_notification_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-notification"
 monasca_notification_tag: "{{ monasca_tag }}"
 monasca_notification_image_full: "{{ monasca_notification_image }}:{{ monasca_notification_tag }}"
 
-monasca_persister_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.monasca_persister | default(monasca_install_type.default) }}-monasca-persister"
+monasca_persister_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-persister"
 monasca_persister_tag: "{{ monasca_tag }}"
 monasca_persister_image_full: "{{ monasca_persister_image }}:{{ monasca_persister_tag }}"
 
