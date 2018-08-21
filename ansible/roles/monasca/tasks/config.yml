@@ -47,6 +47,44 @@
   notify:
     - Restart monasca-agent-collector container
 
+- name: Ensuring monasca-agent collector plugin config directory exists
+  vars:
+    service: "{{ monasca_services['monasca-agent-collector'] }}"
+  file:
+    path: "{{ node_config_directory }}/monasca-agent-collector/plugins"
+    state: "directory"
+    owner: "{{ config_owner_user }}"
+    group: "{{ config_owner_group }}"
+    mode: "0770"
+    recurse: yes
+  become: true
+  when:
+    - inventory_hostname in groups[service['group']]
+    - service.enabled | bool
+
+- name: Copying over monasca-agent-collector plugin config
+  vars:
+    service: "{{ monasca_services['monasca-agent-collector'] }}"
+  merge_yaml:
+    sources:
+      - "{{ role_path }}/templates/monasca-agent-collector/plugins/{{ item }}.j2"
+      - "{{ node_custom_config }}/monasca/{{ item }}"
+      - "{{ node_custom_config }}/monasca/{{ inventory_hostname }}/{{ item }}"
+    dest: "{{ node_config_directory }}/monasca-agent-collector/plugins/{{ item }}"
+    mode: "0660"
+  become: true
+  register: monasca_agent_collector_plugin_confs
+  with_items:
+    - cpu.yml
+    - disk.yml
+    - network.yml
+    - memory.yml
+  when:
+    - inventory_hostname in groups[service['group']]
+    - service.enabled | bool
+  notify:
+    - Restart monasca-agent-collector container
+
 - name: Copying over monasca-agent-forwarder config
   vars:
     service: "{{ monasca_services['monasca-agent-forwarder'] }}"

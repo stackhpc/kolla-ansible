@@ -78,6 +78,7 @@ monasca_services:
     group: monasca-agent
     enabled: true
     image: "{{ monasca_agent_image_full }}"
+    pid_mode: "host"
     volumes:
       - "{{ node_config_directory }}/monasca-agent-collector/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"

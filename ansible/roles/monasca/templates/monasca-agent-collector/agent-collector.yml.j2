@@ -28,7 +28,7 @@ Main:
   sub_collection_warn: 6
   collector_restart_interval: 24
   non_local_traffic: True  # Required?
-  forwarder_url: http://localhost:{{ monasca_agent_forwarder_port }}
+  forwarder_url: http://127.0.0.1:{{ monasca_agent_forwarder_port }}
   listen_port: {{ monasca_agent_forwarder_port }}
 
 Statsd:
@@ -36,7 +36,7 @@ Statsd:
   non_local_traffic: True
 
 Logging:
-  log_level: {{ monasca_logging_debug }}
+  log_level: {{ 'DEBUG' if monasca_logging_debug else 'INFO' }}
   collector_log_file: /var/log/kolla/monasca/agent-collector.log
   forwarder_log_file: /var/log/kolla/monasca/agent-forwarder.log
   statsd_log_file: /var/log/kolla/monasca/agent-statsd.log

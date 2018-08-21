@@ -181,6 +181,7 @@
     - service.enabled | bool
     - config_json.changed | bool
       or monasca_agent_collector_confs.changed | bool
+      or monasca_agent_collector_plugin_confs.changed | bool
       or monasca_agent_collector_container.changed | bool
 
 - name: Restart monasca-agent-forwarder container
