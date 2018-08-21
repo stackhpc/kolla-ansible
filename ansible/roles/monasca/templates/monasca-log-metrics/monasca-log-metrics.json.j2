@@ -1,5 +1,5 @@
 {
-    "command": "/usr/share/logstash/bin/logstash --log-in-json --log /var/log/kolla/logstash/monasca-log-metrics.log -f /etc/logstash/conf.d/log-metrics.conf",
+    "command": "/usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/log-metrics.conf",
     "config_files": [
         {
             "source": "{{ container_config_directory }}/log-metrics.conf",
