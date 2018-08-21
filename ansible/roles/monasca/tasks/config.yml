@@ -32,10 +32,10 @@
     service: "{{ monasca_services['monasca-agent-collector'] }}"
   merge_yaml:
     sources:
-      - "{{ role_path }}/templates/monasca-agent/{{ item }}.j2"
+      - "{{ role_path }}/templates/monasca-agent-collector/{{ item }}.j2"
       - "{{ node_custom_config }}/monasca/{{ item }}"
       - "{{ node_custom_config }}/monasca/{{ inventory_hostname }}/{{ item }}"
-    dest: "{{ node_config_directory }}/monasca-agent/{{ item }}"
+    dest: "{{ node_config_directory }}/monasca-agent-collector/{{ item }}"
     mode: "0660"
   become: true
   register: monasca_agent_collector_confs
@@ -52,10 +52,10 @@
     service: "{{ monasca_services['monasca-agent-forwarder'] }}"
   merge_yaml:
     sources:
-      - "{{ role_path }}/templates/monasca-agent/{{ item }}.j2"
+      - "{{ role_path }}/templates/monasca-agent-forwarder/{{ item }}.j2"
       - "{{ node_custom_config }}/monasca/{{ item }}"
       - "{{ node_custom_config }}/monasca/{{ inventory_hostname }}/{{ item }}"
-    dest: "{{ node_config_directory }}/monasca-agent/{{ item }}"
+    dest: "{{ node_config_directory }}/monasca-agent-forwarder/{{ item }}"
     mode: "0660"
   become: true
   register: monasca_agent_forwarder_confs
@@ -72,10 +72,10 @@
     service: "{{ monasca_services['monasca-agent-statsd'] }}"
   merge_yaml:
     sources:
-      - "{{ role_path }}/templates/monasca-agent/{{ item }}.j2"
+      - "{{ role_path }}/templates/monasca-agent-statsd/{{ item }}.j2"
       - "{{ node_custom_config }}/monasca/{{ item }}"
       - "{{ node_custom_config }}/monasca/{{ inventory_hostname }}/{{ item }}"
-    dest: "{{ node_config_directory }}/monasca-agent/{{ item }}"
+    dest: "{{ node_config_directory }}/monasca-agent-statsd/{{ item }}"
     mode: "0660"
   become: true
   register: monasca_agent_statsd_confs

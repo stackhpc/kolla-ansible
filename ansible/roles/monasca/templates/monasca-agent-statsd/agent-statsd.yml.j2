@@ -3,7 +3,7 @@ Api:
   service_type: monitoring
   endpoint_type: internal
   region_name: {{ openstack_region_name }}
-  username: {{ monasca_agent_username }}
+  username: {{ monasca_agent_user }}
   password: {{ monasca_agent_password }}
   keystone_url: {{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_admin_port }}/v3
   user_domain_id: null
@@ -20,7 +20,7 @@ Api:
   amplifier: 0
 
 Main:
-  hostname: {{ hostvars[host]['ansible_hostname'] }}
+  hostname: {{ ansible_hostname }}
   dimensions: {}
   check_freq: {{ monasca_agent_check_frequency }}
   num_collector_threads: 1
@@ -32,11 +32,11 @@ Main:
   listen_port: {{ monasca_agent_forwarder_port }}
 
 Statsd:
-  monasca_statsd_port : {{ monasca_statsd_port }}
+  monasca_statsd_port : {{ monasca_agent_statsd_port }}
   non_local_traffic: True
 
 Logging:
-  log_level: {{ monasca_debug_level }}
+  log_level: {{ monasca_logging_debug }}
   collector_log_file: /var/log/kolla/monasca/agent-collector.log
   forwarder_log_file: /var/log/kolla/monasca/agent-forwarder.log
   statsd_log_file: /var/log/kolla/monasca/agent-statsd.log
