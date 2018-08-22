@@ -563,7 +563,9 @@
 
 - name: Apply role monasca
   gather_facts: false
-  hosts: monasca
+  hosts:
+    - monasca
+    - monasca-agent
   serial: '{{ serial|default("0") }}'
   roles:
     - { role: monasca,

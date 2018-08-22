@@ -75,10 +75,10 @@
   become: true
   register: monasca_agent_collector_plugin_confs
   with_items:
-    - cpu.yml
-    - disk.yml
-    - network.yml
-    - memory.yml
+    - cpu.yaml
+    - disk.yaml
+    - network.yaml
+    - memory.yaml
   when:
     - inventory_hostname in groups[service['group']]
     - service.enabled | bool
