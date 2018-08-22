@@ -69,7 +69,7 @@
   kolla_toolbox:
     module_name: "kolla_keystone_user"
     module_args:
-      project: "service"
+      project: "{{ monasca_metrics_project }}"
       user: "{{ monasca_agent_user }}"
       password: "{{ monasca_agent_password }}"
       role: "{{ monasca_agent_authorized_roles | first }}"
