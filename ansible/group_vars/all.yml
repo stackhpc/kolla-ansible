@@ -287,7 +287,6 @@ opendaylight_tomcat_redirect_port: "8663"
 opendaylight_karaf_ssh_port: "8101"
 opendaylight_openflow_port: "6653"
 opendaylight_ovsdb_port: "6641"
-opendaylight_haproxy_ovsdb_port: "6642"
 
 public_protocol: "{{ 'https' if kolla_enable_tls_external | bool else 'http' }}"
 internal_protocol: "http"
@@ -322,6 +321,10 @@ openstack_auth:
     password: "{{ keystone_admin_password }}"
     project_name: "admin"
     domain_name: "default"
+
+# Endpoint type used to connect with OpenStack services with ansible modules.
+# Valid options are [ public, internal, admin ]
+openstack_interface: "admin"
 
 # These roles are required for Kolla to be operation, however a savvy deployer
 # could disable some of these required roles and run their own services.
@@ -362,6 +365,7 @@ enable_heat: "yes"
 enable_horizon: "yes"
 enable_horizon_cloudkitty: "{{ enable_cloudkitty | bool }}"
 enable_horizon_designate: "{{ enable_designate | bool }}"
+enable_horizon_fwaas: "{{ enable_neutron_fwaas | bool }}"
 enable_horizon_freezer: "{{ enable_freezer | bool }}"
 enable_horizon_ironic: "{{ enable_ironic | bool }}"
 enable_horizon_karbor: "{{ enable_karbor | bool }}"
@@ -660,7 +664,7 @@ vmware_vcenter_insecure: "True"
 ######################
 # OpenDaylight
 ######################
-opendaylight_release: "0.6.1-Carbon"
+opendaylight_release: "0.6.2-Carbon"
 opendaylight_mechanism_driver: "opendaylight_v2"
 opendaylight_l3_service_plugin: "odl-router_v2"
 opendaylight_acl_impl: "learn"
