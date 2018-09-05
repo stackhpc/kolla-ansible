@@ -131,6 +131,8 @@ monasca_storm_nimbus_servers: "{% for host in groups['storm-nimbus'] %}'{{ hostv
 
 # Kafka topics used by Monasca services
 monasca_metrics_topic: "metrics"
+monasca_metrics_topic_kafka_partitions: "{{ groups['monitoring'] | length * 3 }}"
+
 monasca_raw_logs_topic: "logs"
 monasca_transformed_logs_topic: "transformed-logs"
 monasca_events_topic: "events"
