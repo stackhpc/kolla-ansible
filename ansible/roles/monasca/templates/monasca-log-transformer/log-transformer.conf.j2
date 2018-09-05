@@ -3,8 +3,8 @@
 
 input {
     kafka {
-        zk_connect => "{{ monasca_zookeeper_servers }}"
-        topic_id => "{{ monasca_raw_logs_topic }}"
+        bootstrap_servers => "{{ monasca_kafka_servers }}"
+        topics => ["{{ monasca_raw_logs_topic }}"]
         group_id => "transformer-logstash-consumer"
     }
 }

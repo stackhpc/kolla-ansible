@@ -2,11 +2,10 @@
 
 input {
     kafka {
-        zk_connect => "{{ monasca_zookeeper_servers }}"
-        topic_id => "{{ monasca_raw_logs_topic }}"
+        bootstrap_servers => "{{ monasca_zookeeper_servers }}"
+        topics => ["{{ monasca_raw_logs_topic }}"]
         group_id => "transformer-logstash-consumer"
-        consumer_id => "monasca_log_metrics"
-        # This should be equal to the number of partitions
+        # TODO: This should be equal to the number of partitions
         # https://www.elastic.co/guide/en/logstash/2.4/plugins-inputs-kafka.html#plugins-inputs-kafka-consumer_threads
         consumer_threads => "4"
     }
@@ -54,6 +53,5 @@ output {
   kafka {
     bootstrap_servers => "{{ monasca_kafka_servers }}"
     topic_id => "{{ monasca_metrics_topic }}"
-    client_id => "monasca_log_metrics"
   }
 }
