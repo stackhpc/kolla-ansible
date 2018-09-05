@@ -18,6 +18,61 @@ monasca_services:
       - "{{ node_config_directory }}/monasca-log-api/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
       - "kolla_logs:/var/log/kolla"
+  monasca-log-transformer:
+    container_name: monasca_log_transformer
+    group: monasca-log-transformer
+    enabled: true
+    image: "{{ monasca_logstash_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-log-transformer/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-log-persister:
+    container_name: monasca_log_persister
+    group: monasca-log-persister
+    enabled: true
+    image: "{{ monasca_logstash_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-log-persister/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-log-metrics:
+    container_name: monasca_log_metrics
+    group: monasca-log-metrics
+    enabled: true
+    image: "{{ monasca_logstash_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-log-metrics/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-thresh:
+    container_name: monasca_thresh
+    group: monasca-thresh
+    enabled: true
+    image: "{{ monasca_thresh_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-thresh/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "monasca-thresh:/var/lib/monasca-thresh/"
+      - "kolla_logs:/var/log/kolla"
+  monasca-notification:
+    container_name: monasca_notification
+    group: monasca-notification
+    enabled: true
+    image: "{{ monasca_notification_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-notification/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-persister:
+    container_name: monasca_persister
+    group: monasca-persister
+    enabled: true
+    image: "{{ monasca_persister_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-persister/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
 
 ####################
 # Databases
@@ -42,23 +97,56 @@ monasca_agent_authorized_roles:
 monasca_delegate_authorized_roles:
   - admin
 
-monasca_kafka: "{% for host in groups['kafka'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ kafka_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+monasca_kafka_servers: "{% for host in groups['kafka'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ kafka_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+monasca_zookeeper_servers: "{% for host in groups['zookeeper'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ zookeeper_client_port }}{% if not loop.last %},{% endif %}{% endfor %}"
 monasca_memcached_servers: "{% for host in groups['memcached'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}"
-monasca_elasticsearch_servers: "{% for host in groups['elasticsearch'] %}{{ internal_protocol }}://{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ elasticsearch_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+monasca_elasticsearch_servers: "{% for host in groups['elasticsearch'] %}'{{ internal_protocol }}://{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ elasticsearch_port }}'{% if not loop.last %},{% endif %}{% endfor %}"
+monasca_storm_nimbus_servers: "{% for host in groups['storm-nimbus'] %}'{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}'{% if not loop.last %},{% endif %}{% endfor %}"
+
+# Kafka topics used by Monasca services
+monasca_metrics_topic: "metrics"
+monasca_raw_logs_topic: "logs"
+monasca_transformed_logs_topic: "transformed-logs"
+monasca_events_topic: "events"
+monasca_alarm_state_transitions_topic: "alarm-state-transitions"
+monasca_alarm_notifications_topic: "alarm-notifications"
+monasca_alarm_notifications_retry_topic: "retry-notifications"
+monasca_periodic_notifications_topic: "60-seconds-notifications"
+
+# TODO: exted to support many values
+monasca_periodic_notifications_period: 60
 
 ####################
 # Docker
 ####################
-monasca_install_type: "{{ kolla_install_type }}"
+#FIXME: We need some sensible defaults here if anyone is ever to build these..
+monasca_install_type:
+    default: "{{ kolla_install_type }}"
 monasca_tag: "{{ openstack_release }}"
 
-monasca_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-api"
+monasca_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.monasca_api | default(monasca_install_type.default) }}-monasca-api"
 monasca_api_tag: "{{ monasca_tag }}"
 monasca_api_image_full: "{{ monasca_api_image }}:{{ monasca_api_tag }}"
 
-monasca_log_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-log-api"
+monasca_log_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.monasca_log_api | default(monasca_install_type.default) }}-monasca-log-api"
 monasca_log_api_tag: "{{ monasca_tag }}"
 monasca_log_api_image_full: "{{ monasca_log_api_image }}:{{ monasca_log_api_tag }}"
+
+monasca_logstash_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.logstash | default(monasca_install_type.default) }}-logstash"
+monasca_logstash_tag: "{{ monasca_tag }}"
+monasca_logstash_image_full: "{{ monasca_logstash_image }}:{{ monasca_logstash_tag }}"
+
+monasca_thresh_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.thresh | default(monasca_install_type.default) }}-monasca-thresh"
+monasca_thresh_tag: "{{ monasca_tag }}"
+monasca_thresh_image_full: "{{ monasca_thresh_image }}:{{ monasca_thresh_tag }}"
+
+monasca_notification_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.monasca_notification | default(monasca_install_type.default) }}-monasca-notification"
+monasca_notification_tag: "{{ monasca_tag }}"
+monasca_notification_image_full: "{{ monasca_notification_image }}:{{ monasca_notification_tag }}"
+
+monasca_persister_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type.monasca_persister | default(monasca_install_type.default) }}-monasca-persister"
+monasca_persister_tag: "{{ monasca_tag }}"
+monasca_persister_image_full: "{{ monasca_persister_image }}:{{ monasca_persister_tag }}"
 
 ####################
 # OpenStack
