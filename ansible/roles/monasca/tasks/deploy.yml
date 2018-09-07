@@ -5,7 +5,13 @@
 
 - include: config.yml
   when: inventory_hostname in groups['monasca-api'] or
-        inventory_hostname in groups['monasca-log-api']
+        inventory_hostname in groups['monasca-log-api'] or
+        inventory_hostname in groups['monasca-log-transformer'] or
+        inventory_hostname in groups['monasca-log-persister'] or
+        inventory_hostname in groups['monasca-log-metrics'] or
+        inventory_hostname in groups['monasca-thresh'] or
+        inventory_hostname in groups['monasca-notification'] or
+        inventory_hostname in groups['monasca-persister']
 
 - include: bootstrap.yml
   when: inventory_hostname in groups['monasca-api']
@@ -15,4 +21,10 @@
 
 - include: check.yml
   when: inventory_hostname in groups['monasca-api'] or
-        inventory_hostname in groups['monasca-log-api']
+        inventory_hostname in groups['monasca-log-api'] or
+        inventory_hostname in groups['monasca-log-transformer'] or
+        inventory_hostname in groups['monasca-log-persister'] or
+        inventory_hostname in groups['monasca-log-metrics'] or
+        inventory_hostname in groups['monasca-thresh'] or
+        inventory_hostname in groups['monasca-notification'] or
+        inventory_hostname in groups['monasca-persister']
