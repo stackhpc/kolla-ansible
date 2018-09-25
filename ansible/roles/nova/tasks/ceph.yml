@@ -5,7 +5,6 @@
     state: "directory"
     mode: "0770"
   with_items:
-    - "nova-compute"
     - "nova-libvirt/secrets"
   when: inventory_hostname in groups['compute']
 

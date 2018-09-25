@@ -1,11 +1,4 @@
 ---
-- name: Ensuring config directory exists
-  file:
-    path: "{{ node_config_directory }}/manila-share"
-    state: "directory"
-  when:
-    - inventory_hostname in groups['manila-share']
-
 - name: Copying over ceph.conf for manila
   merge_configs:
     sources:

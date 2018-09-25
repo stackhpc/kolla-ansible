@@ -9,6 +9,16 @@
     - item.value.enabled | bool
   with_dict: "{{ gnocchi_services }}"
 
+- include: ceph.yml
+  when:
+    - enable_ceph | bool
+    - gnocchi_backend_storage == 'ceph'
+
+- include: external_ceph.yml
+  when:
+    - enable_ceph | bool == False
+    - gnocchi_backend_storage == 'ceph'
+
 - name: Check if policies shall be overwritten
   local_action: stat path="{{ item }}"
   run_once: True
