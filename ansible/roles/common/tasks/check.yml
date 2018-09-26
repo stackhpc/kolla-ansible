@@ -1,1 +1,15 @@
 ---
+- name: Check that all log files are readable by fluentd
+  command: >-
+    docker exec fluentd
+    bash -c '
+        rc=0
+        for f in $(find /var/log/kolla/ -type f); do
+            if [[ ! -r $f ]]; then
+                echo "Cannot read $f"
+                rc=1
+            fi
+        done
+        exit $rc
+    '
+  changed_when: false
