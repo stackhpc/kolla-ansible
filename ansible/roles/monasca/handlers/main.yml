@@ -95,7 +95,7 @@
     image: "{{ service.image }}"
     volumes: "{{ service.volumes }}"
   when:
-    - kolla_action != "config"
+    - action != "config"
     - inventory_hostname in groups[service.group]
     - service.enabled | bool
     - config_json.changed | bool
@@ -115,7 +115,7 @@
     image: "{{ service.image }}"
     volumes: "{{ service.volumes }}"
   when:
-    - kolla_action != "config"
+    - action != "config"
     - inventory_hostname in groups[service.group]
     - service.enabled | bool
     - config_json.changed | bool
@@ -136,7 +136,7 @@
     image: "{{ service.image }}"
     volumes: "{{ service.volumes }}"
   when:
-    - kolla_action != "config"
+    - action != "config"
     - inventory_hostname in groups[service.group]
     - service.enabled | bool
     - config_json.changed | bool
@@ -156,7 +156,7 @@
     image: "{{ service.image }}"
     volumes: "{{ service.volumes }}"
   when:
-    - kolla_action != "config"
+    - action != "config"
     - inventory_hostname in groups[service.group]
     - service.enabled | bool
     - config_json.changed | bool

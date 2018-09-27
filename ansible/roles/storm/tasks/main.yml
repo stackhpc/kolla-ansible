@@ -1,2 +1,2 @@
 ---
-- include: "{{ kolla_action }}.yml"
+- include: "{{ action }}.yml"

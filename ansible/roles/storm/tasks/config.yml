@@ -75,7 +75,7 @@
     environment: "{{ item.value.environment }}"
   register: check_storm_containers
   when:
-    - kolla_action != "config"
+    - action != "config"
     - inventory_hostname in groups[item.value.group]
     - item.value.enabled | bool
   with_dict: "{{ storm_services }}"
