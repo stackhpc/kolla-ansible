@@ -18,6 +18,94 @@ monasca_services:
       - "{{ node_config_directory }}/monasca-log-api/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
       - "kolla_logs:/var/log/kolla"
+  monasca-log-transformer:
+    container_name: monasca_log_transformer
+    group: monasca-log-transformer
+    enabled: true
+    image: "{{ monasca_logstash_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-log-transformer/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-log-persister:
+    container_name: monasca_log_persister
+    group: monasca-log-persister
+    enabled: true
+    image: "{{ monasca_logstash_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-log-persister/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-log-metrics:
+    container_name: monasca_log_metrics
+    group: monasca-log-metrics
+    enabled: true
+    image: "{{ monasca_logstash_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-log-metrics/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-thresh:
+    container_name: monasca_thresh
+    group: monasca-thresh
+    enabled: true
+    image: "{{ monasca_thresh_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-thresh/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "monasca-thresh:/var/lib/monasca-thresh/"
+      - "kolla_logs:/var/log/kolla"
+  monasca-notification:
+    container_name: monasca_notification
+    group: monasca-notification
+    enabled: true
+    image: "{{ monasca_notification_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-notification/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-persister:
+    container_name: monasca_persister
+    group: monasca-persister
+    enabled: true
+    image: "{{ monasca_persister_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-persister/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-agent-collector:
+    container_name: monasca_agent_collector
+    group: monasca-agent
+    enabled: true
+    image: "{{ monasca_agent_image_full }}"
+    pid_mode: "host"
+    volumes:
+      - "{{ node_config_directory }}/monasca-agent-collector/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/:/rootfs"
+      - "/var/run:/var/run:rw"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker/:/var/lib/docker:ro"
+      - "/dev/disk/:/dev/disk:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-agent-statsd:
+    container_name: monasca_agent_statsd
+    group: monasca-agent
+    enabled: true
+    image: "{{ monasca_agent_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-agent-statsd/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
+  monasca-agent-forwarder:
+    container_name: monasca_agent_forwarder
+    group: monasca-agent
+    enabled: true
+    image: "{{ monasca_agent_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/monasca-agent-forwarder/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "kolla_logs:/var/log/kolla"
 
 ####################
 # Databases
@@ -33,8 +121,32 @@ monasca_influxdb_http_port: "{{ influxdb_http_port }}"
 ####################
 # Monasca
 ####################
-monasca_kafka: "{% for host in groups['kafka'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ kafka_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+monasca_kafka_servers: "{% for host in groups['kafka'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ kafka_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+monasca_zookeeper_servers: "{% for host in groups['zookeeper'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ zookeeper_client_port }}{% if not loop.last %},{% endif %}{% endfor %}"
 monasca_memcached_servers: "{% for host in groups['memcached'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+monasca_elasticsearch_servers: "{% for host in groups['elasticsearch'] %}'{{ internal_protocol }}://{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ elasticsearch_port }}'{% if not loop.last %},{% endif %}{% endfor %}"
+monasca_storm_nimbus_servers: "{% for host in groups['storm-nimbus'] %}'{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}'{% if not loop.last %},{% endif %}{% endfor %}"
+
+# Kafka topics used by Monasca services
+monasca_metrics_topic: "metrics"
+monasca_metrics_topic_kafka_partitions: "{{ groups['monitoring'] | length * 3 }}"
+
+monasca_raw_logs_topic: "logs"
+monasca_transformed_logs_topic: "transformed-logs"
+monasca_events_topic: "events"
+monasca_alarm_state_transitions_topic: "alarm-state-transitions"
+monasca_alarm_notifications_topic: "alarm-notifications"
+monasca_alarm_notifications_retry_topic: "retry-notifications"
+monasca_periodic_notifications_topic: "60-seconds-notifications"
+
+# TODO: exted to support many values
+monasca_periodic_notifications_period: 60
+
+# Agent settings
+monasca_agent_max_buffer_size: 1000
+monasca_agent_backlog_send_rate: 1000
+monasca_agent_max_batch_size: 1000
+monasca_agent_check_frequency: 30
 
 ####################
 # Docker
@@ -50,16 +162,40 @@ monasca_log_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{
 monasca_log_api_tag: "{{ monasca_tag }}"
 monasca_log_api_image_full: "{{ monasca_log_api_image }}:{{ monasca_log_api_tag }}"
 
+monasca_logstash_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-logstash"
+monasca_logstash_tag: "{{ monasca_tag }}"
+monasca_logstash_image_full: "{{ monasca_logstash_image }}:{{ monasca_logstash_tag }}"
+
+monasca_thresh_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-thresh"
+monasca_thresh_tag: "{{ monasca_tag }}"
+monasca_thresh_image_full: "{{ monasca_thresh_image }}:{{ monasca_thresh_tag }}"
+
+monasca_notification_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-notification"
+monasca_notification_tag: "{{ monasca_tag }}"
+monasca_notification_image_full: "{{ monasca_notification_image }}:{{ monasca_notification_tag }}"
+
+monasca_persister_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-persister"
+monasca_persister_tag: "{{ monasca_tag }}"
+monasca_persister_image_full: "{{ monasca_persister_image }}:{{ monasca_persister_tag }}"
+
+monasca_agent_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ monasca_install_type }}-monasca-agent"
+monasca_agent_tag: "{{ monasca_tag }}"
+monasca_agent_image_full: "{{ monasca_agent_image }}:{{ monasca_agent_tag }}"
+
 ####################
 # OpenStack
 ####################
 monasca_openstack_auth: "{{ openstack_auth }}"
 
+monasca_metrics_project: "monasca"
+monasca_agent_user: "monasca-agent"
 monasca_keystone_user: "monasca"
 monasca_default_authorized_roles:
   - admin
 monasca_read_only_authorized_roles:
   - monasca-read-only-user
+# NOTE(dszumski): The first role in this list is assigned to the monasca-agent
+# user for monitoring the OpenStack deployment.
 monasca_agent_authorized_roles:
   - agent
 monasca_delegate_authorized_roles:

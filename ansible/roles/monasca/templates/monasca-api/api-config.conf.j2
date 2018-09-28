@@ -14,8 +14,9 @@ ip_address = {{ monasca_influxdb_address }}
 port = {{ monasca_influxdb_http_port }}
 
 [kafka]
-partitions = 0
-uri = {{ monasca_kafka }}
+partitions = {{ monasca_metrics_topic_kafka_partitions }}
+uri = {{ monasca_kafka_servers }}
+metrics_topic = {{ monasca_metrics_topic }}
 
 [messaging]
 driver = monasca_api.common.messaging.kafka_publisher:KafkaPublisher
