@@ -3,11 +3,18 @@ log_file = monasca-log-api.log
 log_dir = /var/log/kolla/monasca
 debug = {{ monasca_logging_debug }}
 
+[service]
+region = {{ openstack_region_name }}
+# Increase the maximum payload size to slightly above the default Fluentd chunk size (8MB)
+max_log_size = 10485760
+
 [kafka_healthcheck]
-kafka_url = {{ monasca_kafka }}
+kafka_url = {{ monasca_kafka_servers }}
+kafka_topics = {{ monasca_raw_logs_topic }}
 
 [log_publisher]
-kafka_url = {{ monasca_kafka }}
+kafka_url = {{ monasca_kafka_servers }}
+topics = {{ monasca_raw_logs_topic }}
 
 [monitoring]
 # TODO(dszumski): Deploy statsd to use this
@@ -33,3 +40,6 @@ service_token_roles_required=True
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = {{ memcache_secret_key }}
 memcached_servers = {{ monasca_memcached_servers }}
+
+[elasticsearch]
+uris = {{ monasca_elasticsearch_servers }}

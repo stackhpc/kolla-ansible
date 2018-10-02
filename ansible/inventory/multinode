@@ -124,6 +124,9 @@ control
 [monasca:children]
 monitoring
 
+[storm:children]
+monitoring
+
 [mongodb:children]
 control
 
@@ -447,6 +450,31 @@ monasca
 
 [monasca-log-api:children]
 monasca
+
+[monasca-log-transformer:children]
+monasca
+
+[monasca-log-persister:children]
+monasca
+
+[monasca-log-metrics:children]
+monasca
+
+[monasca-thresh:children]
+monasca
+
+[monasca-notification:children]
+monasca
+
+[monasca-persister:children]
+monasca
+
+# Storm
+[storm-worker:children]
+storm
+
+[storm-nimbus:children]
+storm
 
 # Ironic
 [ironic-api:children]
