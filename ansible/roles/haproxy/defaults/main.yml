@@ -50,6 +50,8 @@ haproxy_glance_api_server_timeout: "6h"
 haproxy_outward_rabbitmq_client_timeout: "1h"
 haproxy_outward_rabbitmq_server_timeout: "1h"
 
+haproxy_nova_serialconsole_proxy_tunnel_timeout: "10m"
+
 syslog_server: "{{ api_interface_address }}"
 syslog_haproxy_facility: "local1"
 
