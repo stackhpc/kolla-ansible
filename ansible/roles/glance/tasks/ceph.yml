@@ -7,6 +7,7 @@
       - "{{ node_custom_config }}/ceph/{{ inventory_hostname }}/ceph.conf"
     dest: "{{ node_config_directory }}/glance-api/ceph.conf"
     mode: "0660"
+  become: true
   when: inventory_hostname in groups['glance-api']
 
 - include: ../../ceph_pools.yml
@@ -31,6 +32,7 @@
     content: "{{ cephx_key.stdout }}\n\r"
     dest: "{{ node_config_directory }}/glance-api/ceph.client.glance.keyring"
     mode: "0600"
+  become: true
   when: inventory_hostname in groups['glance-api']
 
 - name: Ensuring config directory has correct owner and permission
