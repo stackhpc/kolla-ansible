@@ -37,6 +37,27 @@ tenant network types:
 
     neutron_tenant_network_types: "vxlan,vlan,flat"
 
+In the same file, optionally a default gateway to be used for the Ironic
+Inspector inspection network:
+
+.. code-block:: yaml
+
+   ironic_dnsmasq_default_gateway: 192.168.5.1
+
+.. end
+
+In the same file, specify the PXE bootloader file for Ironic Inspector. The
+file is relative to the ``/tftpboot`` directory. The default is ``pxelinux.0``,
+and should be correct for x86 systems. Other platforms may require a different
+value, for example aarch64 on Debian requires
+``debian-installer/arm64/bootnetaa64.efi``.
+
+.. code-block:: yaml
+
+   ironic_dnsmasq_boot_file: pxelinux.0
+
+.. end
+
 Configuring Web Console
 =======================
 Configuration based off upstream web_console_documentation_.

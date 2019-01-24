@@ -41,19 +41,26 @@ if echo $ACTION | grep -q "ceph"; then
 GATE_IMAGES+=",ceph,cinder"
 fi
 
+    # Use the kolla-ansible tag rather than the kolla tag, since this is what
+    # kolla-ansible will use by default.
+    TAG=$(python -c "import pbr.version; print(pbr.version.VersionInfo('kolla-ansible'))")
     cat <<EOF | sudo tee /etc/kolla/kolla-build.conf
 [DEFAULT]
 include_header = /etc/kolla/header
 namespace = lokolla
 base = ${BASE_DISTRO}
 install_type = ${INSTALL_TYPE}
+tag = ${TAG}
 profile = gate
 registry = 127.0.0.1:4000
 push = true
+logs_dir = /tmp/logs/build
 
 [profiles]
 gate = ${GATE_IMAGES}
 EOF
+
+mkdir -p /tmp/logs/build
 
     if [[ "${DISTRO}" == "Debian" ]]; then
         # Infra does not sign their mirrors so we ignore gpg signing in the gate
@@ -171,6 +178,7 @@ tools/kolla-ansible -i ${RAW_INVENTORY} -vvv prechecks > /tmp/logs/ansible/prech
 # service in CI
 tools/kolla-ansible -i ${RAW_INVENTORY} -vvv deploy > /tmp/logs/ansible/deploy
 tools/kolla-ansible -i ${RAW_INVENTORY} -vvv post-deploy > /tmp/logs/ansible/post-deploy
+tools/kolla-ansible -i ${RAW_INVENTORY} -vvv check > /tmp/logs/ansible/check-deploy
 
 # Test OpenStack Environment
 # TODO: use kolla-ansible check when it's ready
@@ -180,8 +188,10 @@ sanity_check
 # TODO(jeffrey4l): make some configure file change and
 # trigger a real reconfigure
 tools/kolla-ansible -i ${RAW_INVENTORY} -vvv reconfigure >  /tmp/logs/ansible/post-deploy
+tools/kolla-ansible -i ${RAW_INVENTORY} -vvv check > /tmp/logs/ansible/check-reconfigure
 # TODO(jeffrey4l): need run a real upgrade
 tools/kolla-ansible -i ${RAW_INVENTORY} -vvv upgrade > /tmp/logs/ansible/upgrade
+tools/kolla-ansible -i ${RAW_INVENTORY} -vvv check > /tmp/logs/ansible/check-upgrade
 
 # run prechecks again
 tools/kolla-ansible -i ${RAW_INVENTORY} -vvv prechecks > /tmp/logs/ansible/prechecks2
