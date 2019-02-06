@@ -17,6 +17,8 @@
 import docker
 import json
 import re
+import socket
+import time
 
 from ansible.module_utils.basic import AnsibleModule
 
@@ -138,8 +140,17 @@ def main():
         module.fail_json(msg='kolla_toolbox container is not running.')
 
     kolla_toolbox = kolla_toolbox[0]
-    job = client.exec_create(kolla_toolbox, command_line)
-    output = client.exec_start(job)
+
+    # We are seeing instability - add a retry mechanism.
+    for i in range(10):
+        job = client.exec_create(kolla_toolbox, command_line)
+        try:
+            output = client.exec_start(job)
+        except socket.timeout:
+            # Retry on socket timeouts, allow other errors to be raised.
+            time.sleep(10)
+        else:
+            break
 
     for exp in [JSON_REG, NON_JSON_REG]:
         m = exp.match(output)
