@@ -18,6 +18,8 @@ from distutils.version import StrictVersion
 import docker
 import json
 import re
+import socket
+import time
 
 from ansible.module_utils.basic import AnsibleModule
 
@@ -166,9 +168,17 @@ def main():
         # Use the JSON output formatter, so that we can parse it.
         environment = {"ANSIBLE_STDOUT_CALLBACK": "json",
                        "ANSIBLE_LOAD_CALLBACK_PLUGINS": "True"}
-        job = client.exec_create(kolla_toolbox, command_line,
-                                 environment=environment, **kwargs)
-        json_output = client.exec_start(job)
+        # We are seeing instability - add a retry mechanism.
+        for i in range(10):
+            job = client.exec_create(kolla_toolbox, command_line,
+                                     environment=environment, **kwargs)
+            try:
+                json_output = client.exec_start(job)
+            except socket.timeout:
+                # Retry on socket timeouts, allow other errors to be raised.
+                time.sleep(10)
+            else:
+                break
 
         try:
             output = json.loads(json_output)
@@ -201,8 +211,16 @@ def main():
         # Remove Ansible's internal variables from returned fields.
         ret.pop('_ansible_no_log', None)
     else:
-        job = client.exec_create(kolla_toolbox, command_line, **kwargs)
-        output = client.exec_start(job)
+        # We are seeing instability - add a retry mechanism.
+        for i in range(10):
+            job = client.exec_create(kolla_toolbox, command_line, **kwargs)
+            try:
+                output = client.exec_start(job)
+            except socket.timeout:
+                # Retry on socket timeouts, allow other errors to be raised.
+                time.sleep(10)
+            else:
+                break
 
         for exp in [JSON_REG, NON_JSON_REG]:
             m = exp.match(output)
