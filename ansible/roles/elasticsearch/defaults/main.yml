@@ -10,7 +10,7 @@ elasticsearch_services:
     volumes:
       - "{{ node_config_directory }}/elasticsearch/:{{ container_config_directory }}/"
       - "/etc/localtime:/etc/localtime:ro"
-      - "elasticsearch:/var/lib/elasticsearch/data"
+      - "{{ elasticsearch_datadir_volume }}:/var/lib/elasticsearch/data"
       - "kolla_logs:/var/log/kolla/"
     dimensions: "{{ elasticsearch_dimensions }}"
   elasticsearch-curator:

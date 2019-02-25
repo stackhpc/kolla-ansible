@@ -33,6 +33,10 @@ By default Elasticsearch is deployed on port ``9200``.
    Elasticsearch stores a lot of logs, so if you are running centralized logging,
    remember to give ``/var/lib/docker`` an adequate space.
 
+   Alternatively it is possible to use a local directory instead of the volume
+   ``elasticsearch`` to store the data of Elasticsearch. The path can be set via
+   the variable ``elasticsearch_datadir_volume``.
+
 To stop your disks filling up, retention policies can be set. These are
 enforced by Elasticsearch Curator which can be enabled by setting the
 following in ``/etc/kolla/globals.yml``:
