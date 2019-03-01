@@ -794,3 +794,10 @@ control
 
 [masakari-monitors:children]
 compute
+
+[prometheus-mtail:children]
+monitoring
+control
+compute
+network
+storage
