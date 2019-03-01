@@ -406,8 +406,11 @@ prometheus_ceph_mgr_exporter_port: "9283"
 # Default cadvisor port of 8080 already in use
 prometheus_cadvisor_port: "18080"
 prometheus_mtail_port: "9197"
+<<<<<<< HEAD
 prometheus_libvirt_exporter_port: "9177"
 prometheus_jiralert_port: "9097"
+=======
+>>>>>>> 65899df... Add mtail for exporting log events to Prometheus
 
 # Prometheus alertmanager ports
 prometheus_alertmanager_port: "9093"
