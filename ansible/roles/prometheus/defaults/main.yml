@@ -108,6 +108,7 @@ prometheus_services:
     image: "{{ prometheus_libvirt_exporter_image_full }}"
     volumes: "{{ prometheus_libvirt_exporter_default_volumes + prometheus_libvirt_exporter_extra_volumes }}"
     dimensions: "{{ prometheus_libvirt_exporter_dimensions }}"
+<<<<<<< HEAD
   prometheus-jiralert:
     container_name: "prometheus_jiralert"
     group: "prometheus-jiralert"
@@ -115,6 +116,8 @@ prometheus_services:
     image: "{{ prometheus_jiralert_image_full }}"
     volumes: "{{ prometheus_jiralert_default_volumes + prometheus_jiralert_extra_volumes }}"
     dimensions: "{{ prometheus_jiralert_dimensions }}"
+=======
+>>>>>>> 0690d93... Add support for deploying Prometheus libvirt exporter
 
 ####################
 # Database
@@ -202,10 +205,13 @@ prometheus_libvirt_exporter_image: "{{ docker_registry ~ '/' if docker_registry 
 prometheus_libvirt_exporter_tag: "{{ prometheus_tag }}"
 prometheus_libvirt_exporter_image_full: "{{ prometheus_libvirt_exporter_image }}:{{ prometheus_libvirt_exporter_tag }}"
 
+<<<<<<< HEAD
 prometheus_jiralert_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ prometheus_install_type }}-prometheus-jiralert"
 prometheus_jiralert_tag: "{{ prometheus_tag }}"
 prometheus_jiralert_image_full: "{{ prometheus_jiralert_image }}:{{ prometheus_jiralert_tag }}"
 
+=======
+>>>>>>> 0690d93... Add support for deploying Prometheus libvirt exporter
 prometheus_server_dimensions: "{{ default_container_dimensions }}"
 prometheus_haproxy_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_mysqld_exporter_dimensions: "{{ default_container_dimensions }}"
@@ -218,7 +224,10 @@ prometheus_elasticsearch_exporter_dimensions: "{{ default_container_dimensions }
 prometheus_blackbox_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_mtail_dimensions: "{{ default_container_dimensions }}"
 prometheus_libvirt_exporter_dimensions: "{{ default_container_dimensions }}"
+<<<<<<< HEAD
 prometheus_jiralert_dimensions: "{{ default_container_dimensions }}"
+=======
+>>>>>>> 0690d93... Add support for deploying Prometheus libvirt exporter
 
 prometheus_server_default_volumes:
   - "{{ node_config_directory }}/prometheus-server/:{{ container_config_directory }}/:ro"
@@ -300,6 +309,10 @@ prometheus_mtail_default_volumes:
   - "kolla_logs:/var/log/kolla/"
   - "/var/log/secure:/var/log/secure:ro"
   - "/var/log/messages:/var/log/messages:ro"
+prometheus_libvirt_exporter_default_volumes:
+  - "{{ node_config_directory }}/prometheus-libvirt-exporter/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "libvirtd_run:/var/run/libvirt:ro"
 
 prometheus_extra_volumes: "{{ default_extra_volumes }}"
 prometheus_server_extra_volumes: "{{ prometheus_extra_volumes }}"
