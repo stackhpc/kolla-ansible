@@ -22,6 +22,7 @@
   template:
     src: "{{ item.key }}.json.j2"
     dest: "{{ node_config_directory }}/{{ item.key }}/config.json"
+    mode: "0660"
   register: elasticsearch_config_jsons
   when:
     - inventory_hostname in groups[item.value.group]
@@ -34,6 +35,7 @@
   template:
     src: "elasticsearch.yml.j2"
     dest: "{{ node_config_directory }}/{{ item.key }}/{{ item.key }}.yml"
+    mode: "0660"
   register: elasticsearch_confs
   when:
     - inventory_hostname in groups[item.value.group]

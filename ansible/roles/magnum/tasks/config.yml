@@ -30,6 +30,7 @@
   template:
     src: "{{ item.key }}.json.j2"
     dest: "{{ node_config_directory }}/{{ item.key }}/config.json"
+    mode: "0660"
   register: magnum_config_jsons
   when:
     - inventory_hostname in groups[item.value.group]
@@ -50,6 +51,7 @@
       - "{{ node_custom_config }}/magnum/{{ item.key }}.conf"
       - "{{ node_custom_config }}/magnum/{{ inventory_hostname }}/magnum.conf"
     dest: "{{ node_config_directory }}/{{ item.key }}/magnum.conf"
+    mode: "0660"
   register: magnum_confs
   when:
     - inventory_hostname in groups[item.value.group]
@@ -63,6 +65,7 @@
   template:
     src: "{{ magnum_policy_file_path }}"
     dest: "{{ node_config_directory }}/{{ item.key }}/{{ magnum_policy_file }}"
+    mode: "0660"
   register: magnum_policy_overwriting
   when:
     - magnum_policy_file is defined
