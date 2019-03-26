@@ -73,6 +73,7 @@
   template:
     src: "{{ freezer_policy_file_path }}"
     dest: "{{ node_config_directory }}/{{ item.key }}/{{ freezer_policy_file }}"
+    mode: "0660"
   register: freezer_policy_overwriting
   when:
     - freezer_policy_file is defined

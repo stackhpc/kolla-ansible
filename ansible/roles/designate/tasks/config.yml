@@ -30,6 +30,7 @@
   template:
     src: "{{ item.key }}.json.j2"
     dest: "{{ node_config_directory }}/{{ item.key }}/config.json"
+    mode: "0660"
   register: designate_config_jsons
   when:
     - inventory_hostname in groups[item.value.group]
@@ -55,6 +56,7 @@
       - "{{ node_custom_config }}/designate/{{ item.key }}.conf"
       - "{{ node_custom_config }}/designate/{{ inventory_hostname }}/designate.conf"
     dest: "{{ node_config_directory }}/{{ item.key }}/designate.conf"
+    mode: "0660"
   register: designate_confs
   when:
     - inventory_hostname in groups[item.value.group]
@@ -74,6 +76,7 @@
   template:
     src:  "{{ item }}"
     dest: "{{ node_config_directory }}/designate-worker/pools.yaml"
+    mode: "0660"
   register: designate_pool
   when:
     - inventory_hostname in groups[service.group]
@@ -90,6 +93,7 @@
   template:
     src: "{{ item }}"
     dest: "{{ node_config_directory }}/designate-backend-bind9/named.conf"
+    mode: "0660"
   register: designate_named
   when:
     - designate_backend == 'bind9'
@@ -107,6 +111,7 @@
   template:
     src: "rndc.conf.j2"
     dest: "{{ node_config_directory }}/{{ item.key }}/rndc.conf"
+    mode: "0660"
   register: designate_rndc_conf
   when:
     - designate_backend == 'bind9' and designate_backend_external == 'no'
@@ -122,6 +127,7 @@
   template:
     src: "rndc.key.j2"
     dest: "{{ node_config_directory }}/{{ item.key }}/rndc.key"
+    mode: "0660"
   register: designate_rndc_key_file
   when:
     - designate_backend == 'bind9' and designate_backend_external == 'no'
@@ -145,6 +151,7 @@
   template:
     src: "{{ designate_policy_file_path }}"
     dest: "{{ node_config_directory }}/{{ item.key }}/{{ designate_policy_file }}"
+    mode: "0660"
   register: designate_policy_overwriting
   when:
     - designate_policy_file is defined

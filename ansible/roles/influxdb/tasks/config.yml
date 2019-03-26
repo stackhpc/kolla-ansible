@@ -13,6 +13,7 @@
   template:
     src: "{{ item.key }}.json.j2"
     dest: "{{ node_config_directory }}/influxdb/config.json"
+    mode: "0660"
   register: influxdb_config_jsons
   when:
     - inventory_hostname in groups[item.value.group]
@@ -27,6 +28,7 @@
   template:
     src: "{{ item }}"
     dest: "{{ node_config_directory }}/influxdb/influxdb.conf"
+    mode: "0660"
   register: influxdb_confs
   when:
     - inventory_hostname in groups[service.group]

@@ -3,7 +3,7 @@
   file:
     path: "{{ node_config_directory }}/{{ item }}"
     state: "directory"
-    recurse: yes
+    mode: "0770"
   become: true
   with_items:
     - "kolla-toolbox"
@@ -14,7 +14,7 @@
   file:
     path: "{{ node_config_directory }}/{{ item }}"
     state: "directory"
-    recurse: yes
+    mode: "0770"
   become: true
   with_items:
     - "fluentd"
@@ -68,6 +68,7 @@
   template:
     src: "{{ item.path }}"
     dest: "{{ node_config_directory }}/fluentd/input/{{ item.path | basename }}"
+    mode: "0660"
   register: fluentd_input_custom
   with_items: "{{ find_custom_fluentd_inputs.files }}"
   notify:
@@ -106,6 +107,7 @@
   template:
     src: "{{ item.path }}"
     dest: "{{ node_config_directory }}/fluentd/output/{{ item.path | basename }}"
+    mode: "0660"
   register: fluentd_output_custom
   when:
     - enable_fluentd | bool
@@ -156,6 +158,7 @@
   template:
     src: "{{ item.path }}"
     dest: "{{ node_config_directory }}/fluentd/filter/{{ item.path | basename }}"
+    mode: "0660"
   register: fluentd_filter_custom
   with_items: "{{ find_custom_fluentd_filters.files }}"
   when: enable_fluentd | bool

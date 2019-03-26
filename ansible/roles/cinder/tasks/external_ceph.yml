@@ -9,6 +9,7 @@
       - "{{ node_custom_config }}/cinder/ceph.conf"
       - "{{ node_custom_config }}/cinder/{{ item.key }}/ceph.conf"
     dest: "{{ node_config_directory }}/{{ item.key }}/ceph.conf"
+    mode: "0660"
   when:
     - item.value.enabled | bool
     - inventory_hostname in groups[item.value.group]
@@ -22,6 +23,7 @@
   copy:
     src: "{{ item }}"
     dest: "{{ node_config_directory }}/cinder-volume/"
+    mode: "0660"
   with_fileglob:
     - "{{ node_custom_config }}/cinder/cinder-volume/ceph.client*"
   when:
@@ -35,6 +37,7 @@
   copy:
     src: "{{ item }}"
     dest: "{{ node_config_directory }}/cinder-backup/"
+    mode: "0660"
   with_fileglob:
     - "{{ node_custom_config }}/cinder/cinder-backup/ceph.client*"
   when:

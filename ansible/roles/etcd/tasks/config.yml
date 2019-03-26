@@ -13,6 +13,7 @@
   template:
     src: "{{ item.key }}.json.j2"
     dest: "{{ node_config_directory }}/{{ item.key }}/config.json"
+    mode: "0660"
   register: etcd_config_jsons
   when:
     - item.value.enabled | bool
