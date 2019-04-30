@@ -1,5 +1,6 @@
 # These initial groups are the only groups required to be modified. The
 # additional groups are for more control of the environment.
+
 [control]
 {% for host in hostvars %}
 {{ host }} ansible_host={{ hostvars[host]['ansible_host'] }} ansible_user=kolla ansible_ssh_private_key_file={{ ansible_env.HOME ~ '/.ssh/id_rsa_kolla' }}
@@ -20,10 +21,25 @@
 {{ host }} ansible_host={{ hostvars[host]['ansible_host'] }} ansible_user=kolla ansible_ssh_private_key_file={{ ansible_env.HOME ~ '/.ssh/id_rsa_kolla' }}
 {% endfor %}
 
+{% if scenario == 'monasca' %}
+[monitoring]
+{% for host in hostvars if host in ['primary', 'secondary1', 'secondary2'] %}
+{{ host }} ansible_host={{ hostvars[host]['ansible_host'] }} ansible_user=kolla ansible_ssh_private_key_file={{ ansible_env.HOME ~ '/.ssh/id_rsa_kolla' }}
+{% endfor %}
+
+[logging]
+{% for host in hostvars if host in ['secondary3', 'secondary4', 'secondary5'] %}
+{{ host }} ansible_host={{ hostvars[host]['ansible_host'] }} ansible_user=kolla ansible_ssh_private_key_file={{ ansible_env.HOME ~ '/.ssh/id_rsa_kolla' }}
+{% endfor %}
+{% else %}
 [monitoring]
 {% for host in hostvars %}
 {{ host }} ansible_host={{ hostvars[host]['ansible_host'] }} ansible_user=kolla ansible_ssh_private_key_file={{ ansible_env.HOME ~ '/.ssh/id_rsa_kolla' }}
 {% endfor %}
+
+[logging:children]
+monitoring
+{% endif %}
 
 [deployment]
 {% for host in hostvars %}
@@ -85,20 +101,29 @@ monitoring
 [etcd:children]
 control
 
-[influxdb:children]
-monitoring
+[influxdb]
+# NOTE(dszumski): This doesn't support clustering
+primary
 
 [prometheus:children]
 monitoring
 
 [kafka:children]
+{% if scenario == 'monasca' %}
+logging
+{% else %}
 control
+{% endif %}
 
 [karbor:children]
 control
 
 [kibana:children]
+{% if scenario == 'monasca' %}
+logging
+{% else %}
 control
+{% endif %}
 
 [telegraf:children]
 compute
@@ -108,10 +133,18 @@ network
 storage
 
 [elasticsearch:children]
+{% if scenario == 'monasca' %}
+logging
+{% else %}
 control
+{% endif %}
 
 [haproxy:children]
+{% if scenario == 'monasca' %}
+monitoring
+{% else %}
 network
+{% endif %}
 
 [hyperv]
 #hyperv_host
@@ -124,7 +157,11 @@ network
 #ansible_winrm_server_cert_validation=ignore
 
 [mariadb:children]
+{% if scenario == 'monasca' %}
+logging
+{% else %}
 control
+{% endif %}
 
 [rabbitmq:children]
 control
@@ -149,7 +186,11 @@ monitoring
 monitoring
 
 [keystone:children]
+{% if scenario == 'monasca' %}
+monitoring
+{% else %}
 control
+{% endif %}
 
 [glance:children]
 control
@@ -178,7 +219,11 @@ control
 control
 
 [horizon:children]
+{% if scenario == 'monasca' %}
+monitoring
+{% else %}
 control
+{% endif %}
 
 [swift:children]
 control
@@ -270,7 +315,11 @@ control
 deployment
 
 [zookeeper:children]
+{% if scenario == 'monasca' %}
+logging
+{% else %}
 control
+{% endif %}
 
 [zun:children]
 control
@@ -481,13 +530,13 @@ monasca
 monasca
 
 [monasca-log-transformer:children]
-monasca
+logging
 
 [monasca-log-persister:children]
-monasca
+logging
 
 [monasca-log-metrics:children]
-monasca
+logging
 
 [monasca-thresh:children]
 monasca

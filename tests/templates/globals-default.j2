@@ -147,3 +147,9 @@ enable_grafana: "yes"
 enable_prometheus: "yes"
 enable_prometheus_openstack_exporter: "no"
 {% endif %}
+
+{% if scenario == "monasca" %}
+enable_keystone: "yes"
+enable_monasca: "yes"
+enable_rabbitmq: "no"
+{% endif %}
