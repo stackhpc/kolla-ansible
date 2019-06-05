@@ -20,6 +20,7 @@ Projects Deployment References
    swift-guide
    bifrost
    networking-guide
+   keystone-guide
    kuryr-guide
    zun-guide
    osprofiler-guide
