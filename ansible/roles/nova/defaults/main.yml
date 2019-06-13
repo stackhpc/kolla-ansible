@@ -338,10 +338,6 @@ haproxy_nova_serialconsole_proxy_tunnel_timeout: "10m"
 # OpenStack
 ####################
 
-nova_legacy_admin_endpoint: "{{ admin_protocol }}://{{ nova_internal_fqdn }}:{{ nova_api_port }}/v2/%(tenant_id)s"
-nova_legacy_internal_endpoint: "{{ internal_protocol }}://{{ nova_internal_fqdn }}:{{ nova_api_port }}/v2/%(tenant_id)s"
-nova_legacy_public_endpoint: "{{ public_protocol }}://{{ nova_external_fqdn }}:{{ nova_api_port }}/v2/%(tenant_id)s"
-
 nova_admin_endpoint: "{{ admin_protocol }}://{{ nova_internal_fqdn }}:{{ nova_api_port }}/v2.1"
 nova_internal_endpoint: "{{ internal_protocol }}://{{ nova_internal_fqdn }}:{{ nova_api_port }}/v2.1"
 nova_public_endpoint: "{{ public_protocol }}://{{ nova_external_fqdn }}:{{ nova_api_port }}/v2.1"
