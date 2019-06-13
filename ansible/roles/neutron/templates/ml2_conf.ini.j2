@@ -59,7 +59,6 @@ flat_networks = {% for bridge in neutron_bridge_name.split(',') %}physnet{{ loop
 
 [ml2_type_vxlan]
 vni_ranges = 1:1000
-vxlan_group = 239.1.1.1
 
 [securitygroup]
 {% if neutron_plugin_agent == "openvswitch" or neutron_plugin_agent == "opendaylight" %}
