@@ -36,6 +36,22 @@
     </record>
 </filter>
 
+# Rename internal Fluent message field to match other logs
+<filter fluent.**>
+    @type parser
+    key_name message
+    format /^(?<Payload>.*)$/
+</filter>
+
+<filter fluent.**>
+    @type record_transformer
+    <record>
+        Hostname "#{Socket.gethostname}"
+        programname ${tag_parts[0]}
+        log_level ${tag_parts[1]}
+    </record>
+</filter>
+
 {% if enable_monasca | bool %}
 # Kolla configures Fluentd to extract timestamps from OpenStack service
 # logs, however these timestamps are not saved in the event and are not
