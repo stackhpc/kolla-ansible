@@ -8,19 +8,6 @@ export PYTHONUNBUFFERED=1
 
 GIT_PROJECT_DIR=$(mktemp -d)
 
-function clone_repos {
-    cat > /tmp/clonemap <<EOF
-clonemap:
- - name: openstack/kolla
-   dest: ${GIT_PROJECT_DIR}/kolla
- - name: openstack/requirements
-   dest: ${GIT_PROJECT_DIR}/requirements
-EOF
-    /usr/zuul-env/bin/zuul-cloner -m /tmp/clonemap --workspace "$(pwd)" \
-        --cache-dir /opt/git https://git.openstack.org \
-        openstack/kolla openstack/requirements
-}
-
 function setup_config {
     # Use Infra provided pypi.
     # Wheel package mirror may be not compatible. So do not enable it.
@@ -40,7 +27,7 @@ EOF
         GATE_IMAGES="bifrost"
     fi
 
-    if [[ $ACTION == "ceph" ]]; then
+    if [[ $ACTION =~ "ceph" ]]; then
         GATE_IMAGES+=",ceph,cinder"
     fi
 
@@ -97,17 +84,17 @@ function setup_ansible {
     RAW_INVENTORY=/etc/kolla/inventory
 
     # TODO(SamYaple): Move to virtualenv
-    sudo -H pip install -U "ansible>=2.4" "docker>=2.0.0" "python-openstackclient" "ara" "cmd2<0.9.0"
+    sudo -H pip install -U "ansible>=2.4" "docker>=2.0.0" "python-openstackclient" "ara<1.0.0" "cmd2<0.9.0"
     if [[ $ACTION == "zun" ]]; then
         sudo -H pip install -U "python-zunclient"
     fi
     detect_distro
 
     sudo mkdir /etc/ansible
-    ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
+    ara_location=$(python -m ara.setup.callback_plugins)
     sudo tee /etc/ansible/ansible.cfg<<EOF
 [defaults]
-callback_plugins = ${ara_location}/plugins/callbacks
+callback_plugins = ${ara_location}
 host_key_checking = False
 EOF
 
@@ -146,10 +133,43 @@ function sanity_check {
     # If the status is not ACTIVE, print info and exit 1
     nova --debug show kolla_boot_test | awk '{buf=buf"\n"$0} $2=="status" && $4!="ACTIVE" {failed="yes"}; END {if (failed=="yes") {print buf; exit 1}}'
     if echo $ACTION | grep -q "ceph"; then
-#TODO(egonzalez): Recover openstack cli command once volume calls are fixed.
-#        openstack volume create --size 2 test_volume
-        cinder create --name test_volume 2
+        openstack volume create --size 2 test_volume
+        attempt=1
+        while [[ $(openstack volume show test_volume -f value -c status) != "available" ]]; do
+            echo "Volume not available yet"
+            attempt=$((attempt+1))
+            if [[ $attempt -eq 10 ]]; then
+                echo "Volume failed to become available"
+                openstack volume show test_volume
+                return 1
+            fi
+            sleep 10
+        done
         openstack server add volume kolla_boot_test test_volume --device /dev/vdb
+        attempt=1
+        while [[ $(openstack volume show test_volume -f value -c status) != "in-use" ]]; do
+            echo "Volume not attached yet"
+            attempt=$((attempt+1))
+            if [[ $attempt -eq 10 ]]; then
+                echo "Volume failed to attach"
+                openstack volume show test_volume
+                return 1
+            fi
+            sleep 10
+        done
+        openstack server remove volume kolla_boot_test test_volume
+        attempt=1
+        while [[ $(openstack volume show test_volume -f value -c status) != "available" ]]; do
+            echo "Volume not detached yet"
+            attempt=$((attempt+1))
+            if [[ $attempt -eq 10 ]]; then
+                echo "Volume failed to detach"
+                openstack volume show test_volume
+                return 1
+            fi
+            sleep 10
+        done
+        openstack volume delete test_volume
     fi
     if echo $ACTION | grep -q "zun"; then
         openstack --debug appcontainer service list
@@ -195,7 +215,7 @@ function sanity_check_bifrost {
     # TODO(mgoddard): Use openstackclient when clouds.yaml works. See
     # https://bugs.launchpad.net/bifrost/+bug/1754070.
     attempts=0
-    while [[ $(sudo docker exec bifrost_deploy bash -c "source env-vars && ironic driver-list" | wc -l) -le 4 ]]; do
+    while [[ $(sudo docker exec bifrost_deploy bash -c "OS_CLOUD=bifrost openstack baremetal driver list -f value" | wc -l) -eq 0 ]]; do
         attempts=$((attempts + 1))
         if [[ $attempts -gt 6 ]]; then
             echo "Timed out waiting for ironic conductor to become active"
@@ -203,9 +223,9 @@ function sanity_check_bifrost {
         fi
         sleep 10
     done
-    sudo docker exec bifrost_deploy bash -c "source env-vars && ironic node-list"
-    sudo docker exec bifrost_deploy bash -c "source env-vars && ironic node-create --driver ipmi --name test-node"
-    sudo docker exec bifrost_deploy bash -c "source env-vars && ironic node-delete test-node"
+    sudo docker exec bifrost_deploy bash -c "OS_CLOUD=bifrost openstack baremetal node list"
+    sudo docker exec bifrost_deploy bash -c "OS_CLOUD=bifrost openstack baremetal node create --driver ipmi --name test-node"
+    sudo docker exec bifrost_deploy bash -c "OS_CLOUD=bifrost openstack baremetal node delete test-node"
 }
 
 function test_bifrost {
@@ -243,8 +263,6 @@ check_failure() {
 }
 
 
-
-clone_repos
 setup_ansible
 setup_config
 setup_node
