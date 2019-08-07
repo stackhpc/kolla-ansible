@@ -101,7 +101,7 @@
     - item.enabled | bool
   with_items:
     - uuid: "{{ rbd_secret_uuid }}"
-      name: "client.nova secret"
+      name: "client.admin secret"
       enabled: "{{ nova_backend == 'rbd' }}"
     - uuid: "{{ cinder_rbd_secret_uuid }}"
       name: "client.cinder secret"
@@ -110,7 +110,7 @@
     - Restart nova-libvirt container
 
 - name: Extract nova key from file
-  local_action: shell cat "{{ nova_cephx_keyring_file.stat.path }}" | grep -E 'key\s*=' | awk '{ print $3 }'
+  local_action: shell cat "{{ admin_cephx_keyring_file.stat.path }}" | grep -E 'key\s*=' | awk '{ print $3 }'
   changed_when: false
   run_once: True
   register: nova_cephx_raw_key
