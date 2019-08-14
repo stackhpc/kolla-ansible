@@ -45,6 +45,7 @@ options:
       - compare_container
       - compare_image
       - create_volume
+      - ensure_image
       - get_container_env
       - get_container_state
       - pull_image
@@ -879,6 +880,10 @@ class DockerWorker(object):
                     )
                 raise
 
+    def ensure_image(self):
+        if not self.check_image():
+            self.pull_image()
+
 
 def generate_module():
     # NOTE(jeffrey4l): add empty string '' to choices let us use
@@ -886,13 +891,20 @@ def generate_module():
     argument_spec = dict(
         common_options=dict(required=False, type='dict', default=dict()),
         action=dict(required=True, type='str',
-                    choices=['compare_container', 'compare_image',
-                             'create_volume', 'get_container_env',
-                             'get_container_state', 'pull_image',
+                    choices=['compare_container',
+                             'compare_image',
+                             'create_volume',
+                             'ensure_image',
+                             'get_container_env',
+                             'get_container_state',
+                             'pull_image',
                              'recreate_or_restart_container',
-                             'remove_container', 'remove_image',
-                             'remove_volume', 'restart_container',
-                             'start_container', 'stop_container',
+                             'remove_container',
+                             'remove_image',
+                             'remove_volume',
+                             'restart_container',
+                             'start_container',
+                             'stop_container',
                              'stop_and_remove_container']),
         api_version=dict(required=False, type='str', default='auto'),
         auth_email=dict(required=False, type='str'),
@@ -941,6 +953,7 @@ def generate_module():
         ['action', 'compare_container', ['name']],
         ['action', 'compare_image', ['name']],
         ['action', 'create_volume', ['name']],
+        ['action', 'ensure_image', ['image']],
         ['action', 'get_container_env', ['name']],
         ['action', 'get_container_state', ['name']],
         ['action', 'recreate_or_restart_container', ['name']],
