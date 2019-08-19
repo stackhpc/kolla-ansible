@@ -2,7 +2,7 @@
 - name: Restart nova-conductor container
   vars:
     service_name: "nova-conductor"
-    service: "{{ nova_services[service_name] }}"
+    service: "{{ nova_cell_services[service_name] }}"
   become: true
   kolla_docker:
     action: "recreate_or_restart_container"
@@ -18,7 +18,7 @@
 - name: Restart nova-ssh container
   vars:
     service_name: "nova-ssh"
-    service: "{{ nova_services[service_name] }}"
+    service: "{{ nova_cell_services[service_name] }}"
   become: true
   kolla_docker:
     action: "recreate_or_restart_container"
@@ -35,7 +35,7 @@
 - name: Restart nova-libvirt container
   vars:
     service_name: "nova-libvirt"
-    service: "{{ nova_services[service_name] }}"
+    service: "{{ nova_cell_services[service_name] }}"
   become: true
   kolla_docker:
     action: "recreate_or_restart_container"
@@ -54,90 +54,10 @@
   when:
     - kolla_action != "config"
 
-- name: Restart nova-scheduler container
-  vars:
-    service_name: "nova-scheduler"
-    service: "{{ nova_services[service_name] }}"
-  become: true
-  kolla_docker:
-    action: "recreate_or_restart_container"
-    common_options: "{{ docker_common_options }}"
-    name: "{{ service.container_name }}"
-    image: "{{ service.image }}"
-    privileged: "{{ service.privileged | default(False) }}"
-    volumes: "{{ service.volumes|reject('equalto', '')|list }}"
-    dimensions: "{{ service.dimensions }}"
-  when:
-    - kolla_action != "config"
-
-- name: Restart nova-novncproxy container
-  vars:
-    service_name: "nova-novncproxy"
-    service: "{{ nova_services[service_name] }}"
-  become: true
-  kolla_docker:
-    action: "recreate_or_restart_container"
-    common_options: "{{ docker_common_options }}"
-    name: "{{ service.container_name }}"
-    image: "{{ service.image }}"
-    privileged: "{{ service.privileged | default(False) }}"
-    volumes: "{{ service.volumes|reject('equalto', '')|list }}"
-    dimensions: "{{ service.dimensions }}"
-  when:
-    - kolla_action != "config"
-
-- name: Restart nova-spicehtml5proxy container
-  vars:
-    service_name: "nova-spicehtml5proxy"
-    service: "{{ nova_services[service_name] }}"
-  become: true
-  kolla_docker:
-    action: "recreate_or_restart_container"
-    common_options: "{{ docker_common_options }}"
-    name: "{{ service.container_name }}"
-    image: "{{ service.image }}"
-    privileged: "{{ service.privileged | default(False) }}"
-    volumes: "{{ service.volumes|reject('equalto', '')|list }}"
-    dimensions: "{{ service.dimensions }}"
-  when:
-    - kolla_action != "config"
-
-- name: Restart nova-serialproxy container
-  vars:
-    service_name: "nova-serialproxy"
-    service: "{{ nova_services[service_name] }}"
-  become: true
-  kolla_docker:
-    action: "recreate_or_restart_container"
-    common_options: "{{ docker_common_options }}"
-    name: "{{ service.container_name }}"
-    image: "{{ service.image }}"
-    privileged: "{{ service.privileged | default(False) }}"
-    volumes: "{{ service.volumes|reject('equalto', '')|list }}"
-    dimensions: "{{ service.dimensions }}"
-  when:
-    - kolla_action != "config"
-
-- name: Restart nova-api container
-  vars:
-    service_name: "nova-api"
-    service: "{{ nova_services[service_name] }}"
-  become: true
-  kolla_docker:
-    action: "recreate_or_restart_container"
-    common_options: "{{ docker_common_options }}"
-    name: "{{ service.container_name }}"
-    image: "{{ service.image }}"
-    privileged: "{{ service.privileged | default(False) }}"
-    volumes: "{{ service.volumes|reject('equalto', '')|list }}"
-    dimensions: "{{ service.dimensions }}"
-  when:
-    - kolla_action != "config"
-
 - name: Restart nova-compute container
   vars:
     service_name: "nova-compute"
-    service: "{{ nova_services[service_name] }}"
+    service: "{{ nova_cell_services[service_name] }}"
   become: true
   kolla_docker:
     action: "recreate_or_restart_container"
@@ -155,7 +75,7 @@
 - name: Restart nova-compute-ironic container
   vars:
     service_name: "nova-compute-ironic"
-    service: "{{ nova_services[service_name] }}"
+    service: "{{ nova_cell_services[service_name] }}"
   become: true
   kolla_docker:
     action: "recreate_or_restart_container"
@@ -222,7 +142,7 @@
 # https://bugs.launchpad.net/kolla-ansible/+bug/1833069.
 # TODO(mgoddard): Use SIGHUP when this bug has been fixed.
 
-- name: Restart nova services to remove RPC version cap
+- name: Restart nova cell services to remove RPC version cap in cell
   become: true
   kolla_docker:
     action: restart_container
@@ -232,8 +152,8 @@
     - kolla_action == 'upgrade'
     - inventory_hostname in groups[item.value.group]
     - item.value.enabled | bool
-    - item.key in nova_services_require_nova_conf
-  with_dict: "{{ nova_services }}"
+    - item.key in nova_cell_services_require_nova_conf
+  with_dict: "{{ nova_cell_services }}"
   listen:
     - Restart nova-compute container
     - Restart nova-compute-ironic container

@@ -10,7 +10,7 @@
     common_options: "{{ docker_common_options }}"
     name: "nova_conductor"
     image: "{{ nova_conductor_image_full }}"
-  when: inventory_hostname in groups['nova-conductor']
+  when: inventory_hostname in groups[nova_cell_conductor_group]
   register: conductor_differs
 
 # Short downtime here, but from user perspective his call will just timeout or execute later
@@ -21,7 +21,7 @@
     common_options: "{{ docker_common_options }}"
     name: "nova_conductor"
   when:
-    - inventory_hostname in groups['nova-conductor']
+    - inventory_hostname in groups[nova_cell_conductor_group]
     - conductor_differs['result']
 
 - name: Flush handlers

@@ -1,10 +1,11 @@
 ---
-project_name: "nova"
+project_name: "nova-cell"
 
-nova_services:
+nova_cell_services:
   nova-libvirt:
-    container_name: nova_libvirt
-    group: compute
+    instance_name: "nova-libvirt"
+    container_name: "nova_libvirt"
+    group: "{{ nova_cell_compute_group }}"
     enabled: "{{ nova_compute_virt_type in ['kvm', 'qemu'] }}"
     image: "{{ nova_libvirt_image_full }}"
     pid_mode: "host"
@@ -12,134 +13,25 @@ nova_services:
     volumes: "{{ nova_libvirt_default_volumes + nova_libvirt_extra_volumes }}"
     dimensions: "{{ nova_libvirt_dimensions }}"
   nova-ssh:
+    instance_name: "nova-ssh"
     container_name: "nova_ssh"
-    group: "compute"
+    group: "{{ nova_cell_compute_group }}"
     image: "{{ nova_ssh_image_full }}"
     enabled: "{{ enable_nova_ssh | bool }}"
     volumes: "{{ nova_ssh_default_volumes + nova_ssh_extra_volumes }}"
     dimensions: "{{ nova_ssh_dimensions }}"
-  nova-api:
-    container_name: "nova_api"
-    group: "nova-api"
-    image: "{{ nova_api_image_full }}"
-    enabled: True
-    privileged: True
-    volumes: "{{ nova_api_default_volumes + nova_api_extra_volumes }}"
-    dimensions: "{{ nova_api_dimensions }}"
-    haproxy:
-      nova_api:
-        enabled: "{{ enable_nova }}"
-        mode: "http"
-        external: false
-        port: "{{ nova_api_port }}"
-        listen_port: "{{ nova_api_listen_port }}"
-      nova_api_external:
-        enabled: "{{ enable_nova }}"
-        mode: "http"
-        external: true
-        port: "{{ nova_api_port }}"
-        listen_port: "{{ nova_api_listen_port }}"
-      nova_metadata:
-        enabled: "{{ enable_nova }}"
-        mode: "http"
-        external: false
-        port: "{{ nova_metadata_port }}"
-        listen_port: "{{ nova_metadata_listen_port }}"
-      nova_metadata_external:
-        enabled: "{{ enable_nova }}"
-        mode: "http"
-        external: true
-        port: "{{ nova_metadata_port }}"
-        listen_port: "{{ nova_metadata_listen_port }}"
-      nova_rdp:
-        enabled: "{{ enable_nova|bool and nova_console == 'rdp' }}"
-        mode: "http"
-        external: false
-        port: "{{ rdp_port }}"
-        host_group: "hyperv"
-  nova-novncproxy:
-    container_name: "nova_novncproxy"
-    group: "nova-novncproxy"
-    image: "{{ nova_novncproxy_image_full }}"
-    enabled: "{{ nova_console == 'novnc' }}"
-    volumes: "{{ nova_novncproxy_default_volumes + nova_novncproxy_extra_volumes }}"
-    dimensions: "{{ nova_novncproxy_dimensions }}"
-    haproxy:
-      nova_novncproxy:
-        enabled: "{{ enable_nova|bool and nova_console == 'novnc' }}"
-        mode: "http"
-        external: false
-        port: "{{ nova_novncproxy_port }}"
-        listen_port: "{{ nova_novncproxy_listen_port }}"
-        backend_http_extra:
-          - "timeout tunnel 1h"
-      nova_novncproxy_external:
-        enabled: "{{ enable_nova|bool and nova_console == 'novnc' }}"
-        mode: "http"
-        external: true
-        port: "{{ nova_novncproxy_port }}"
-        listen_port: "{{ nova_novncproxy_listen_port }}"
-  nova-scheduler:
-    container_name: "nova_scheduler"
-    group: "nova-scheduler"
-    image: "{{ nova_scheduler_image_full }}"
-    enabled: True
-    volumes: "{{ nova_scheduler_default_volumes + nova_scheduler_extra_volumes }}"
-    dimensions: "{{ nova_scheduler_dimensions }}"
-  nova-spicehtml5proxy:
-    container_name: "nova_spicehtml5proxy"
-    group: "nova-spicehtml5proxy"
-    image: "{{ nova_spicehtml5proxy_image_full }}"
-    enabled: "{{ nova_console == 'spice' }}"
-    volumes: "{{ nova_spicehtml5proxy_default_volumes + nova_spicehtml5proxy_extra_volumes }}"
-    dimensions: "{{ nova_spicehtml5proxy_dimensions }}"
-    haproxy:
-      nova_spicehtml5proxy:
-        enabled: "{{ enable_nova|bool and nova_console == 'spice' }}"
-        mode: "http"
-        external: false
-        port: "{{ nova_spicehtml5proxy_port }}"
-        listen_port: "{{ nova_spicehtml5proxy_listen_port }}"
-      nova_spicehtml5proxy_external:
-        enabled: "{{ enable_nova|bool and nova_console == 'spice' }}"
-        mode: "http"
-        external: true
-        port: "{{ nova_spicehtml5proxy_port }}"
-        listen_port: "{{ nova_spicehtml5proxy_listen_port }}"
-  nova-serialproxy:
-    container_name: "nova_serialproxy"
-    group: "nova-serialproxy"
-    image: "{{ nova_serialproxy_image_full }}"
-    enabled: "{{ enable_nova_serialconsole_proxy | bool }}"
-    volumes: "{{ nova_serialproxy_default_volumes + nova_serialproxy_extra_volumes }}"
-    dimensions: "{{ nova_serialproxy_dimensions }}"
-    haproxy:
-      nova_serialconsole_proxy:
-        enabled: "{{ enable_nova|bool and enable_nova_serialconsole_proxy|bool }}"
-        mode: "http"
-        external: false
-        port: "{{ nova_serialproxy_port }}"
-        listen_port: "{{ nova_serialproxy_listen_port }}"
-        backend_http_extra:
-          - "timeout tunnel {{ haproxy_nova_serialconsole_proxy_tunnel_timeout }}"
-      nova_serialconsole_proxy_external:
-        enabled: "{{ enable_nova|bool and enable_nova_serialconsole_proxy|bool }}"
-        mode: "http"
-        external: true
-        port: "{{ nova_serialproxy_port }}"
-        listen_port: "{{ nova_serialproxy_listen_port }}"
-        backend_http_extra:
-          - "timeout tunnel {{ haproxy_nova_serialconsole_proxy_tunnel_timeout }}"
   nova-conductor:
-    container_name: "nova_conductor"
-    group: "nova-conductor"
+    instance_name: "{{ nova_cell_namespace + 'nova-conductor' }}"
+    container_name: "{{ nova_cell_container_namespace + 'nova_conductor' }}"
+    group: "{{ nova_cell_conductor_group }}"
     enabled: True
     image: "{{ nova_conductor_image_full }}"
     volumes: "{{ nova_conductor_default_volumes + nova_conductor_extra_volumes }}"
     dimensions: "{{ nova_conductor_dimensions }}"
   nova-compute:
+    instance_name: "nova-compute"
     container_name: "nova_compute"
-    group: "compute"
+    group: "{{ nova_cell_compute_group }}"
     image: "{{ nova_compute_image_full }}"
     environment:
       LIBGUESTFS_BACKEND: "direct"
@@ -149,12 +41,25 @@ nova_services:
     volumes: "{{ nova_compute_default_volumes + nova_compute_extra_volumes }}"
     dimensions: "{{ nova_compute_dimensions }}"
   nova-compute-ironic:
+    instance_name: "nova-compute-ironic"
     container_name: "nova_compute_ironic"
-    group: "nova-compute-ironic"
+    group: "{{ nova_cell_compute_ironic_group }}"
     image: "{{ nova_compute_ironic_image_full }}"
-    enabled: "{{ enable_ironic | bool }}"
+    enabled: "{{ enable_ironic | bool and nova_cell_name == nova_cell_ironic_cell_name }}"
     volumes: "{{ nova_compute_ironic_default_volumes + nova_compute_ironic_extra_volumes }}"
     dimensions: "{{ nova_compute_ironic_dimensions }}"
+
+####################
+# Namespace
+####################
+nova_cell_name: ''
+nova_cell_namespace: "{{ nova_cell_name + '-' if nova_cell_name else '' }}"
+nova_cell_container_namespace: "{{ nova_cell_namespace|replace('-', '_') }}"
+
+nova_cell_compute_group: 'compute'
+nova_cell_compute_ironic_group: 'nova-compute-ironic'
+nova_cell_conductor_group: 'nova-conductor'
+nova_cell_ironic_cell_name: ''
 
 ####################
 # Ceph
@@ -189,13 +94,49 @@ ceph_client_nova_keyring_caps:
 ####################
 # Database
 ####################
-nova_database_name: "nova"
-nova_database_user: "{% if use_preconfigured_databases | bool and use_common_mariadb_user | bool %}{{ database_user }}{% else %}nova{% endif %}"
-nova_database_address: "{{ database_address }}:{{ database_port }}"
+nova_cell_database_admin_user: "{{ database_user }}"
+nova_cell_database_admin_password: "{{ database_password }}"
 
+nova_cell_database_name: "{{ 'nova_' ~ nova_cell_name if nova_cell_name else 'nova' }}"
+nova_cell_database_user: "{% if use_preconfigured_databases | bool and use_common_mariadb_user | bool %}{{ database_user }}{% else %}nova{% endif %}"
+nova_cell_database_password: '{{ nova_database_password }}'
+nova_cell_database_address: "{% if nova_cell_database_group is defined %}{{ hostvars[groups[nova_cell_database_group][0]]['ansible_' + hostvars[groups[nova_cell_database_group][0]]['api_interface']]['ipv4']['address'] }}{% else %}{{ database_address }}{% endif %}"
+nova_cell_database_port: '{{ database_port }}'
+
+# NOTE(dszumski): We use this so that each cell can register itself
 nova_api_database_name: "nova_api"
 nova_api_database_user: "{% if use_preconfigured_databases | bool and use_common_mariadb_user | bool %}{{ database_user }}{% else %}nova_api{% endif %}"
 nova_api_database_address: "{{ database_address }}:{{ database_port }}"
+
+# Optional group for cell database. If this is not defined, then the top level database is used.
+# nova_cell_database_group:
+
+####################
+# RabbitMQ
+####################
+
+# Internal rabbit users should set these
+nova_cell_rpc_user: "{{ om_rpc_user }}"
+nova_cell_rpc_password: "{{ om_rpc_password }}"
+nova_cell_rpc_port: "{{ om_rpc_port }}"
+nova_cell_rpc_group_name: "{{ om_rpc_group }}"
+nova_cell_rpc_transport: "{{ om_rpc_transport }}"
+nova_cell_rpc_vhost: "{{ om_rpc_vhost }}"
+
+nova_cell_notify_user: "{{ nova_cell_rpc_user }}"
+nova_cell_notify_password: "{{ nova_cell_rpc_password }}"
+nova_cell_notify_port: "{{ nova_cell_rpc_port }}"
+nova_cell_notify_group_name: "{{ nova_cell_rpc_group_name }}"
+nova_cell_notify_transport: "{{ nova_cell_rpc_transport }}"
+nova_cell_notify_vhost: "{{ nova_cell_rpc_vhost }}"
+
+# External Rabbit users should override these
+nova_cell_rpc_transport_url: "{{ nova_cell_rpc_transport }}://{% for host in groups[nova_cell_rpc_group_name] %}{{ nova_cell_rpc_user }}:{{ nova_cell_rpc_password }}@{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ nova_cell_rpc_port }}{% if not loop.last %},{% endif %}{% endfor %}/{{ nova_cell_rpc_vhost }}"
+nova_cell_notify_transport_url: "{{ nova_cell_notify_transport }}://{% for host in groups[nova_cell_notify_group_name] %}{{ nova_cell_notify_user }}:{{ nova_cell_notify_password }}@{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ nova_cell_notify_port }}{% if not loop.last %},{% endif %}{% endfor %}/{{ nova_cell_notify_vhost }}"
+
+nova_cell_rabbitmq_vhosts:
+  - "{{ nova_cell_rpc_vhost }}"
+  - "{{ nova_cell_notify_vhost }}"
 
 ####################
 # Docker
@@ -216,41 +157,16 @@ nova_conductor_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ 
 nova_conductor_tag: "{{ nova_tag }}"
 nova_conductor_image_full: "{{ nova_conductor_image }}:{{ nova_conductor_tag }}"
 
-nova_novncproxy_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ nova_install_type }}-nova-novncproxy"
-nova_novncproxy_tag: "{{ nova_tag }}"
-nova_novncproxy_image_full: "{{ nova_novncproxy_image }}:{{ nova_novncproxy_tag }}"
-
-nova_spicehtml5proxy_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ nova_install_type }}-nova-spicehtml5proxy"
-nova_spicehtml5proxy_tag: "{{ nova_tag }}"
-nova_spicehtml5proxy_image_full: "{{ nova_spicehtml5proxy_image }}:{{ nova_spicehtml5proxy_tag }}"
-
-nova_scheduler_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ nova_install_type }}-nova-scheduler"
-nova_scheduler_tag: "{{ nova_tag }}"
-nova_scheduler_image_full: "{{ nova_scheduler_image }}:{{ nova_scheduler_tag }}"
-
 nova_compute_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ nova_install_type }}-nova-compute"
 nova_compute_tag: "{{ nova_tag }}"
 nova_compute_image_full: "{{ nova_compute_image }}:{{ nova_compute_tag }}"
-
-nova_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ nova_install_type }}-nova-api"
-nova_api_tag: "{{ nova_tag }}"
-nova_api_image_full: "{{ nova_api_image }}:{{ nova_api_tag }}"
 
 nova_compute_ironic_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ nova_install_type }}-nova-compute-ironic"
 nova_compute_ironic_tag: "{{ nova_tag }}"
 nova_compute_ironic_image_full: "{{ nova_compute_ironic_image }}:{{ nova_compute_ironic_tag }}"
 
-nova_serialproxy_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ nova_install_type }}-nova-serialproxy"
-nova_serialproxy_tag: "{{ nova_tag }}"
-nova_serialproxy_image_full: "{{ nova_serialproxy_image }}:{{ nova_serialproxy_tag }}"
-
 nova_libvirt_dimensions: "{{ default_container_dimensions }}"
 nova_ssh_dimensions: "{{ default_container_dimensions }}"
-nova_api_dimensions: "{{ default_container_dimensions }}"
-nova_novncproxy_dimensions: "{{ default_container_dimensions }}"
-nova_scheduler_dimensions: "{{ default_container_dimensions }}"
-nova_spicehtml5proxy_dimensions: "{{ default_container_dimensions }}"
-nova_serialproxy_dimensions: "{{ default_container_dimensions }}"
 nova_conductor_dimensions: "{{ default_container_dimensions }}"
 nova_compute_dimensions: "{{ default_container_dimensions }}"
 nova_compute_ironic_dimensions: "{{ default_container_dimensions }}"
@@ -275,34 +191,8 @@ nova_ssh_default_volumes:
   - "{{ nova_instance_datadir_volume }}:/var/lib/nova"
   - "{% if enable_shared_var_lib_nova_mnt | bool %}/var/lib/nova/mnt:/var/lib/nova/mnt:shared{% endif %}"
   - "{{ kolla_dev_repos_directory ~ '/nova/nova:/var/lib/kolla/venv/lib/python2.7/site-packages/nova' if nova_dev_mode | bool else '' }}"
-nova_api_default_volumes:
-  - "{{ node_config_directory }}/nova-api/:{{ container_config_directory }}/:ro"
-  - "/etc/localtime:/etc/localtime:ro"
-  - "/lib/modules:/lib/modules:ro"
-  - "kolla_logs:/var/log/kolla/"
-  - "{{ kolla_dev_repos_directory ~ '/nova/nova:/var/lib/kolla/venv/lib/python2.7/site-packages/nova' if nova_dev_mode | bool else '' }}"
-nova_novncproxy_default_volumes:
-  - "{{ node_config_directory }}/nova-novncproxy/:{{ container_config_directory }}/:ro"
-  - "/etc/localtime:/etc/localtime:ro"
-  - "kolla_logs:/var/log/kolla/"
-  - "{{ kolla_dev_repos_directory ~ '/nova/nova:/var/lib/kolla/venv/lib/python2.7/site-packages/nova' if nova_dev_mode | bool else '' }}"
-nova_scheduler_default_volumes:
-  - "{{ node_config_directory }}/nova-scheduler/:{{ container_config_directory }}/:ro"
-  - "/etc/localtime:/etc/localtime:ro"
-  - "kolla_logs:/var/log/kolla/"
-  - "{{ kolla_dev_repos_directory ~ '/nova/nova:/var/lib/kolla/venv/lib/python2.7/site-packages/nova' if nova_dev_mode | bool else '' }}"
-nova_spicehtml5proxy_default_volumes:
-  - "{{ node_config_directory }}/nova-spicehtml5proxy/:{{ container_config_directory }}/:ro"
-  - "/etc/localtime:/etc/localtime:ro"
-  - "kolla_logs:/var/log/kolla/"
-  - "{{ kolla_dev_repos_directory ~ '/nova/nova:/var/lib/kolla/venv/lib/python2.7/site-packages/nova' if nova_dev_mode | bool else '' }}"
-nova_serialproxy_default_volumes:
-  - "{{ node_config_directory }}/nova-serialproxy/:{{ container_config_directory }}/:ro"
-  - "/etc/localtime:/etc/localtime:ro"
-  - "kolla_logs:/var/log/kolla/"
-  - "{{ kolla_dev_repos_directory ~ '/nova/nova:/var/lib/kolla/venv/lib/python2.7/site-packages/nova' if nova_dev_mode | bool else '' }}"
 nova_conductor_default_volumes:
-  - "{{ node_config_directory }}/nova-conductor/:{{ container_config_directory }}/:ro"
+  - "{{ node_config_directory }}/{{ nova_cell_namespace + 'nova-conductor' }}/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
   - "kolla_logs:/var/log/kolla/"
   - "{{ kolla_dev_repos_directory ~ '/nova/nova:/var/lib/kolla/venv/lib/python2.7/site-packages/nova' if nova_dev_mode | bool else '' }}"
@@ -327,32 +217,13 @@ nova_compute_ironic_default_volumes:
 nova_extra_volumes: "{{ default_extra_volumes }}"
 nova_libvirt_extra_volumes: "{{ nova_extra_volumes }}"
 nova_ssh_extra_volumes: "{{ nova_extra_volumes }}"
-nova_api_extra_volumes: "{{ nova_extra_volumes }}"
-nova_novncproxy_extra_volumes: "{{ nova_extra_volumes }}"
-nova_scheduler_extra_volumes: "{{ nova_extra_volumes }}"
-nova_spicehtml5proxy_extra_volumes: "{{ nova_extra_volumes }}"
-nova_serialproxy_extra_volumes: "{{ nova_extra_volumes }}"
 nova_conductor_extra_volumes: "{{ nova_extra_volumes }}"
 nova_compute_extra_volumes: "{{ nova_extra_volumes }}"
 nova_compute_ironic_extra_volumes: "{{ nova_extra_volumes }}"
 
-
-####################
-# HAProxy
-####################
-haproxy_nova_serialconsole_proxy_tunnel_timeout: "10m"
-
 ####################
 # OpenStack
 ####################
-
-nova_legacy_admin_endpoint: "{{ admin_protocol }}://{{ nova_internal_fqdn }}:{{ nova_api_port }}/v2/%(tenant_id)s"
-nova_legacy_internal_endpoint: "{{ internal_protocol }}://{{ nova_internal_fqdn }}:{{ nova_api_port }}/v2/%(tenant_id)s"
-nova_legacy_public_endpoint: "{{ public_protocol }}://{{ nova_external_fqdn }}:{{ nova_api_port }}/v2/%(tenant_id)s"
-
-nova_admin_endpoint: "{{ admin_protocol }}://{{ nova_internal_fqdn }}:{{ nova_api_port }}/v2.1"
-nova_internal_endpoint: "{{ internal_protocol }}://{{ nova_internal_fqdn }}:{{ nova_api_port }}/v2.1"
-nova_public_endpoint: "{{ public_protocol }}://{{ nova_external_fqdn }}:{{ nova_api_port }}/v2.1"
 
 nova_logging_debug: "{{ openstack_logging_debug }}"
 
@@ -365,15 +236,10 @@ nova_safety_upgrade: "no"
 nova_libvirt_port: "16509"
 nova_ssh_port: "8022"
 
-nova_services_require_nova_conf:
-  - nova-api
+nova_cell_services_require_nova_conf:
   - nova-compute
   - nova-compute-ironic
   - nova-conductor
-  - nova-novncproxy
-  - nova-serialproxy
-  - nova-scheduler
-  - nova-spicehtml5proxy
 
 # After upgrading nova-compute, services will have an RPC version cap in place.
 # We need to restart all services that communicate with nova-compute in order
@@ -383,31 +249,6 @@ nova_services_require_nova_conf:
 # update the version of their service in the database.  This seems to take
 # around 10 seconds, but the default is 30 to allow room for slowness.
 nova_compute_startup_delay: 30
-
-####################
-# Keystone
-####################
-nova_ks_services:
-  - name: "nova_legacy"
-    type: "compute_legacy"
-    description: "OpenStack Compute Service (Legacy 2.0)"
-    endpoints:
-      - {'interface': 'admin', 'url': '{{ nova_legacy_admin_endpoint }}'}
-      - {'interface': 'internal', 'url': '{{ nova_legacy_internal_endpoint }}'}
-      - {'interface': 'public', 'url': '{{ nova_legacy_public_endpoint }}'}
-  - name: "nova"
-    type: "compute"
-    description: "OpenStack Compute Service"
-    endpoints:
-      - {'interface': 'admin', 'url': '{{ nova_admin_endpoint }}'}
-      - {'interface': 'internal', 'url': '{{ nova_internal_endpoint }}'}
-      - {'interface': 'public', 'url': '{{ nova_public_endpoint }}'}
-
-nova_ks_users:
-  - project: "service"
-    user: "{{ nova_keystone_user }}"
-    password: "{{ nova_keystone_password }}"
-    role: "admin"
 
 ####################
 # Notification

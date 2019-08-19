@@ -1,7 +1,7 @@
 ---
 - name: Running Nova bootstrap container
   vars:
-    nova_api: "{{ nova_services['nova-api'] }}"
+    nova_conductor: "{{ nova_cell_services['nova-conductor'] }}"
     bootstrap_environment:
       KOLLA_BOOTSTRAP:
       KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
@@ -14,11 +14,10 @@
     common_options: "{{ docker_common_options }}"
     detach: False
     environment: "{{ upgrade_environment if nova_enable_rolling_upgrade|bool else bootstrap_environment }}"
-    image: "{{ nova_api.image }}"
+    image: "{{ nova_conductor.image }}"
     labels:
       BOOTSTRAP:
-    name: "bootstrap_nova"
+    name: "{{ nova_cell_container_namespace + 'bootstrap_nova_conductor' }}"
     restart_policy: no
-    volumes: "{{ nova_api.volumes|reject('equalto', '')|list }}"
-  run_once: True
-  delegate_to: "{{ groups[nova_api.group][0] }}"
+    volumes: "{{ nova_conductor.volumes|reject('equalto', '')|list }}"
+  when: inventory_hostname == groups[nova_cell_conductor_group][0]

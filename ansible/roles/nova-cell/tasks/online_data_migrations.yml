@@ -1,0 +1,23 @@
+---
+# TODO: Open question whether this needs to wait until top level is upgraded
+# (and hence everything, or if it is OK to run after the cell services have
+# been updated.
+- name: Run Nova online database migrations
+  vars:
+    nova_conductor: "{{ nova_cell_services['nova-conductor'] }}"
+  become: true
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_OSM:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ nova_conductor.image }}"
+    labels:
+      BOOTSTRAP:
+    name: "{{ nova_cell_container_namespace + 'bootstrap_nova' }}"
+    restart_policy: "no"
+    volumes: "{{ nova_conductor.volumes }}"
+  tags: nova
+  when: inventory_hostname == groups[nova_cell_conductor_group][0]

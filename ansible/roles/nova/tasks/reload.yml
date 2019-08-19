@@ -1,0 +1,18 @@
+---
+- name: Reload top level nova services
+  become: true
+  kolla_docker:
+    action: "recreate_or_restart_container"
+    common_options: "{{ docker_common_options }}"
+    name: "{{ item.value.container_name }}"
+    image: "{{ item.value.image }}"
+    privileged: "{{ item.value.privileged | default(False) }}"
+    volumes: "{{ item.value.volumes|reject('equalto', '')|list }}"
+    dimensions: "{{ item.value.dimensions }}"
+  when:
+    - kolla_action == 'upgrade'
+    - inventory_hostname in groups[item.value.group]
+    - item.value.enabled | bool
+    - item.key in nova_services_require_nova_conf
+  with_dict: "{{ nova_services }}"
+  tags: nova

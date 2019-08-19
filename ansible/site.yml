@@ -718,10 +718,7 @@
 - name: Apply role nova
   gather_facts: false
   hosts:
-    - ceph-mon
-    - compute
     - nova-api
-    - nova-conductor
     - nova-novncproxy
     - nova-scheduler
     - '&enable_nova_True'
@@ -730,6 +727,53 @@
     - { role: nova,
         tags: nova,
         when: enable_nova | bool }
+
+- name: Apply role nova-cell
+  gather_facts: false
+  hosts:
+    - ceph-mon
+    - compute
+    - nova-conductor
+    - '&enable_nova_True'
+  serial: '{{ kolla_serial|default("0") }}'
+  roles:
+    - { role: nova-cell,
+        tags: nova,
+        when: enable_nova | bool }
+
+- name: Reload top level Nova services
+  gather_facts: false
+  hosts:
+    - nova-api
+    - nova-novncproxy
+    - nova-scheduler
+    - '&enable_nova_True'
+  serial: '{{ kolla_serial|default("0") }}'
+  tasks:
+    - include_role:
+        name: nova
+        tasks_from: reload
+      tags: nova
+      when:
+        - enable_nova | bool
+        - kolla_action in ['upgrade']
+        - nova_safety_upgrade | bool
+
+# TODO: Do we need to run these migrations in the API cell as well?
+- name: Finish Nova upgrade
+  gather_facts: false
+  hosts:
+    - nova-conductor
+    - '&enable_nova_True'
+  serial: '{{ kolla_serial|default("0") }}'
+  tasks:
+    - include_role:
+        role: nova-cell
+        tasks_from: online_data_migrations
+      tags: nova
+      when:
+        - enable_nova | bool
+        - kolla_action in ['upgrade']
 
 - name: Apply role opendaylight
   gather_facts: false

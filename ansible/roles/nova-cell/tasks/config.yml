@@ -9,12 +9,12 @@
     - { name: "net.ipv4.conf.default.rp_filter", value: "{{ nova_compute_host_rp_filter_mode }}"}
   when:
     - set_sysctl | bool
-    - inventory_hostname in groups['compute']
+    - inventory_hostname in groups[nova_cell_compute_group]
 
 - name: Ensuring config directories exist
   become: true
   file:
-    path: "{{ node_config_directory }}/{{ item.key }}"
+    path: "{{ node_config_directory }}/{{ item.value.instance_name }}"
     state: "directory"
     owner: "{{ config_owner_user }}"
     group: "{{ config_owner_group }}"
@@ -22,23 +22,21 @@
   when:
     - inventory_hostname in groups[item.value.group]
     - item.value.enabled | bool
-  with_dict: "{{ nova_services }}"
+  with_dict: "{{ nova_cell_services }}"
 
 - include_tasks: ceph.yml
   when:
     - enable_ceph | bool and nova_backend == "rbd"
     - inventory_hostname in groups['ceph-mon'] or
-        inventory_hostname in groups['compute'] or
-        inventory_hostname in groups['nova-api'] or
-        inventory_hostname in groups['nova-conductor'] or
-        inventory_hostname in groups['nova-novncproxy'] or
-        inventory_hostname in groups['nova-scheduler']
+        inventory_hostname in groups[nova_cell_conductor_group] or
+        inventory_hostname in groups[nova_cell_compute_group]]
 
 - include_tasks: external_ceph.yml
   when:
     - not enable_ceph | bool and (nova_backend == "rbd" or cinder_backend_ceph | bool)
-    - inventory_hostname in groups['compute']
+    - inventory_hostname in groups[nova_cell_compute_group]
 
+# TODO remove policies? Only the API should use them?
 - name: Check if policies shall be overwritten
   local_action: stat path="{{ item }}"
   run_once: True
@@ -60,12 +58,12 @@
   become: true
   template:
     src: "{{ item.key }}.json.j2"
-    dest: "{{ node_config_directory }}/{{ item.key }}/config.json"
+    dest: "{{ node_config_directory }}/{{ item.value.instance_name }}/config.json"
     mode: "0660"
   when:
     - inventory_hostname in groups[item.value.group]
     - item.value.enabled | bool
-  with_dict: "{{ nova_services }}"
+  with_dict: "{{ nova_cell_services }}"
   notify:
     - "Restart {{ item.key }} container"
 
@@ -74,7 +72,7 @@
     xenapi_facts: "{{ lookup('file', xenapi_facts_root + '/' + inventory_hostname + '/' + xenapi_facts_file) | from_json }}"
   when:
     - nova_compute_virt_type == 'xenapi'
-    - inventory_hostname in groups['compute']
+    - inventory_hostname in groups[nova_cell_compute_group]
 
 - name: Copying over nova.conf
   become: true
@@ -85,25 +83,24 @@
       - "{{ role_path }}/templates/nova.conf.j2"
       - "{{ node_custom_config }}/global.conf"
       - "{{ node_custom_config }}/nova.conf"
-      - "{{ node_custom_config }}/nova/{{ item.key }}.conf"
       - "{{ node_custom_config }}/nova/{{ inventory_hostname }}/nova.conf"
-    dest: "{{ node_config_directory }}/{{ item.key }}/nova.conf"
+    dest: "{{ node_config_directory }}/{{ item.value.instance_name }}/nova.conf"
     mode: "0660"
   when:
     - inventory_hostname in groups[item.value.group]
     - item.value.enabled | bool
-    - item.key in nova_services_require_nova_conf
-  with_dict: "{{ nova_services }}"
+    - item.key in nova_cell_services_require_nova_conf
+  with_dict: "{{ nova_cell_services }}"
   notify:
     - "Restart {{ item.key }} container"
 
 - name: Copying over libvirt configuration
   become: true
   vars:
-    service: "{{ nova_services['nova-libvirt'] }}"
+    service: "{{ nova_cell_services['nova-libvirt'] }}"
   template:
     src: "{{ item.src }}"
-    dest: "{{ node_config_directory }}/nova-libvirt/{{ item.dest }}"
+    dest: "{{ node_config_directory }}/{{ service.instance_name }}/{{ item.dest }}"
     mode: "0660"
   when:
     - inventory_hostname in groups[service.group]
@@ -117,10 +114,10 @@
 - name: Copying files for nova-ssh
   become: true
   vars:
-    service: "{{ nova_services['nova-ssh'] }}"
+    service: "{{ nova_cell_services['nova-ssh'] }}"
   template:
     src: "{{ item.src }}"
-    dest: "{{ node_config_directory }}/nova-ssh/{{ item.dest }}"
+    dest: "{{ node_config_directory }}/{{ service.instance_name }}/{{ item.dest }}"
     mode: "0660"
   when:
     - inventory_hostname in groups[service.group]
@@ -135,10 +132,10 @@
 
 - name: Copying VMware vCenter CA file
   vars:
-    service: "{{ nova_services['nova-compute'] }}"
+    service: "{{ nova_cell_services['nova-compute'] }}"
   copy:
     src: "{{ node_custom_config }}/vmware_ca"
-    dest: "{{ node_config_directory }}/nova-compute/vmware_ca"
+    dest: "{{ node_config_directory }}/{{ service.instance_name }}/vmware_ca"
     mode: "0660"
   when:
     - nova_compute_virt_type == "vmware"
@@ -150,15 +147,16 @@
 
 - name: Copying 'release' file for nova_compute
   vars:
-    service: "{{ nova_services['nova-compute'] }}"
+    service: "{{ nova_cell_services['nova-compute'] }}"
   copy:
     src: "{{ item }}"
-    dest: "{{ node_config_directory }}/nova-compute/release"
+    dest: "{{ node_config_directory }}/{{ service.instance_name }}/release"
     mode: "0660"
   with_first_found:
     - files:
-        - "{{ node_custom_config }}/nova_compute/{{ inventory_hostname }}/release"
+        - "{{ node_custom_config }}/nova_compute/{{ nova_cell_namespace }}{{ inventory_hostname }}/release"
         - "{{ node_custom_config }}/nova_compute/release"
+        - "{{ node_custom_config }}/{{ nova_cell_namespace }}nova_compute/release"
         - "{{ node_custom_config }}/nova/release"
       skip: true
   when:
@@ -171,24 +169,19 @@
   become: true
   vars:
     services_require_policy_json:
-      - nova-api
       - nova-compute
       - nova-compute-ironic
       - nova-conductor
-      - nova-novncproxy
-      - nova-serialproxy
-      - nova-scheduler
-      - nova-spicehtml5proxy
   template:
     src: "{{ nova_policy_file_path }}"
-    dest: "{{ node_config_directory }}/{{ item.key }}/{{ nova_policy_file }}"
+    dest: "{{ node_config_directory }}/{{ item.value.instance_name }}/{{ nova_policy_file }}"
     mode: "0660"
   when:
     - inventory_hostname in groups[item.value.group]
     - item.value.enabled | bool
     - nova_policy_file is defined
     - item.key in services_require_policy_json
-  with_dict: "{{ nova_services }}"
+  with_dict: "{{ nova_cell_services }}"
   notify:
     - "Restart {{ item.key }} container"
 
@@ -210,6 +203,6 @@
     - kolla_action != "config"
     - inventory_hostname in groups[item.value.group]
     - item.value.enabled | bool
-  with_dict: "{{ nova_services }}"
+  with_dict: "{{ nova_cell_services }}"
   notify:
     - "Restart {{ item.key }} container"

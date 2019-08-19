@@ -2,7 +2,7 @@
 - name: Ensuring config directories exist
   become: true
   file:
-    path: "{{ node_config_directory }}/nova-compute-fake-{{ item }}"
+    path: "{{ node_config_directory }}/{{ nova_cell_namespace }}nova-compute-fake-{{ item }}"
     state: "directory"
     mode: "0770"
   with_sequence: start=1 end={{ num_nova_fake_per_node }}
@@ -13,7 +13,7 @@
   become: true
   template:
     src: "nova-compute.json.j2"
-    dest: "{{ node_config_directory }}/nova-compute-fake-{{ item }}/config.json"
+    dest: "{{ node_config_directory }}/{{ nova_cell_namespace }}nova-compute-fake-{{ item }}/config.json"
     mode: "0660"
   with_sequence: start=1 end={{ num_nova_fake_per_node }}
   notify:
@@ -37,7 +37,7 @@
 - name: Ensuring config directory has correct owner and permission
   become: true
   file:
-    path: "{{ node_config_directory }}/nova-compute-fake-{{ item }}"
+    path: "{{ node_config_directory }}/{{ nova_cell_namespace }}nova-compute-fake-{{ item }}"
     recurse: yes
     owner: "{{ config_owner_user }}"
     group: "{{ config_owner_group }}"
@@ -54,7 +54,7 @@
     image: "{{ nova_compute_image_full }}"
     privileged: True
     volumes:
-      - "{{ node_config_directory }}/nova-compute-fake-{{ item }}/:{{ container_config_directory }}/:ro"
+      - "{{ node_config_directory }}/{{ nova_cell_namespace }}nova-compute-fake-{{ item }}/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
       - "/lib/modules:/lib/modules:ro"
       - "/run:/run:shared"
@@ -62,7 +62,7 @@
   with_sequence: start=1 end={{ num_nova_fake_per_node }}
   when:
     - kolla_action != "config"
-    - inventory_hostname in groups['compute']
+    - inventory_hostname in groups[nova_cell_compute_group]
     - enable_nova_fake | bool
   notify:
     - Restart nova-compute-fake containers
