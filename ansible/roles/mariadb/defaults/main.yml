@@ -3,18 +3,21 @@ project_name: "mariadb"
 
 mariadb_services:
   mariadb:
-    container_name: mariadb
-    group: mariadb
+    instance_name: "{{ mariadb_namespace + 'mariadb' }}"
+    container_name: "{{ mariadb_container_name }}"
+    group: "{{ role_mariadb_group }}"
     enabled: true
     image: "{{ mariadb_image_full }}"
+    environment:
+      MARIADB_LOG_DIR: "/var/log/kolla/{{ mariadb_container_name }}"
     volumes: "{{ mariadb_default_volumes + mariadb_extra_volumes }}"
     dimensions: "{{ mariadb_dimensions }}"
     haproxy:
       mariadb:
         enabled: "{{ enable_mariadb|bool and not enable_external_mariadb_load_balancer|bool }}"
         mode: "tcp"
-        port: "{{ database_port }}"
-        listen_port: "{{ mariadb_port }}"
+        port: "{{ role_mariadb_database_port }}"
+        listen_port: "{{ role_mariadb_port }}"
         frontend_tcp_extra:
           - "option clitcpka"
           - "timeout client 3600s"
@@ -26,8 +29,8 @@ mariadb_services:
       mariadb_external_lb:
         enabled: "{{ enable_mariadb|bool and enable_external_mariadb_load_balancer|bool }}"
         mode: "tcp"
-        port: "{{ database_port }}"
-        listen_port: "{{ mariadb_port }}"
+        port: "{{ role_mariadb_database_port }}"
+        listen_port: "{{ role_mariadb_port }}"
         frontend_tcp_extra:
           - "option clitcpka"
           - "timeout client 3600s"
@@ -37,16 +40,54 @@ mariadb_services:
         custom_member_list: "{{ external_haproxy_members.split(';') }}"
 
 ####################
+# Role variables
+####################
+#
+# These variables are designed to be overridden in an external playbook to
+# support deploying multiple instances of this role. For examples please
+# see ansible/site.yml. Note that this isn't an extensive list of role
+# variables.
+#
+# +---------------------------------------+--------------------------------------------------+
+# |               Variable                |                Description                       |
+# +---------------------------------------+--------------------------------------------------+
+# | role_mariadb_namespace                | A prefix for container names, volumes, logs      |
+# |                                       | and config file directories.                     |
+# | role_mariadb_database_address         | The address to which the service is bound. This  |
+# |                                       | defaults to the internal FQDN, but could also be |
+# |                                       | an IP on a host interface etc.                   |
+# | role_mariadb_port                     | The port on which the instances(s) will listen.  |
+# |                                       | This defaults to the frontend port but may be    |
+# |                                       | different.                                       |
+# | role_mariadb_database_port            | The port on which the service will be exposed to |
+# |                                       | clients (frontend port). This may be via HAProxy,|
+# |                                       | or a direct connection to a single instance.     |
+# | role_mariadb_database_user            | Database root username.                          |
+# | role_mariadb_database_password        | Database root password.                          |
+# | role_mariadb_database_backup_password | Database backup password.                        |
+# | role_mariadb_group                    | The inventory group name containing the database |
+# |                                       | hosts.                                           |
+# +---------------------------------------+--------- ----------------------------------------+
+
+####################
+# Namespace
+####################
+role_mariadb_namespace: ""
+mariadb_namespace: "{{ role_mariadb_namespace + '-' if role_mariadb_namespace else '' }}"
+mariadb_container_name: "{{ mariadb_namespace|replace('-', '_') + 'mariadb' }}"
+
+####################
 # Database
 ####################
-database_cluster_name: "openstack"
+role_mariadb_port: "{{ role_mariadb_database_port }}"
+database_cluster_name: "{{ mariadb_namespace + 'openstack' }}"
 database_max_timeout: 120
 
 ####################
 # HAProxy
 ####################
-internal_haproxy_members: "{% for host in groups['mariadb'] %}server {{ hostvars[host]['ansible_hostname'] }} {{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ mariadb_port }} check inter 2000 rise 2 fall 5{% if not loop.first %} backup{% endif %};{% endfor %}"
-external_haproxy_members: "{% for host in groups['mariadb'] %}server {{ host }} {{ host }}:{{ mariadb_port }} check inter 2000 rise 2 fall 5{% if not loop.first %} backup{% endif %};{% endfor %}"
+internal_haproxy_members: "{% for host in groups[role_mariadb_group] %}server {{ hostvars[host]['ansible_hostname'] }} {{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ role_mariadb_port }} check inter 2000 rise 2 fall 5{% if not loop.first %} backup{% endif %};{% endfor %}"
+external_haproxy_members: "{% for host in groups[role_mariadb_group] %}server {{ host }} {{ host }}:{{ role_mariadb_port }} check inter 2000 rise 2 fall 5{% if not loop.first %} backup{% endif %};{% endfor %}"
 
 ####################
 # Docker
@@ -57,9 +98,9 @@ mariadb_image_full: "{{ mariadb_image }}:{{ mariadb_tag }}"
 mariadb_dimensions: "{{ default_container_dimensions }}"
 
 mariadb_default_volumes:
-  - "{{ node_config_directory }}/mariadb/:{{ container_config_directory }}/:ro"
+  - "{{ node_config_directory }}/{{ mariadb_namespace + 'mariadb' }}/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "mariadb:/var/lib/mysql"
+  - "{{ mariadb_container_name }}:/var/lib/mysql"
   - "kolla_logs:/var/log/kolla/"
 mariadb_extra_volumes: "{{ default_extra_volumes }}"
 
@@ -75,8 +116,8 @@ xtrabackup_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ dock
 xtrabackup_tag: "{{ openstack_release }}"
 xtrabackup_image_full: "{{ xtrabackup_image }}:{{ xtrabackup_tag }}"
 
-mariadb_backup_host: "{{ groups['mariadb'][0] }}"
+mariadb_backup_host: "{{ groups[role_mariadb_group][0] }}"
 mariadb_backup_database_schema: "PERCONA_SCHEMA"
 mariadb_backup_database_user: "backup"
-mariadb_backup_database_address: "{{ database_address }}"
+mariadb_backup_database_address: "{{ role_mariadb_database_address }}"
 mariadb_backup_type: "full"

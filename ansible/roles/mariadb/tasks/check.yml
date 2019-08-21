@@ -1,9 +1,10 @@
 ---
-- name: Waiting for MariaDB service to be ready through VIP
+- name: Waiting for {{ mariadb_service.container_name }} service to be ready
   become: true
-  command: "docker exec mariadb mysql -h {{ database_address }} -P {{ database_port }} -u haproxy -e 'show databases;'"
+  command: "docker exec {{ mariadb_service.container_name }} mysql -h {{ role_mariadb_database_address }} -P {{ role_mariadb_database_port }} -u haproxy -e 'show databases;'"
   register: result
   until: result is success
   changed_when: False
   retries: 6
   delay: 10
+  when: inventory_hostname == groups[role_mariadb_group][0]

@@ -240,6 +240,10 @@
             role: mariadb
             tasks_from: loadbalancer
           tags: mariadb
+          vars:
+            role_mariadb_database_port: '{{ database_port }}'
+            role_mariadb_port: '{{ mariadb_port }}'
+            role_mariadb_group: '{{ mariadb_group }}'
           when: enable_mariadb | bool
         - include_role:
             role: masakari
@@ -462,6 +466,13 @@
   roles:
     - { role: mariadb,
         tags: mariadb,
+        role_mariadb_database_address: '{{ database_address }}',
+        role_mariadb_database_user: '{{ database_user }}',
+        role_mariadb_database_password: '{{ database_password }}',
+        role_mariadb_database_backup_password: '{{ mariadb_backup_database_password }}',
+        role_mariadb_database_port: '{{ database_port }}',
+        role_mariadb_port: '{{ mariadb_port }}',
+        role_mariadb_group: '{{ mariadb_group }}',
         when: enable_mariadb | bool }
 
 - name: Apply role memcached

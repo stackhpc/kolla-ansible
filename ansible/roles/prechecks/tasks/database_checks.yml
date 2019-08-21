@@ -4,7 +4,7 @@
     msg: "The {{ item }} host is not accessible from {{ inventory_hostname }}"
     host: "{{ item }}"
     port: "{{ database_port }}"
-  with_items: "{{ groups['mariadb'] }}"
+  with_items: "{{ groups[mariadb_group] }}"
   when:
     - not enable_mariadb | bool
     - enable_external_mariadb_load_balancer | bool

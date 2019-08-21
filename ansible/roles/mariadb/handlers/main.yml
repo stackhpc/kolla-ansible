@@ -3,13 +3,14 @@
   vars:
     service_name: "mariadb"
     service: "{{ mariadb_services[service_name] }}"
+    task_environment:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+      BOOTSTRAP_ARGS: "--wsrep-new-cluster"
   become: true
   kolla_docker:
     action: "start_container"
     common_options: "{{ docker_common_options }}"
-    environment:
-      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
-      BOOTSTRAP_ARGS: "--wsrep-new-cluster"
+    environment: "{{ service.environment | combine(task_environment) }}"
     image: "{{ service.image }}"
     labels:
       BOOTSTRAP:
@@ -29,7 +30,7 @@
 - name: wait first mariadb container
   wait_for:
     host: "{{ api_interface_address }}"
-    port: "{{ mariadb_port }}"
+    port: "{{ role_mariadb_port }}"
     connect_timeout: 1
     timeout: 60
     search_regex: "MariaDB"
@@ -68,6 +69,7 @@
   kolla_docker:
     action: "recreate_or_restart_container"
     common_options: "{{ docker_common_options }}"
+    environment: "{{ service.environment }}"
     name: "{{ service.container_name }}"
     image: "{{ service.image }}"
     volumes: "{{ service.volumes }}"
@@ -83,7 +85,7 @@
 - name: wait for slave mariadb
   wait_for:
     host: "{{ api_interface_address }}"
-    port: "{{ mariadb_port }}"
+    port: "{{ role_mariadb_port }}"
     connect_timeout: 1
     timeout: 60
     search_regex: "MariaDB"
@@ -101,18 +103,19 @@
   vars:
     service_name: "mariadb"
     service: "{{ mariadb_services[service_name] }}"
+    task_environment:
+      KOLLA_UPGRADE:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+      DB_HOST: "{{ api_interface_address }}"
+      DB_PORT: "{{ role_mariadb_port }}"
+      DB_ROOT_PASSWORD: "{{ role_mariadb_database_password }}"
   become: true
   kolla_docker:
     action: "start_container"
     common_options: "{{ docker_common_options }}"
     detach: False
     dimensions: "{{ service.dimensions }}"
-    environment:
-      KOLLA_UPGRADE:
-      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
-      DB_HOST: "{{ api_interface_address }}"
-      DB_PORT: "{{ mariadb_port }}"
-      DB_ROOT_PASSWORD: "{{ database_password }}"
+    environment: "{{ service.environment | combine(task_environment) }}"
     image: "{{ service.image }}"
     labels:
       UPGRADE:
@@ -134,6 +137,7 @@
   kolla_docker:
     action: "recreate_or_restart_container"
     common_options: "{{ docker_common_options }}"
+    environment: "{{ service.environment }}"
     name: "{{ service.container_name }}"
     image: "{{ service.image }}"
     volumes: "{{ service.volumes }}"
@@ -149,7 +153,7 @@
 - name: Waiting for master mariadb
   wait_for:
     host: "{{ api_interface_address }}"
-    port: "{{ mariadb_port }}"
+    port: "{{ role_mariadb_port }}"
     connect_timeout: 1
     timeout: 60
     search_regex: "MariaDB"
@@ -167,18 +171,19 @@
   vars:
     service_name: "mariadb"
     service: "{{ mariadb_services[service_name] }}"
+    task_environment:
+      KOLLA_UPGRADE:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+      DB_HOST: "{{ api_interface_address }}"
+      DB_PORT: "{{ role_mariadb_port }}"
+      DB_ROOT_PASSWORD: "{{ role_mariadb_database_password }}"
   become: true
   kolla_docker:
     action: "start_container"
     common_options: "{{ docker_common_options }}"
     detach: False
     dimensions: "{{ service.dimensions }}"
-    environment:
-      KOLLA_UPGRADE:
-      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
-      DB_HOST: "{{ api_interface_address }}"
-      DB_PORT: "{{ mariadb_port }}"
-      DB_ROOT_PASSWORD: "{{ database_password }}"
+    environment: "{{ service.environment | combine(task_environment) }}"
     image: "{{ service.image }}"
     labels:
       UPGRADE:

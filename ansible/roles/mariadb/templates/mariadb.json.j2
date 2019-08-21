@@ -17,7 +17,7 @@
     ],
     "permissions": [
         {
-            "path": "/var/log/kolla/mariadb",
+            "path": "/var/log/kolla/{{ mariadb_container_name }}",
             "owner": "mysql:mysql",
             "recurse": true
         },

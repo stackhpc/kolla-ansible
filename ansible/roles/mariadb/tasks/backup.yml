@@ -1,5 +1,10 @@
 ---
 - name: Taking {{ mariadb_backup_type }} database backup via XtraBackup
+  vars:
+    service_name: "mariadb"
+    service: "{{ mariadb_services[service_name] }}"
+    task_environment:
+      BACKUP_TYPE: "{{ mariadb_backup_type }}"
   become: true
   kolla_docker:
     action: "start_container"
@@ -8,13 +13,12 @@
     name: "xtrabackup"
     restart_policy: no
     remove_on_exit: True
-    environment:
-      BACKUP_TYPE: "{{ mariadb_backup_type }}"
+    environment: "{{ service.environment | combine(task_environment) }}"
     volumes:
       - "{{ node_config_directory }}xtrabackup:/etc/mysql:ro"
       - "/etc/localtime:/etc/localtime:ro"
-      - "mariadb_backup:/backup"
+      - "{{ mariadb_container_name + '_backup' }}:/backup"
     volumes_from:
-      - "mariadb"
+      - "{{ mariadb_container_name }}"
   when:
     - inventory_hostname == mariadb_backup_host

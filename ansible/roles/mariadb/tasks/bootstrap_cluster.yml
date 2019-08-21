@@ -3,16 +3,17 @@
   vars:
     service_name: "mariadb"
     service: "{{ mariadb_services[service_name] }}"
+    task_environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+      DB_ROOT_PASSWORD: "{{ role_mariadb_database_password }}"
+      DB_MAX_TIMEOUT: "{{ database_max_timeout }}"
   become: true
   kolla_docker:
     action: "start_container"
     common_options: "{{ docker_common_options }}"
     detach: False
-    environment:
-      KOLLA_BOOTSTRAP:
-      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
-      DB_ROOT_PASSWORD: "{{ database_password }}"
-      DB_MAX_TIMEOUT: "{{ database_max_timeout }}"
+    environment: "{{ service.environment | combine(task_environment) }}"
     image: "{{ service.image }}"
     labels:
       BOOTSTRAP:

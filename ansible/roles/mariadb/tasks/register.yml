@@ -5,14 +5,14 @@
     module_name: mysql_user
     module_args:
       login_host: "{{ api_interface_address }}"
-      login_port: "{{ mariadb_port }}"
-      login_user: "{{ database_user }}"
-      login_password: "{{ database_password }}"
+      login_port: "{{ role_mariadb_port }}"
+      login_user: "{{ role_mariadb_database_user }}"
+      login_password: "{{ role_mariadb_database_password }}"
       name: "haproxy"
       password: ""
       host: "%"
       priv: "*.*:USAGE"
-  run_once: True
+  when: inventory_hostname == groups[role_mariadb_group][0]
 
 - import_tasks: wait_for_loadbalancer.yml
 
@@ -21,50 +21,50 @@
   kolla_toolbox:
     module_name: mysql_db
     module_args:
-      login_host: "{{ database_address }}"
-      login_port: "{{ database_port }}"
-      login_user: "{{ database_user }}"
-      login_password: "{{ database_password }}"
+      login_host: "{{ role_mariadb_database_address }}"
+      login_port: "{{ role_mariadb_database_port }}"
+      login_user: "{{ role_mariadb_database_user }}"
+      login_password: "{{ role_mariadb_database_password }}"
       name: "{{ mariadb_backup_database_schema }}"
-  run_once: True
   when:
     - enable_xtrabackup | bool
+    - inventory_hostname == groups[role_mariadb_group][0]
 
 - name: Creating database backup user and setting permissions
   become: true
   kolla_toolbox:
     module_name: mysql_user
     module_args:
-      login_host: "{{ database_address }}"
-      login_port: "{{ database_port }}"
-      login_user: "{{ database_user }}"
-      login_password: "{{ database_password }}"
+      login_host: "{{ role_mariadb_database_address }}"
+      login_port: "{{ role_mariadb_database_port }}"
+      login_user: "{{ role_mariadb_database_user }}"
+      login_password: "{{ role_mariadb_database_password }}"
       name: "{{ mariadb_backup_database_user }}"
-      password: "{{ mariadb_backup_database_password }}"
+      password: "{{ role_mariadb_database_backup_password }}"
       host: "%"
       priv: "*.*:CREATE TABLESPACE,RELOAD,PROCESS,SUPER,LOCK TABLES,REPLICATION CLIENT"
       append_privs: True
-  run_once: True
   when:
     - enable_xtrabackup | bool
+    - inventory_hostname == groups[role_mariadb_group][0]
 
 - name: Granting permissions on XtraBackup database to backup user
   become: true
   kolla_toolbox:
     module_name: mysql_user
     module_args:
-      login_host: "{{ database_address }}"
-      login_port: "{{ database_port }}"
-      login_user: "{{ database_user }}"
-      login_password: "{{ database_password }}"
+      login_host: "{{ role_mariadb_database_address }}"
+      login_port: "{{ role_mariadb_database_port }}"
+      login_user: "{{ role_mariadb_database_user }}"
+      login_password: "{{ role_mariadb_database_password }}"
       name: "{{ mariadb_backup_database_user }}"
-      password: "{{ mariadb_backup_database_password }}"
+      password: "{{ role_mariadb_database_backup_password }}"
       host: "%"
       priv: "{{ mariadb_backup_database_schema }}.*:CREATE,INSERT,SELECT"
       append_privs: True
-  run_once: True
   when:
     - enable_xtrabackup | bool
+    - inventory_hostname == groups[role_mariadb_group][0]
 
 - name: Cleaning up facts
   set_fact:

@@ -1,10 +1,10 @@
 #!/bin/bash -e
 
 # Edit parameters below to specify the address and login to server.
-USER={{ database_user }}
-PSWD={{ database_password }}
+USER={{ role_mariadb_database_user }}
+PSWD={{ role_mariadb_database_password }}
 HOST={{ api_interface_address }}
-PORT={{ mariadb_port }}
+PORT={{ role_mariadb_port }}
 LB_USER=haproxy
 
 ENABLE_LB="UPDATE mysql.user SET User='${LB_USER}' WHERE User='${LB_USER}_blocked';"
