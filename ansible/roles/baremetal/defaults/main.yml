@@ -8,8 +8,8 @@ enable_docker_repo: true
 # All other distros & versions use legacy packages by default in Rocky for
 # backwards compatibility.
 docker_legacy_packages: >-
-  {{ ansible_facts.distribution != 'Ubuntu' or
-     ansible_facts.distribution_version | version_compare('18.04', 'lt') }}
+  {{ ansible_distribution != 'Ubuntu' or
+     ansible_distribution_version | version_compare('18.04', 'lt') }}
 
 # Docker APT repository configuration.
 docker_apt_url: "{% if docker_legacy_packages | bool %}{{ docker_legacy_apt_url }}{% else %}{{ docker_new_apt_url }}{% endif %}"
@@ -77,14 +77,18 @@ docker_runtime_directory: ""
 # https://bugs.launchpad.net/ubuntu/+source/python-setuptools/+bug/1774419.
 easy_install_available: >-
   {{ ansible_distribution != 'Ubuntu' or
-     ansible_distribution_major_version is version(18, 'lt') }}
+     ansible_distribution_major_version | version_compare(18, 'lt') }}
 
+# Ubuntu 18+ bundles nfs-ganesha 2.6.0 with Ceph Mimic packages,
+# which does udp rpcbind test even with NFSv3 disabled - therefore
+# rpcbind needs to be installed, when Ceph NFS is enabled.
 debian_pkg_install:
  - "{{ docker_apt_package }}"
  - git
  - "{% if not easy_install_available %}python-pip{% endif %}"
  - python-setuptools
  - ntp
+ - "{% if enable_ceph_nfs|bool %}rpcbind{% endif %}"
 
 redhat_pkg_install:
  - epel-release
@@ -93,6 +97,7 @@ redhat_pkg_install:
  - python-setuptools
  - ntp
  - sudo
+ - "{% if enable_ceph_nfs|bool %}rpcbind{% endif %}"
 
 ubuntu_pkg_removals:
  - lxd
