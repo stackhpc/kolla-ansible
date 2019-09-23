@@ -44,6 +44,11 @@ options:
       - The extra variables used by the module
     required: False
     type: str or dict
+  user:
+    description:
+      - The user to execute Ansible inside kolla_toolbox with
+    required: False
+    type: str
   api_version:
     description:
       - The version of the API for docker-py to use when contacting Docker
@@ -126,6 +131,7 @@ def main():
         module_extra_vars=dict(type='json'),
         api_version=dict(required=False, type='str', default='auto'),
         timeout=dict(required=False, type='int', default=180),
+        user=dict(required=False, type='str'),
     )
     module = AnsibleModule(argument_spec=specs, bypass_checks=True)
     client = get_docker_client()(
@@ -138,7 +144,10 @@ def main():
         module.fail_json(msg='kolla_toolbox container is not running.')
 
     kolla_toolbox = kolla_toolbox[0]
-    job = client.exec_create(kolla_toolbox, command_line)
+    kwargs = {}
+    if 'user' in module.params:
+        kwargs['user'] = module.params['user']
+    job = client.exec_create(kolla_toolbox, command_line, **kwargs)
     output = client.exec_start(job)
 
     for exp in [JSON_REG, NON_JSON_REG]:

@@ -1,0 +1,16 @@
+---
+- name: "{{ project_name }} | Ensure RabbitMQ vhosts exist"
+  become: true
+  kolla_toolbox:
+    module_name: rabbitmq_vhost
+    module_args:
+      name: "{{ item }}"
+    user: rabbitmq
+  run_once: "{{ service_rabbitmq_run_once }}"
+  when: service_rabbitmq_when | bool
+  delegate_to: "{{ service_rabbitmq_delegate_host }}"
+  loop: "{{ service_rabbitmq_vhosts | unique | reject('equalto', '/') | list }}"
+  register: service_rabbitmq_result
+  until: service_rabbitmq_result is success
+  retries: "{{ service_rabbitmq_retries }}"
+  delay: "{{ service_rabbitmq_delay }}"
