@@ -4,9 +4,18 @@
   path /var/log/kolla/mariadb/mariadb.log
   pos_file /var/run/{{ fluentd_dir }}/mariadb.pos
   tag infra.mariadb
-  format multiline
-  format_firstline /^\d{6}/
-  format1 /^(?<time>\d{6} \d{1,2}:\d{1,2}:\d{1,2}) (\[(?<log_level>\S+)\]|mysqld_safe) (?<Payload>.*)/
-  time_format %y%m%d %k:%M:%S
+  format multiline_grok
   enable_watch_timer false
+  multiline_start_regexp /^[^\s\W]/
+  <grok>
+    pattern (?<time>%{YEAR}-%{MONTHNUM}-%{MONTHDAY} +%{HOUR}:?%{MINUTE}(?::?%{SECOND})) [0-9]{15} \[%{LOGLEVEL:log_level}\] %{GREEDYDATA:Payload}
+    time_format %Y-%m-%d %k:%M:%S
+  </grok>
+  <grok>
+    pattern (?<time>%{YEAR}%{MONTHNUM}%{MONTHDAY} %{HOUR}:?%{MINUTE}(?::?%{SECOND})) mysqld_safe %{GREEDYDATA:Payload}
+    time_format %y%m%d %k:%M:%S
+  </grok>
+  <grok>
+    pattern %{GREEDYDATA:Payload}
+  </grok>
 </source>
