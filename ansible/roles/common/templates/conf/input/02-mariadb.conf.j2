@@ -4,8 +4,7 @@
   pos_file /var/run/{{ fluentd_binary }}/mariadb.pos
   tag infra.mariadb
   format multiline
-  format_firstline /^\d{6}/
-  format1 /^(?<time>\d{6} \d{1,2}:\d{1,2}:\d{1,2}) (\[(?<log_level>\S+)\]|mysqld_safe) (?<Payload>.*)/
-  time_format %y%m%d %k:%M:%S
+  format_firstline /^(\d{4}-\d{2}-\d{2}|\d{6}) /
+  format1 /^(?<Payload>.*)/
   enable_watch_timer false
 </source>
