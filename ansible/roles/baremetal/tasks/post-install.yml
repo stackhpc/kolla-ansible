@@ -55,6 +55,17 @@
   become: True
   when: not create_kolla_user | bool
 
+# NOTE(osmanlicilegi): br_netfilter modules is required to set
+# net.bridge.bridge-nf-call-iptables at nova-cell/tasks/config.yml
+- name: Check whether br_netfilter module has been loaded, and docker iptables manipulation is disabled
+  block:
+    - name: Load and persist br_netfilter module
+      import_role:
+        role: module-load
+      vars:
+        modules:
+          - {'name': br_netfilter}
+
 - name: Ensure docker service directory exists
   file:
     path: /etc/systemd/system/docker.service.d
