@@ -259,7 +259,6 @@ heat_api_cfn_listen_port: "{{ heat_api_cfn_port }}"
 horizon_port: "80"
 horizon_listen_port: "{{ horizon_port }}"
 
-influxdb_admin_port: "8083"
 influxdb_http_port: "8086"
 
 ironic_internal_fqdn: "{{ kolla_internal_fqdn }}"
@@ -569,7 +568,7 @@ enable_horizon_vitrage: "{{ enable_vitrage | bool }}"
 enable_horizon_watcher: "{{ enable_watcher | bool }}"
 enable_horizon_zun: "{{ enable_zun | bool }}"
 enable_hyperv: "no"
-enable_influxdb: "{{ enable_monasca | bool }}"
+enable_influxdb: "{{ enable_monasca | bool or (enable_cloudkitty | bool and cloudkitty_storage_backend == 'influxdb') }}"
 enable_ironic: "no"
 enable_ironic_ipxe: "no"
 enable_ironic_neutron_agent: "{{ enable_neutron | bool and enable_ironic | bool }}"
@@ -584,6 +583,9 @@ enable_manila_backend_generic: "no"
 enable_manila_backend_hnas: "no"
 enable_manila_backend_cephfs_native: "no"
 enable_manila_backend_cephfs_nfs: "no"
+# TODO(mgoddard): Change this to a plain "no" when support enable_xtrabackup
+# has been removed.
+enable_mariabackup: "{{ enable_xtrabackup | default('no') }}"
 enable_mistral: "no"
 enable_monasca: "no"
 enable_mongodb: "no"
@@ -612,7 +614,7 @@ enable_openvswitch: "{{ enable_neutron | bool and neutron_plugin_agent != 'linux
 enable_ovs_dpdk: "no"
 enable_osprofiler: "no"
 enable_panko: "no"
-enable_placement: "{{ enable_nova }}"
+enable_placement: "{{ enable_nova | bool }}"
 enable_qdrouterd: "{{ 'yes' if om_rpc_transport == 'amqp' else 'no' }}"
 enable_rally: "no"
 enable_redis: "no"
@@ -631,7 +633,6 @@ enable_trove_singletenant: "no"
 enable_vitrage: "no"
 enable_vmtp: "no"
 enable_watcher: "no"
-enable_xtrabackup: "no"
 enable_zookeeper: "{{ enable_kafka | bool }}"
 enable_zun: "no"
 
@@ -642,6 +643,7 @@ neutron_keystone_user: "neutron"
 nova_keystone_user: "nova"
 placement_keystone_user: "placement"
 murano_keystone_user: "murano"
+cinder_keystone_user: "cinder"
 
 # Nova fake driver and the number of fake driver per compute node
 enable_nova_fake: "no"
@@ -834,6 +836,12 @@ cinder_backup_mount_options_nfs: ""
 #######################
 # Valid option is gnocchi
 cloudkitty_collector_backend: "gnocchi"
+# Valid options are 'sqlalchemy' or 'influxdb'. The default value is
+# 'influxdb', which matches the default in Cloudkitty since the Stein release.
+# When the backend is "influxdb", we also enable Influxdb.
+# Also, when using 'influxdb' as the backend, we trigger the configuration/use
+# of Cloudkitty storage backend version 2.
+cloudkitty_storage_backend: "influxdb"
 
 #######################
 # Designate options
@@ -1026,8 +1034,14 @@ enable_prometheus_elasticsearch_exporter: "{{ enable_prometheus | bool and enabl
 prometheus_alertmanager_user: "admin"
 prometheus_openstack_exporter_interval: "60s"
 prometheus_elasticsearch_exporter_interval: "60s"
+prometheus_cmdline_extras:
 
 ############
 # Vitrage
 ############
 enable_vitrage_prometheus_datasource: "{{ enable_prometheus | bool }}"
+
+####################
+# InfluxDB options
+####################
+influxdb_address: "{{ kolla_internal_fqdn }}"

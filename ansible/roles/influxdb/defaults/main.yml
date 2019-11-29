@@ -14,11 +14,6 @@ influxdb_services:
       - "kolla_logs:/var/log/kolla/"
     dimensions: "{{ influxdb_dimensions }}"
     haproxy:
-      influxdb_admin:
-        enabled: "{{ enable_influxdb }}"
-        mode: "http"
-        external: false
-        port: "{{ influxdb_admin_port }}"
       influxdb_http:
         enabled: "{{ enable_influxdb }}"
         mode: "http"
@@ -29,7 +24,8 @@ influxdb_services:
 ####################
 # Docker
 ####################
-influxdb_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-influxdb"
+influxdb_install_type: "{{ kolla_install_type }}"
+influxdb_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ influxdb_install_type }}-influxdb"
 influxdb_tag: "{{ openstack_release }}"
 influxdb_image_full: "{{ influxdb_image }}:{{ influxdb_tag }}"
 influxdb_dimensions: "{{ default_container_dimensions }}"

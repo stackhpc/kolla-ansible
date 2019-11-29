@@ -90,9 +90,30 @@
       scenario: cinder-lvm
 
 - job:
+    name: kolla-ansible-centos-source-mariadb
+    parent: kolla-ansible-base
+    nodeset: kolla-ansible-centos-multi
+    voting: false
+    vars:
+      base_distro: centos
+      install_type: source
+      scenario: mariadb
+
+- job:
+    name: kolla-ansible-ubuntu-source-mariadb
+    parent: kolla-ansible-base
+    nodeset: kolla-ansible-bionic-multi
+    voting: false
+    vars:
+      base_distro: ubuntu
+      install_type: source
+      scenario: mariadb
+
+- job:
     name: kolla-ansible-centos-source-upgrade
     parent: kolla-ansible-upgrade-base
     nodeset: kolla-ansible-centos
+    timeout: 9000
     vars:
       base_distro: centos
       install_type: source
@@ -101,6 +122,7 @@
     name: kolla-ansible-ubuntu-source-upgrade
     parent: kolla-ansible-upgrade-base
     nodeset: kolla-ansible-bionic
+    timeout: 9000
     vars:
       base_distro: ubuntu
       install_type: source
