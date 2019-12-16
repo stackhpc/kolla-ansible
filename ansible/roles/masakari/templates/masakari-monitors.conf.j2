@@ -11,6 +11,7 @@ project_domain_id = {{ default_project_domain_id }}
 username = {{ masakari_keystone_user }}
 password = {{ masakari_keystone_password }}
 api_interface = internal
+cafile = {{ openstack_cacert | default(omit) }}
 
 [libvirt]
 connection_uri = "qemu+tcp://{{ migration_interface_address | put_address_in_context('url') }}/system"
