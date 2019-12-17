@@ -33,6 +33,31 @@ By default Elasticsearch is deployed on port ``9200``.
    Elasticsearch stores a lot of logs, so if you are running centralized logging,
    remember to give ``/var/lib/docker`` an adequate space.
 
+To stop your disks filling up, retention policies can be set. These are
+enforced by Elasticsearch Curator which can be enabled by setting the
+following in ``/etc/kolla/globals.yml``:
+
+.. code-block:: yaml
+
+   enable_elasticsearch_curator: "yes"
+
+Elasticsearch Curator is configured via an actions file. The format of the
+actions file is described in the `Elasticsearch Curator documentation <https://www.elastic.co/guide/en/elasticsearch/client/curator/current/actionfile.html>`.
+The actions file should be placed in the Kolla custom config directory, for
+example: ``/etc/kolla/config/elasticsearch/elasticsearch-curator-actions.yml``.
+
+When testing the actions file you may wish to perform a dry run to be certain
+of what Curator will actually do. A dry run can be enabled by setting the
+following in ``/etc/kolla/globals.yml``:
+
+.. code-block:: yaml
+
+   elasticsearch_curator_dry_run: "yes"
+
+The actions which *would* be taken if a dry run were to be disabled are then
+logged in the Elasticsearch Kolla logs folder under
+``elasticsearch-curator.log``.
+
 Kibana
 ~~~~~~
 

@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Add Elasticsearch Curator for managing aggregated log data.
