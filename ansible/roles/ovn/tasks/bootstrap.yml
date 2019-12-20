@@ -1,0 +1,43 @@
+---
+- name: Creating OVN Northbound DB volume
+  become: true
+  kolla_docker:
+    action: "create_volume"
+    common_options: "{{ docker_common_options }}"
+    name: "ovn_nb_db_server"
+
+- name: Creating OVN Southbound DB volume
+  become: true
+  kolla_docker:
+    action: "create_volume"
+    common_options: "{{ docker_common_options }}"
+    name: "ovn_sb_db_server"
+
+- name: Create br-int bridge on OpenvSwitch
+  become: true
+  command: >
+    docker exec openvswitch_vswitchd ovs-vsctl --may-exist
+    add-br br-int -- set Bridge br-int fail-mode=secure
+
+- name: Set OVN encapsulation settings
+  become: true
+  command: >
+    docker exec openvswitch_vswitchd ovs-vsctl set Open_vSwitch .
+    external_ids:ovn-encap-ip={{ tunnel_interface_address }}
+    external_ids:ovn-encap-type=geneve
+    external_ids:ovn-remote={{ ovn_sb_connection }}
+
+- name: Set OVN bridge mappings
+  become: true
+  command: docker exec openvswitch_vswitchd ovs-vsctl set Open_vSwitch . external_ids:ovn-bridge-mappings=physnet{{ item.0 + 1 }}:{{ item.1 }}
+  when:
+    - neutron_plugin_agent == 'ovn'
+    - inventory_hostname in groups["network"]
+      or (inventory_hostname in groups["compute"] and computes_need_external_bridge | bool)
+  loop: "{{ range(0, neutron_bridge_name.split(',') | length) | zip(neutron_bridge_name.split(',')) | list }}"
+
+- name: Set OVN remote probe interval
+  become: true
+  command: >
+    docker exec openvswitch_vswitchd ovs-vsctl set Open_vSwitch .
+    external_ids:ovn-remote-probe-interval={{ ovn_remote_probe_interval }}

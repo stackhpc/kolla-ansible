@@ -57,3 +57,21 @@ to using the native OVS firewall driver by employing a configuration override
    [security_group]
    firewall_driver = openvswitch
 
+In order to use ``OVN`` as mechanism driver for ``neutron``, you need to set
+the following:
+
+.. path /etc/kolla/globals.yml
+.. code-block:: yaml
+
+   neutron_plugin_agent: "ovn"
+   neutron_type_drivers: "flat,vlan,geneve"
+   neutron_tenant_network_types: "geneve"
+
+You can use Kolla-Ansible OVN controller deployment mechanism by setting:
+
+.. path /etc/kolla/globals.yml
+.. code-block:: yaml
+
+   enable_ovn: "yes"
+
+

@@ -20,7 +20,7 @@
         need_build_image: false
         build_image_tag: "change_{{ zuul.change | default('none') }}"
         openstack_core_enabled: "{{ openstack_core_enabled }}"
-        openstack_core_tested: "{{ scenario in ['core', 'ceph', 'cinder-lvm', 'cells', 'swift'] }}"
+        openstack_core_tested: "{{ scenario in ['core', 'ceph-ansible', 'zun', 'cells', 'swift', 'ovn'] }}"
         dashboard_enabled: "{{ openstack_core_enabled }}"
 
     - name: Install xfsprogs package for Swift filesystems
@@ -248,6 +248,8 @@
             cmd: init-core-openstack.sh
             executable: /bin/bash
             chdir: "{{ kolla_ansible_src_dir }}"
+          environment:
+            SCENARIO: "{{ scenario }}"
           when: openstack_core_tested or scenario in ['ironic', 'scenario_nfv', 'zun']
 
         - name: Run test-core-openstack.sh script
@@ -293,6 +295,15 @@
             executable: /bin/bash
             chdir: "{{ kolla_ansible_src_dir }}"
           when: scenario == "masakari"
+
+        - name: Run test-ovn.sh script
+          script:
+            cmd: test-ovn.sh
+            executable: /bin/bash
+            chdir: "{{ kolla_ansible_src_dir }}"
+          environment:
+            BASE_DISTRO: "{{ base_distro }}"
+          when: scenario == "ovn"
 
         - name: Run test-mariadb.sh script
           script:

@@ -374,6 +374,11 @@ octavia_api_port: "9876"
 octavia_api_listen_port: "{{ octavia_api_port }}"
 octavia_health_manager_port: "5555"
 
+ovn_nb_db_port: "6641"
+ovn_sb_db_port: "6642"
+ovn_nb_connection: "tcp:{% for host in groups['ovn-nb-db'] %}{{ 'api' | kolla_address(host) }}:{{ ovn_nb_db_port }}{% if not loop.last %},tcp:{% endif %}{% endfor %}"
+ovn_sb_connection: "tcp:{% for host in groups['ovn-sb-db'] %}{{ 'api' | kolla_address(host) }}:{{ ovn_sb_db_port }}{% if not loop.last %},tcp:{% endif %}{% endfor %}"
+
 outward_rabbitmq_port: "5674"
 outward_rabbitmq_management_port: "15674"
 outward_rabbitmq_cluster_port: "25674"
@@ -640,6 +645,7 @@ enable_nova_serialconsole_proxy: "no"
 enable_nova_ssh: "yes"
 enable_octavia: "no"
 enable_openvswitch: "{{ enable_neutron | bool and neutron_plugin_agent != 'linuxbridge' }}"
+enable_ovn: "{{ enable_neutron | bool and neutron_plugin_agent == 'ovn' }}"
 enable_ovs_dpdk: "no"
 enable_osprofiler: "no"
 enable_panko: "no"
@@ -895,7 +901,7 @@ neutron_tenant_network_types: "vxlan"
 
 # valid values: ["dvr", "dvr_no_external"]
 neutron_compute_dvr_mode: "dvr"
-computes_need_external_bridge: "{{ (enable_neutron_dvr | bool and neutron_compute_dvr_mode == 'dvr') or enable_neutron_provider_networks | bool }}"
+computes_need_external_bridge: "{{ ((enable_neutron_dvr | bool or neutron_plugin_agent == 'ovn') and neutron_compute_dvr_mode == 'dvr') or enable_neutron_provider_networks | bool }}"
 
 # Default DNS resolvers for virtual networks
 neutron_dnsmasq_dns_servers: "1.1.1.1,8.8.8.8,8.8.4.4"
@@ -1104,3 +1110,9 @@ distro_python_version: "{{ distro_python_version_map[kolla_base_distro] }}"
 # Configure telegraf to use the docker daemon itself as an input for
 # telemetry data.
 telegraf_enable_docker_input: "no"
+
+#####
+# OVN
+#####
+# Configure OVN remote probe interval time in ms
+ovn_remote_probe_interval: "60000"

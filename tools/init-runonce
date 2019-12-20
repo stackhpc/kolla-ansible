@@ -20,6 +20,8 @@ EXT_NET_CIDR='10.0.2.0/24'
 EXT_NET_RANGE='start=10.0.2.150,end=10.0.2.199'
 EXT_NET_GATEWAY='10.0.2.1'
 
+PROVIDER_NET_TYPE=${PROVIDER_NET_TYPE:-vxlan}
+
 # Sanitize language settings to avoid commands bailing out
 # with "unsupported locale setting" errors.
 unset LANG
@@ -75,7 +77,7 @@ if [[ $ENABLE_EXT_NET -eq 1 ]]; then
         --subnet-range ${EXT_NET_CIDR} --gateway ${EXT_NET_GATEWAY} public1-subnet
 fi
 
-openstack network create --provider-network-type vxlan demo-net
+openstack network create --provider-network-type ${PROVIDER_NET_TYPE} demo-net
 openstack subnet create --subnet-range 10.0.0.0/24 --network demo-net \
     --gateway 10.0.0.1 --dns-nameserver 8.8.8.8 demo-subnet
 

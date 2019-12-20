@@ -1,0 +1,11 @@
+---
+- include_tasks: config.yml
+  when: inventory_hostname in groups['ovn-controller'] or
+        inventory_hostname in groups['ovn-northd'] or
+        inventory_hostname in groups['ovn-nb-db'] or
+        inventory_hostname in groups['ovn-sb-db']
+
+- include_tasks: bootstrap.yml
+
+- name: Flush handlers
+  meta: flush_handlers

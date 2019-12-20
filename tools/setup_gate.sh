@@ -54,6 +54,10 @@ function setup_config {
         GATE_IMAGES+=",masakari"
     fi
 
+    if [[ $SCENARIO == "ovn" ]]; then
+        GATE_IMAGES+=",ovn"
+    fi
+
     if [[ $SCENARIO == "mariadb" ]]; then
         GATE_IMAGES="cron,haproxy,keepalived,kolla-toolbox,mariadb"
     fi
