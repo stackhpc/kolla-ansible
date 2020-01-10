@@ -5,6 +5,7 @@ node.name: "{{ api_interface_address }}"
 network.host: "{{ 'api' | kolla_address }}"
 
 cluster.name: "{{ elasticsearch_cluster_name }}"
+cluster.initial_master_nodes: [{% for host in groups['elasticsearch'] %}"{{ 'api' | kolla_address(host) }}"{% if not loop.last %},{% endif %}{% endfor %}]
 node.master: true
 node.data: true
 discovery.seed_hosts: [{% for host in groups['elasticsearch'] %}"{{ 'api' | kolla_address(host) }}"{% if not loop.last %},{% endif %}{% endfor %}]
