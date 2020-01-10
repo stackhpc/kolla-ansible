@@ -14,6 +14,7 @@ elasticsearch_services:
       - "/etc/localtime:/etc/localtime:ro"
       - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
       - "{{ elasticsearch_datadir_volume }}:/var/lib/elasticsearch/data"
+      - "kolla_logs:/var/log/kolla/"
     dimensions: "{{ elasticsearch_dimensions }}"
     haproxy:
       elasticsearch:
