@@ -272,17 +272,17 @@ monasca_log_transformer_default_volumes:
   - "{{ node_config_directory }}/monasca-log-transformer/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
   - "kolla_logs:/var/log/kolla"
-  - "monasca_log_transformer_data:/usr/share/logstash/data"
+  - "monasca_log_transformer_data:/var/lib/logstash"
 monasca_log_persister_default_volumes:
   - "{{ node_config_directory }}/monasca-log-persister/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
   - "kolla_logs:/var/log/kolla"
-  - "monasca_log_persister_data:/usr/share/logstash/data"
+  - "monasca_log_persister_data:/var/lib/logstash"
 monasca_log_metrics_default_volumes:
   - "{{ node_config_directory }}/monasca-log-metrics/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
   - "kolla_logs:/var/log/kolla"
-  - "monasca_log_metrics_data:/usr/share/logstash/data"
+  - "monasca_log_metrics_data:/var/lib/logstash"
 monasca_thresh_default_volumes:
   - "{{ node_config_directory }}/monasca-thresh/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
