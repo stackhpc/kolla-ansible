@@ -4,9 +4,10 @@
 input {
     kafka {
         bootstrap_servers => "{{ monasca_kafka_servers }}"
-        topic_id => "{{ monasca_raw_logs_topic }}"
+        topics => [{{ monasca_raw_logs_topic }}]
         group_id => "log_transformer"
         consumer_threads => "{{ monasca_log_pipeline_threads }}"
+        codec => json
     }
 }
 
@@ -38,6 +39,7 @@ filter {
 
 output {
     kafka {
+        codec => json
         bootstrap_servers => "{{ monasca_kafka_servers }}"
         topic_id => "{{ monasca_transformed_logs_topic }}"
     }
