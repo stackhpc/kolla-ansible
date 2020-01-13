@@ -3,10 +3,9 @@
 
 input {
     kafka {
-        zk_connect => "{{ monasca_zookeeper_servers }}"
+        bootstrap_servers => "{{ monasca_kafka_servers }}"
         topic_id => "{{ monasca_raw_logs_topic }}"
         group_id => "log_transformer"
-        consumer_id => "log_transformer_{{ ansible_hostname }}"
         consumer_threads => "{{ monasca_log_pipeline_threads }}"
     }
 }
@@ -41,7 +40,5 @@ output {
     kafka {
         bootstrap_servers => "{{ monasca_kafka_servers }}"
         topic_id => "{{ monasca_transformed_logs_topic }}"
-        client_id => "log_transformer_{{ ansible_hostname }}"
-        workers => {{ monasca_log_pipeline_threads|int }}
     }
 }
