@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Updates Monasca config to work with the 7.5 ELK release. If any custom
+    Logstash config has been used, it may need to be updated.
