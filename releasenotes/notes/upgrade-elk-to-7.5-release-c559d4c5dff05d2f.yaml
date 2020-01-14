@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    Upgrades ELK stack to 7.5 release. One path to completing this upgrade
+    is to first upgrade Elasticsearch to 6.8 via Kolla custom config, and
+    then finally remove the custom config to deploy the 7.5 release. See the
+    `upgrade notes <https://www.elastic.co/guide/en/elastic-stack/current/upgrading-elastic-stack.html>`__
+    for more detail.
