@@ -42,7 +42,7 @@ filter {
 
     # Convert the timestamp of the event to milliseconds since epoch.
     ruby {
-        code => "event.get('[metric][timestamp]') = event.set('[@timestamp].to_i * 1000')"
+        code => "event.set('[metric][timestamp]', event.get('[@timestamp]').to_i*1000)"
     }
 
     # Clean up any fields which aren't required from the new metric to save space
