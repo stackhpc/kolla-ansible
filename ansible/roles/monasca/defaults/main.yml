@@ -321,6 +321,7 @@ monasca_grafana_extra_volumes: "{{ monasca_extra_volumes }}"
 monasca_openstack_auth: "{{ openstack_auth }}"
 
 monasca_keystone_user: "monasca"
+monasca_keystone_interface: "internal"
 monasca_default_authorized_roles:
   - admin
 monasca_read_only_authorized_roles:

@@ -1,6 +1,6 @@
 Api:
   service_type: monitoring
-  endpoint_type: internal
+  endpoint_type: {{ monasca_keystone_interface }}
   region_name: {{ openstack_region_name }}
   username: {{ monasca_agent_user }}
   password: {{ monasca_agent_password }}
