@@ -12,6 +12,32 @@
     - item.value.enabled | bool
   with_dict: "{{ ceilometer_services }}"
 
+- name: Check custom monasca_field_definitions.yaml exists
+  local_action: stat path="{{ node_custom_config }}/ceilometer/monasca_field_definitions.yaml"
+  register: ceilometer_monasca_field_definitions_file
+
+- name: Copying over monasca_field_definitions.yaml
+  copy:
+    src: "{{ node_custom_config }}/ceilometer/monasca_field_definitions.yaml"
+    dest: "{{ node_config_directory }}/{{ item.key }}/monasca_field_definitions.yaml"
+    force: True
+    mode: "0660"
+  become: true
+  register: ceilometer_monasca_field_definitions_overwriting
+  when:
+    - ceilometer_monasca_field_definitions_file.stat.exists
+    - inventory_hostname in groups[item.value.group]
+    - item.value.enabled | bool
+  with_dict: "{{ ceilometer_services }}"
+  notify:
+    - "Restart {{ item.key }} container"
+
+- name: Set ceilometer monasca_field_definitions file's path
+  set_fact:
+    ceilometer_monasca_field_definitions_file_path: "{{ ceilometer_monasca_field_definitions_file.stat.path }}"
+  when:
+    - ceilometer_monasca_field_definitions_file.stat.exists
+
 - name: Check custom polling.yaml exists
   local_action: stat path="{{ node_custom_config }}/ceilometer/polling.yaml"
   register: ceilometer_polling_file
