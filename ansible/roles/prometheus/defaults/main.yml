@@ -132,6 +132,15 @@ prometheus_services:
 prometheus_mysql_exporter_database_user: "{% if use_preconfigured_databases | bool and use_common_mariadb_user | bool %}{{ database_user }}{% else %}prometheus{% endif %}"
 
 ####################
+# cAdvisor
+####################
+
+# By default CPU load monitoring is disabled. This flag can be used to enable it. See
+# https://github.com/google/cadvisor/blob/release-v0.35/docs/runtime_options.md#cpu for more
+# details.
+prometheus_cadvisor_enable_load_monitoring: false
+
+####################
 # Docker
 ####################
 prometheus_install_type: "{{ kolla_install_type }}"

@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    A flag called `prometheus_cadvisor_enable_load_monitoring` has been added to enable
+    gathering of container CPU load metrics in cAdvisor.
