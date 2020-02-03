@@ -43,3 +43,10 @@
     rewriterule1 Payload ^\d{6} infra.mariadb.mysqld_safe
     rewriterule2 Payload ^\d{4}-\d{2}-\d{2} infra.mariadb.mysqld
 </match>
+
+# Retag log messages from HAProxy according to log format
+<match syslog.{{ syslog_haproxy_facility }}.**>
+    @type rewrite_tag_filter
+    rewriterule1 Payload ^.*haproxy.*\]: [^ ]+:[^ ]+ [^ ]+ [^ ]+ [^ ]+\/[^ ]+ [^\/]+\/[^\/]+\/[^ ]+ [^ ]+ [^ ]+ \S{2}[^\/]+.*$ infra.haproxy.tcp
+    rewriterule2 Payload ^.*haproxy.*\]: [^ ]+:[^ ]+ [^ ]+ [^ ]+ [^ ]+\/[^ ]+ [^\/]+\/[^\/]+\/[^ ]+ [^ ]+ [^ ]+ \S \S \S{4}[^\/]+.*$ infra.haproxy.http
+</match>

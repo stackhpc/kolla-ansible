@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    HAProxy logs are now parsed to extract detailed information about HTTP
+    and TCP connections. The original log message is retained.

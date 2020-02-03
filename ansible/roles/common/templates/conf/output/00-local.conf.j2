@@ -1,5 +1,5 @@
 {% for item in syslog_facilities | selectattr('enabled') %}
-<match syslog.{{ item.facility }}.**>
+<match {{ item.match | default('syslog.' ~ item.facility ~ '.**') }}>
   @type copy
   <store>
     @type file

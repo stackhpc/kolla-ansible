@@ -25,3 +25,23 @@
     timestamp ${time}
   </record>
 </filter>
+
+# Parse HAProxy TCP logs
+<filter infra.haproxy.tcp>
+    @type parser
+    format /^.*haproxy.*\]: (?<client_ip>[^ ]+):(?<client_port>[^ ]+) \[(?<accept_date>[^ ]+)\] (?<frontend_name>[^ ]+) (?<backend_name>[^ ]+)\/(?<server_name>[^ ]+) ((?<tw>[^\/]+)\/(?<tc>[^\/]+)\/(?<tt>[^ ]+)) (?<bytes_read>[^ ]+) \S{2} (?<actconn>[^\/]+)\/(?<feconn>[^\/]+)\/(?<beconn>[^\/]+)\/(?<srv_conn>[^\/]+)\/(?<retries>[^ ]+) (?<srv_queue>[^\/]+)\/(?<backend_queue>[^ ]+)$/
+    time_format %d/%b/%Y:%k:%M:%S.%N
+    time_key accept_date
+    key_name Payload
+    reserve_data true
+</filter>
+
+# Parse HAProxy HTTP logs
+<filter infra.haproxy.http>
+    @type parser
+    format /^.*haproxy.*\]: (?<client_ip>[^ ]+):(?<client_port>[^ ]+) \[(?<accept_date>[^ ]+)\] (?<frontend_name>[^ ]+) (?<backend_name>[^ ]+)\/(?<server_name>[^ ]+) (((?<tq>[^\/]+)\/(?<tw>[^\/]+)\/(?<tc>[^\/]+)\/(?<tr>[^\/]+)\/(?<tt>[^ ]+) (?<status_code>[^ ]+))) (?<bytes_read>[^ ]+) (\S \S \S{4}|\S{2}) (?<actconn>[^\/]+)\/(?<feconn>[^\/]+)\/(?<beconn>[^\/]+)\/(?<srv_conn>[^\/]+)\/(?<retries>[^ ]+) (?<srv_queue>[^\/]+)\/(?<backend_queue>[^ ]+) "(?<http_req>[^ ]+) (?<http_path>[^ ]+) (?<http_version>[^ ]+)"$/
+    time_format %d/%b/%Y:%k:%M:%S.%N
+    time_key accept_date
+    key_name Payload
+    reserve_data true
+</filter>

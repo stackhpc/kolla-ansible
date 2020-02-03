@@ -79,6 +79,7 @@ syslog_facilities:
     output_tag: true
     output_time: true
   - name: "haproxy"
+    match: "infra.haproxy.**"
     enabled: "{{ enable_haproxy | bool and inventory_hostname in groups['haproxy'] }}"
     facility: "{{ syslog_haproxy_facility }}"
     logdir: "haproxy"
