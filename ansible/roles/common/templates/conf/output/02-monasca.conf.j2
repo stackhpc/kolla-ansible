@@ -11,7 +11,7 @@
        project_name {{ monasca_control_plane_project }}
        message_field_name Payload
        buffer_type file
-       buffer_path /var/lib/{{ fluentd_binary }}/data/monasca.*.buffer
+       buffer_path /var/lib/fluentd/data/monasca.*.buffer
        max_retry_wait 1800s
        disable_retry_limit true
     </store>
