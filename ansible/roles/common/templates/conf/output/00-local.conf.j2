@@ -1,3 +1,18 @@
+<source>
+  @type prometheus
+  bind {{ api_interface_address }}
+  port {{ prometheus_fluentd_exporter_port }}
+  metrics_path /metrics
+</source>
+
+<source>
+  @type prometheus_output_monitor
+  interval 10
+  <labels>
+    hostname ${hostname}
+  </labels>
+</source>
+
 <match syslog.{{ syslog_swift_facility }}.**>
   @type copy
   <store>
