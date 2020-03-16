@@ -308,25 +308,6 @@
   when:
     - neutron_metadata_agent.enabled | bool
     - neutron_metadata_agent.host_in_groups | bool
-    - neutron_plugin_agent not in ['ovn']
-  notify:
-    - "Restart {{ service_name }} container"
-
-- name: Copying over networking_ovn_metadata_agent.ini
-  become: true
-  vars:
-    service_name: "neutron-metadata-agent"
-    neutron_metadata_agent: "{{ neutron_services[service_name] }}"
-  merge_configs:
-    sources:
-      - "{{ role_path }}/templates/networking_ovn_metadata_agent.ini.j2"
-      - "{{ node_custom_config }}/neutron/networking_ovn_metadata_agent.ini"
-    dest: "{{ node_config_directory }}/{{ service_name }}/networking_ovn_metadata_agent.ini"
-    mode: "0660"
-  when:
-    - neutron_metadata_agent.enabled | bool
-    - neutron_metadata_agent.host_in_groups | bool
-    - neutron_plugin_agent == "ovn"
   notify:
     - "Restart {{ service_name }} container"
 

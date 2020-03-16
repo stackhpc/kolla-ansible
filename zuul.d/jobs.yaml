@@ -444,38 +444,3 @@
       base_distro: centos
       install_type: source
       scenario: cells
-
-- job:
-    name: kolla-ansible-centos-source-ovn
-    parent: kolla-ansible-ovn-base
-    nodeset: kolla-ansible-centos-multi
-    vars:
-      base_distro: centos
-      install_type: source
-
-- job:
-    name: kolla-ansible-ubuntu-source-ovn
-    parent: kolla-ansible-ovn-base
-    nodeset: kolla-ansible-bionic-multi
-    vars:
-      base_distro: ubuntu
-      install_type: source
-
-- job:
-    name: kolla-ansible-centos8-source-cells
-    parent: kolla-ansible-base
-    nodeset: kolla-ansible-centos8-multi
-    voting: false
-    # NOTE(mgoddard): Use Python3 on CentOS 8 jobs, overriding the use of
-    # Python 2 from the base job.
-    host-vars:
-      primary:
-        ansible_python_interpreter: python3
-      secondary1:
-        ansible_python_interpreter: python3
-      secondary2:
-        ansible_python_interpreter: python3
-    vars:
-      base_distro: centos
-      install_type: source
-      scenario: cells

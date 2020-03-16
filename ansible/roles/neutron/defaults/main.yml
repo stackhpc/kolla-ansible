@@ -84,7 +84,7 @@ neutron_services:
     container_name: "neutron_dhcp_agent"
     image: "{{ neutron_dhcp_agent_image_full }}"
     privileged: True
-    enabled: "{{ neutron_plugin_agent not in ['ovn', 'vmware_nsxv', 'vmware_nsxv3'] }}"
+    enabled: "{{ neutron_plugin_agent not in [ 'vmware_nsxv', 'vmware_nsxv3' ] }}"
     group: "neutron-dhcp-agent"
     host_in_groups: "{{ inventory_hostname in groups['neutron-dhcp-agent'] }}"
     volumes: "{{ neutron_dhcp_agent_default_volumes + neutron_dhcp_agent_extra_volumes }}"
@@ -93,7 +93,7 @@ neutron_services:
     container_name: "neutron_l3_agent"
     image: "{{ neutron_l3_agent_image_full }}"
     privileged: True
-    enabled: "{{ neutron_plugin_agent not in ['ovn', 'vmware_nsxv', 'vmware_nsxv3', 'vmware_dvs'] }}"
+    enabled: "{{ neutron_plugin_agent not in ['vmware_nsxv', 'vmware_nsxv3', 'vmware_dvs'] }}"
     environment:
       KOLLA_LEGACY_IPTABLES: "{{ neutron_legacy_iptables | bool | lower }}"
     host_in_groups: >-
@@ -119,8 +119,7 @@ neutron_services:
     host_in_groups: >-
       {{
       inventory_hostname in groups['neutron-metadata-agent']
-      or (inventory_hostname in groups['compute'] and neutron_plugin_agent == 'openvswitch' and enable_neutron_dvr | bool)
-      or (inventory_hostname in groups['compute'] and neutron_plugin_agent == 'ovn')
+      or (inventory_hostname in groups['compute'] and enable_neutron_dvr | bool)
       }}
     volumes: "{{ neutron_metadata_agent_default_volumes + neutron_metadata_agent_extra_volumes }}"
     dimensions: "{{ neutron_metadata_agent_dimensions }}"
@@ -128,7 +127,7 @@ neutron_services:
     container_name: "neutron_bgp_dragent"
     image: "{{ neutron_bgp_dragent_image_full }}"
     privileged: True
-    enabled: "{{ enable_neutron_bgp_dragent | bool and neutron_plugin_agent not in ['ovn', 'vmware_nsxv', 'vmware_nsxv3', 'vmware_dvs'] }}"
+    enabled: "{{ enable_neutron_bgp_dragent | bool and neutron_plugin_agent not in ['vmware_nsxv', 'vmware_nsxv3', 'vmware_dvs'] }}"
     group: "neutron-bgp-dragent"
     host_in_groups: "{{ inventory_hostname in groups['neutron-bgp-dragent'] }}"
     volumes: "{{ neutron_bgp_dragent_default_volumes + neutron_bgp_dragent_extra_volumes }}"
@@ -361,9 +360,7 @@ mechanism_drivers:
   - name: "baremetal"
     enabled: "{{ enable_ironic_neutron_agent | bool }}"
   - name: "l2population"
-    enabled: "{{ not enable_hyperv | bool }} or {{ not neutron_plugin_agent == 'ovn' }}"
-  - name: "ovn"
-    enabled: "{{ neutron_plugin_agent == 'ovn' }}"
+    enabled: "{{ not enable_hyperv | bool }}"
 
 neutron_mechanism_drivers: "{{ mechanism_drivers | selectattr('enabled', 'equalto', true) | list }}"
 
@@ -403,7 +400,7 @@ service_plugins:
   - name: "qos"
     enabled: "{{ enable_neutron_qos | bool }}"
   - name: "router"
-    enabled: "{{ neutron_plugin_agent != 'ovn' }}"
+    enabled: true
   - name: "segments"
     enabled: "{{ enable_neutron_segments | bool }}"
   - name: "sfc"
@@ -412,8 +409,6 @@ service_plugins:
     enabled: "{{ enable_neutron_vpnaas | bool }}"
   - name: "port_forwarding"
     enabled: "{{ enable_neutron_port_forwarding | bool }}"
-  - name: "networking_ovn.l3.l3_ovn.OVNL3RouterPlugin"
-    enabled: "{{ neutron_plugin_agent == 'ovn' }}"
 
 neutron_service_plugins: "{{ service_plugins | selectattr('enabled', 'equalto', true) | list }}"
 

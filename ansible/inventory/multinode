@@ -268,10 +268,6 @@ control
 [blazar:children]
 control
 
-[ovn:children]
-network
-compute
-
 # Additional control implemented here. These groups allow you to control which
 # services run on which hosts at a per-service level.
 #
@@ -795,15 +791,3 @@ control
 
 [masakari-monitors:children]
 compute
-
-[ovn-controller:children]
-compute
-
-[ovn-northd:children]
-network
-
-[ovn-nb-db:children]
-network
-
-[ovn-sb-db:children]
-network

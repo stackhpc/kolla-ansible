@@ -86,21 +86,6 @@
             files:
               - ^ansible/roles/mariadb/
               - ^tests/test-mariadb.sh
-        - kolla-ansible-centos8-source-cells
-        - kolla-ansible-centos-source-mariadb
-        - kolla-ansible-centos8-source-mariadb
-        - kolla-ansible-ubuntu-source-mariadb
-        - kolla-ansible-centos-source-ceph-ansible
-        # FIXME(mgoddard): Ceph-ansible CentOS 8 job.
-        # - kolla-ansible-centos8-source-ceph-ansible
-        - kolla-ansible-ubuntu-source-ceph-ansible
-        - kolla-ansible-centos-source-upgrade-ceph-ansible
-        - kolla-ansible-ubuntu-source-upgrade-ceph-ansible
-        - kolla-ansible-centos-source-ovn
-        - kolla-ansible-ubuntu-source-ovn
-    check-arm64:
-      jobs:
-        - kolla-ansible-debian-source-aarch64
     gate:
       queue: kolla
       jobs:
