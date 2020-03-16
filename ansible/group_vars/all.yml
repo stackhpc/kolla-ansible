@@ -395,6 +395,7 @@ placement_api_port: "8780"
 placement_api_listen_port: "{{ placement_api_port }}"
 
 prometheus_port: "9091"
+prometheus_fluentd_exporter_port: "24231"
 prometheus_node_exporter_port: "9100"
 prometheus_mysqld_exporter_port: "9104"
 prometheus_haproxy_exporter_port: "9101"
