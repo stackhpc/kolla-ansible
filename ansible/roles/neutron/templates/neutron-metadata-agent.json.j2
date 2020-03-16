@@ -1,9 +1,5 @@
 {
-    {% if neutron_plugin_agent == "ovn" %}
-    "command": "networking-ovn-metadata-agent --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/networking_ovn_metadata_agent.ini",
-    {% else %}
     "command": "neutron-metadata-agent --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/metadata_agent.ini",
-    {% endif %}
     "config_files": [
         {
             "source": "{{ container_config_directory }}/neutron.conf",
@@ -11,21 +7,12 @@
             "owner": "neutron",
             "perm": "0600"
         },
-        {% if neutron_plugin_agent == "ovn" %}
-        {
-            "source": "{{ container_config_directory }}/networking_ovn_metadata_agent.ini",
-            "dest": "/etc/neutron/networking_ovn_metadata_agent.ini",
-            "owner": "neutron",
-            "perm": "0600"
-        },
-        {% else %}
         {
             "source": "{{ container_config_directory }}/metadata_agent.ini",
             "dest": "/etc/neutron/metadata_agent.ini",
             "owner": "neutron",
             "perm": "0600"
         },
-        {% endif %}
         {
             "source": "{{ container_config_directory }}/policy.json",
             "dest": "/etc/neutron/policy.json",

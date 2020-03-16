@@ -327,7 +327,6 @@
 #enable_nova_ssh: "yes"
 #enable_octavia: "no"
 #enable_openvswitch: "{{ enable_neutron | bool and neutron_plugin_agent != 'linuxbridge' }}"
-#enable_ovn: "no"
 #enable_ovs_dpdk: "no"
 #enable_osprofiler: "no"
 #enable_panko: "no"
@@ -654,9 +653,3 @@
 # Configure telegraf to use the docker daemon itself as an input for
 # telemetry data.
 #telegraf_enable_docker_input: "no"
-
-#####
-# OVN
-#####
-# Configure OVN remote probe interval time in ms
-#ovn_remote_probe_interval: "60000"

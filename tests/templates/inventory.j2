@@ -257,9 +257,6 @@ monitoring
 [redis:children]
 control
 
-[ovn:children]
-network
-
 # Additional control implemented here. These groups allow you to control which
 # services run on which hosts at a per-service level.
 #
@@ -729,15 +726,3 @@ elasticsearch
 
 [prometheus-blackbox-exporter:children]
 monitoring
-
-[ovn-controller:children]
-compute
-
-[ovn-northd:children]
-network
-
-[ovn-nb-db:children]
-network
-
-[ovn-sb-db:children]
-network

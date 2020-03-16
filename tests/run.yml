@@ -20,7 +20,7 @@
         need_build_image: false
         build_image_tag: "change_{{ zuul.change | default('none') }}"
         openstack_core_enabled: "{{ openstack_core_enabled }}"
-        openstack_core_tested: "{{ scenario in ['core', 'ceph-ansible', 'zun', 'cells', 'swift', 'ovn'] }}"
+        openstack_core_tested: "{{ scenario in ['core', 'ceph', 'cinder-lvm', 'cells', 'swift'] }}"
         dashboard_enabled: "{{ openstack_core_enabled }}"
         # NOTE(mgoddard): Use Python 3 only for CentOS 8 on stable/train.
         playbook_python_version: "{{ '3' if ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8' else '2' }}"
@@ -287,8 +287,6 @@
             cmd: init-core-openstack.sh
             executable: /bin/bash
             chdir: "{{ kolla_ansible_src_dir }}"
-          environment:
-            SCENARIO: "{{ scenario }}"
           when: openstack_core_tested or scenario in ['ironic', 'scenario_nfv', 'zun']
 
         - name: Run test-core-openstack.sh script
@@ -334,15 +332,6 @@
             executable: /bin/bash
             chdir: "{{ kolla_ansible_src_dir }}"
           when: scenario == "masakari"
-
-        - name: Run test-ovn.sh script
-          script:
-            cmd: test-ovn.sh
-            executable: /bin/bash
-            chdir: "{{ kolla_ansible_src_dir }}"
-          environment:
-            BASE_DISTRO: "{{ base_distro }}"
-          when: scenario == "ovn"
 
         - name: Run test-mariadb.sh script
           script:
