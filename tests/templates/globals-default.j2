@@ -1,4 +1,10 @@
 ---
+# Force the use of python2 on Ubuntu/Debian and CentOS7 remote hosts. This is
+# necessary for delegate_to: localhost, which will otherwise use the local
+# python interpreter (python3).  On CentOS 7, that fails due to a lack of
+# python3 bindings for SELinux.  https://bugs.centos.org/view.php?id=16389
+ansible_python_interpreter: /usr/bin/python{{ '2' if ansible_os_family != 'RedHat' or ansible_distribution_major_version == '7' else '3' }}
+
 kolla_base_distro: "{{ base_distro }}"
 kolla_install_type: "{{ install_type }}"
 network_interface: "{{ api_interface_name }}"
@@ -34,7 +40,7 @@ docker_namespace: "lokolla"
 # docker does not support referencing registry via an IPv6 address
 # see: https://github.com/moby/moby/issues/39033
 docker_registry: "primary:4000"
-openstack_release: "{{ build_image_tag }}"
+openstack_tag: "{{ build_image_tag }}"
 {% else %}
 # use docker hub images
 docker_namespace: "kolla"
@@ -45,9 +51,7 @@ docker_namespace: "kolla"
 # of docker systemd command only once
 docker_custom_option: "--insecure-registry primary:4000"
 {% endif %}
-{% if not is_previous_release %}
-openstack_release: "{{ zuul.branch | basename }}"
-{% else %}
+{% if is_previous_release %}
 openstack_release: "{{ previous_release }}"
 {% endif %}
 {% endif %}
@@ -73,18 +77,15 @@ ceph_osd_host_type: "INVENTORY"
 glance_enable_rolling_upgrade: "yes"
 {% endif %}
 
-{% if scenario == "cinder-lvm" %}
-enable_cinder: "yes"
-# lvm backup driver for cinder-backup does not exist
-enable_cinder_backup: "no"
-enable_cinder_backend_lvm: "yes"
-{% endif %}
-
 {% if scenario == "zun" %}
 enable_zun: "yes"
 enable_kuryr: "yes"
 enable_etcd: "yes"
 docker_configure_for_zun: "yes"
+enable_cinder: "yes"
+# lvm backup driver for cinder-backup does not exist
+enable_cinder_backup: "no"
+enable_cinder_backend_lvm: "yes"
 {% endif %}
 
 {% if scenario == "swift" %}
