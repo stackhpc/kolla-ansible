@@ -4,8 +4,8 @@
     "command": "/usr/sbin/{{ monasca_cmd }} -DFOREGROUND",
     "config_files": [
         {
-            "source": "{{ container_config_directory }}/api.conf",
-            "dest": "/etc/monasca/api.conf",
+            "source": "{{ container_config_directory }}/monasca-api.conf",
+            "dest": "/etc/monasca/monasca-api.conf",
             "owner": "monasca",
             "perm": "0600"
         },
