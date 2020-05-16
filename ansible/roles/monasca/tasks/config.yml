@@ -138,7 +138,7 @@
     mode: "0660"
   become: true
   with_items:
-    - api.conf
+    - monasca-api.conf
     - api-config.ini
   when:
     - inventory_hostname in groups[service['group']]
