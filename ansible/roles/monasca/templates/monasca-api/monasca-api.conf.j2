@@ -15,8 +15,9 @@ ip_address = {{ monasca_influxdb_address }}
 port = {{ monasca_influxdb_http_port }}
 
 [kafka]
+legacy_kafka_client_enabled = False
 metrics_topic = {{ monasca_metrics_topic }}
-logs_topic = {{ monasca_raw_logs_topic }}
+logs_topics = {{ monasca_raw_logs_topic }}
 uri = {{ monasca_kafka_servers }}
 
 [messaging]
@@ -45,6 +46,7 @@ memcache_secret_key = {{ memcache_secret_key }}
 memcached_servers = {{ monasca_memcached_servers }}
 
 [dispatcher]
+# TODO: Delete all of this?
 versions = monasca_api.v2.reference.versions:Versions
 version_2_0 = monasca_api.v2.reference.version_2_0:Version2
 metrics = monasca_api.v2.reference.metrics:Metrics
