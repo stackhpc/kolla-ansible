@@ -10,6 +10,7 @@ storm_services:
     environment:
       STORM_LOG_DIR: /var/log/kolla/storm
       STORM_LOG4J_PROP: "{{ storm_log_settings }}"
+      PYTHON: "{{ '/usr/bin/python' ~ distro_python_version }}"
     volumes: "{{ storm_worker_default_volumes + storm_nimbus_extra_volumes }}"
     dimensions: "{{ storm_worker_dimensions }}"
   storm-nimbus:
@@ -20,6 +21,7 @@ storm_services:
     environment:
       STORM_LOG_DIR: /var/log/kolla/storm
       STORM_LOG4J_PROP: "{{ storm_log_settings }}"
+      PYTHON: "{{ '/usr/bin/python' ~ distro_python_version }}"
     volumes: "{{ storm_nimbus_default_volumes + storm_nimbus_extra_volumes }}"
     dimensions: "{{ storm_nimbus_dimensions }}"
 

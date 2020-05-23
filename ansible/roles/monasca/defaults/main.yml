@@ -64,6 +64,8 @@ monasca_services:
     group: monasca-thresh
     enabled: true
     image: "{{ monasca_thresh_image_full }}"
+    environment:
+        PYTHON: "{{ '/usr/bin/python' ~ distro_python_version }}"
     volumes: "{{ monasca_thresh_default_volumes + monasca_thresh_extra_volumes }}"
     dimensions: "{{ monasca_thresh_dimensions }}"
   monasca-notification:
