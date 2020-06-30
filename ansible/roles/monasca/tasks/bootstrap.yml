@@ -46,16 +46,15 @@
 - name: List influxdb databases
   become: true
   command: "docker exec influxdb influx -host {{ monasca_influxdb_address }} -port {{ monasca_influxdb_http_port }} -execute 'show databases'"
-  run_once: True
-  delegate_to: "{{ groups['influxdb'][0] }}"
   register: monasca_influxdb_database
   changed_when: False
 
 - name: Creating monasca influxdb database
   become: true
-  command: "docker exec influxdb influx -host {{ monasca_influxdb_address }} -port {{ monasca_influxdb_http_port }} -execute 'CREATE DATABASE {{ monasca_influxdb_name }} WITH DURATION {{ monasca_influxdb_retention_policy.duration }} REPLICATION  {{ monasca_influxdb_retention_policy.replication_count }} NAME {{ monasca_influxdb_retention_policy.name }}'"
-  run_once: True
-  delegate_to: "{{ groups['influxdb'][0] }}"
+  command: >
+    docker exec influxdb influx -host {{ monasca_influxdb_address }} -port {{ monasca_influxdb_http_port }} -execute
+    'CREATE DATABASE {{ monasca_influxdb_name }} WITH DURATION {{ monasca_influxdb_retention_policy.duration }}
+    REPLICATION  {{ monasca_influxdb_retention_policy.replication_count }} NAME {{ monasca_influxdb_retention_policy.name }}'
   when: monasca_influxdb_name not in monasca_influxdb_database.stdout_lines
 
 # NOTE(dszumski): The Monasca APIs write logs and messages to Kafka. Since
