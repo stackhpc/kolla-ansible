@@ -20,6 +20,9 @@ function setup_openstack_clients {
     if [[ $SCENARIO == masakari ]]; then
         packages+=(python-masakariclient)
     fi
+    if [[ $SCENARIO == scenario_nfv ]]; then
+        packages+=(python-tackerclient python-barbicanclient python-mistralclient)
+    fi
     virtualenv ~/openstackclient-venv
     ~/openstackclient-venv/bin/pip install -U pip
     ~/openstackclient-venv/bin/pip install -c $UPPER_CONSTRAINTS ${packages[@]}
@@ -99,7 +102,7 @@ function prepare_images {
     else
         kolla_base_distro=${BASE_DISTRO}
     fi
-    sudo tox -e "build-${kolla_base_distro}-${INSTALL_TYPE}"
+    sudo $TOX_VENV/bin/tox -e "build-${kolla_base_distro}-${INSTALL_TYPE}"
     # NOTE(yoctozepto): due to debian buster we push after images are built
     # see https://github.com/docker/for-linux/issues/711
     if [[ "debian" == $BASE_DISTRO ]]; then

@@ -8,8 +8,8 @@
     mode: "0770"
   become: true
   when:
-    - inventory_hostname in groups[item.value.group]
     - item.value.enabled | bool
+    - inventory_hostname in groups[item.value.group]
   with_dict: "{{ elasticsearch_services }}"
 
 - name: Copying over config.json files for services
@@ -19,8 +19,8 @@
     mode: "0660"
   become: true
   when:
-    - inventory_hostname in groups[item.value.group]
     - item.value.enabled | bool
+    - inventory_hostname in groups[item.value.group]
   with_dict: "{{ elasticsearch_services }}"
   notify:
     - Restart {{ item.key }} container
@@ -32,8 +32,8 @@
     mode: "0660"
   become: true
   when:
-    - inventory_hostname in groups[item.value.group]
     - item.value.enabled | bool
+    - inventory_hostname in groups[item.value.group]
   with_dict: "{{ elasticsearch_services }}"
   notify:
     - Restart {{ item.key }} container
