@@ -1,5 +1,5 @@
 <match syslog.{{ syslog_swift_facility }}.**>
-  @type copy
+  type copy
   <store>
     @type file
     path /var/log/kolla/swift/swift_latest.*.log
@@ -34,12 +34,15 @@
      buffer_path /var/lib/fluentd/data/syslog-swift-monasca.*.buffer
      max_retry_wait 1800s
      disable_retry_limit true
+     <buffer>
+       chunk_limit_size 8m
+     </buffer>
   </store>
 {% endif %}
 </match>
 
 <match infra.haproxy.**>
-  @type copy
+  type copy
   <store>
     @type file
     path /var/log/kolla/haproxy/haproxy_latest.*.log
@@ -76,6 +79,9 @@
      buffer_path /var/lib/fluentd/data/syslog-haproxy-monasca.*.buffer
      max_retry_wait 1800s
      disable_retry_limit true
+     <buffer>
+       chunk_limit_size 8m
+     </buffer>
   </store>
 {% endif %}
 </match>
