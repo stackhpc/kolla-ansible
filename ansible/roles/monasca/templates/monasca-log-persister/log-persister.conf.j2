@@ -1,6 +1,6 @@
 # Persist transformed logs to Elasticsearch
 
-{% if monasca_logstash_use_v6 %}
+{% if monasca_logstash_use_v6 | bool %}
 input {
     kafka {
         bootstrap_servers => "{{ monasca_kafka_servers }}"

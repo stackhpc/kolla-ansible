@@ -1,4 +1,4 @@
-{% set monasca_logstash_cmd = '/usr/share/logstash/bin/logstash --path.settings /etc/logstash/ --log.format json --path.logs /var/log/kolla/logstash/monasca-log-metrics' if monasca_logstash_use_v6 else '/opt/logstash/bin/logstash --log-in-json --log /var/log/kolla/logstash/monasca-log-metrics.log' %}
+{% set monasca_logstash_cmd = '/usr/share/logstash/bin/logstash --path.settings /etc/logstash/ --log.format json --path.logs /var/log/kolla/logstash/monasca-log-metrics' if monasca_logstash_use_v6 | bool else '/opt/logstash/bin/logstash --log-in-json --log /var/log/kolla/logstash/monasca-log-metrics.log' %}
 {
     "command": "{{ monasca_logstash_cmd }} -f /etc/logstash/conf.d/log-metrics.conf",
     "config_files": [
