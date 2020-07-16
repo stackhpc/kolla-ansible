@@ -1,7 +1,7 @@
 # Provide input/output streams for transforming Monasca logs.
 # Filters should be provided in other configuration files.
 
-{% if monasca_logstash_use_v6 %}
+{% if monasca_logstash_use_v6 | bool %}
 input {
     kafka {
         bootstrap_servers => "{{ monasca_kafka_servers }}"
@@ -50,7 +50,7 @@ filter {
     }
 }
 
-{% if monasca_logstash_use_v6 %}
+{% if monasca_logstash_use_v6 | bool %}
 output {
     kafka {
         codec => json
