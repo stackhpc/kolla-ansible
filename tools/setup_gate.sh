@@ -8,6 +8,15 @@ export PYTHONUNBUFFERED=1
 
 GIT_PROJECT_DIR=$(mktemp -d)
 
+function setup_openstack_clients {
+    # Prepare for openstack deployment tests
+    local packages=(python-openstackclient)
+    if [[ $ACTION == zun ]]; then
+        packages+=(python-zunclient)
+    fi
+    pip install --user -c $UPPER_CONSTRAINTS ${packages[@]}
+}
+
 function setup_config {
     # Use Infra provided pypi.
     # Wheel package mirror may be not compatible. So do not enable it.
@@ -83,19 +92,17 @@ function detect_distro {
 function setup_ansible {
     RAW_INVENTORY=/etc/kolla/inventory
 
-    # Test latest ansible version on Ubuntu, minimum supported on others.
+    # Test Ansible 2.8.x on Ubuntu, minimum supported on others.
     if [[ $BASE_DISTRO == "ubuntu" ]]; then
-        ANSIBLE_VERSION=">=2.4"
+        ANSIBLE_VERSION=">=2.4,<2.9"
         ARA_VERSION="<1.0.0"
     else
         ANSIBLE_VERSION="<2.5"
         ARA_VERSION="<0.16"
     fi
     # TODO(SamYaple): Move to virtualenv
-    sudo -H pip install -U "ansible${ANSIBLE_VERSION}" "docker>=2.0.0" "python-openstackclient" "ara${ARA_VERSION}" "cmd2<0.9.0"
-    if [[ $ACTION == "zun" ]]; then
-        sudo -H pip install -U "python-zunclient"
-    fi
+    sudo -H pip install -U "ansible${ANSIBLE_VERSION}" "docker>=2.0.0" "ara${ARA_VERSION}" "cmd2<0.9.0" "pyfakefs<4"
+    setup_openstack_clients
     detect_distro
 
     sudo mkdir /etc/ansible
@@ -120,11 +127,14 @@ function prepare_images {
     fi
     sudo docker run -d -p 4000:5000 --restart=always -v /opt/kolla_registry/:/var/lib/registry --name registry registry:2
     pushd "${KOLLA_SRC_DIR}"
-    sudo tox -e "build-${BASE_DISTRO}-${INSTALL_TYPE}"
+    sudo ~/tox-venv/bin/tox -e "build-${BASE_DISTRO}-${INSTALL_TYPE}"
     popd
 }
 
 function sanity_check {
+    # Set PATH to access Python packages installed with --user
+    export PATH=~/.local/bin:$PATH
+
     # Wait for service ready
     sleep 15
     . /etc/kolla/admin-openrc.sh
