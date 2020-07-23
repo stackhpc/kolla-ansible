@@ -935,6 +935,11 @@ neutron_dnsmasq_dns_servers: "1.1.1.1,8.8.8.8,8.8.4.4"
 # Set legacy iptables to allow kernels not supporting iptables-nft
 neutron_legacy_iptables: "no"
 
+# SRIOV physnet:interface mappings when SRIOV is enabled
+# "sriovnet1" and tunnel_interface used here as placeholders
+neutron_sriov_physnet_mappings:
+  sriovnet1: "{{ tunnel_interface }}"
+
 #######################
 # Nova options
 #######################

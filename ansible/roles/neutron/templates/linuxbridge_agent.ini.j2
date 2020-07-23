@@ -13,3 +13,10 @@ firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 l2_population = true
 local_ip = {{ tunnel_interface_address }}
 arp_responder = true
+
+{% if enable_neutron_sriov | bool %}
+[FDB]
+# Allows instances using sriov ports to communicate with instances that do not.
+# See https://docs.openstack.org/neutron/latest/admin/config-sriov.html
+shared_physical_device_mappings = {{ neutron_sriov_physnets }}
+{% endif %}
