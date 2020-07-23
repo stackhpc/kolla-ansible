@@ -56,6 +56,8 @@ kolla_internal_vip_address: "10.10.10.254"
 #docker_namespace: "companyname"
 #docker_registry_username: "sam"
 #docker_registry_password: "correcthorsebatterystaple"
+# Docker client timeout in seconds.
+#docker_client_timeout: 120
 
 ###################
 # Messaging options
@@ -386,6 +388,8 @@ glance_enable_rolling_upgrade: "no"
 #cinder_backend_ceph: "{{ enable_ceph }}"
 #cinder_backend_vmwarevc_vmdk: "no"
 #cinder_volume_group: "cinder-volumes"
+# Valid options are [ '', redis, etcd ]
+#cinder_coordination_backend: "{{ 'redis' if enable_redis|bool else 'etcd' if enable_etcd|bool else '' }}"
 
 # Valid options are [ nfs, swift, ceph ]
 #cinder_backup_driver: "ceph"

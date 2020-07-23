@@ -53,6 +53,7 @@ cinder_services:
       - "{{ node_config_directory }}/cinder-backup/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
       - "/dev/:/dev/"
+      - "/lib/modules:/lib/modules:ro"
       - "/run/:/run/:shared"
       - "cinder:/var/lib/cinder"
       - "{% if enable_iscsid | bool %}iscsi_info:/etc/iscsi{% endif %}"
@@ -142,9 +143,6 @@ cinder_volume_dimensions: "{{ default_container_dimensions }}"
 ####################
 # OpenStack
 ####################
-cinder_admin_endpoint: "{{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ cinder_api_port }}/v1/%(tenant_id)s"
-cinder_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ cinder_api_port }}/v1/%(tenant_id)s"
-cinder_public_endpoint: "{{ public_protocol }}://{{ kolla_external_fqdn }}:{{ cinder_api_port }}/v1/%(tenant_id)s"
 cinder_v2_admin_endpoint: "{{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ cinder_api_port }}/v2/%(tenant_id)s"
 cinder_v2_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ cinder_api_port }}/v2/%(tenant_id)s"
 cinder_v2_public_endpoint: "{{ public_protocol }}://{{ kolla_external_fqdn }}:{{ cinder_api_port }}/v2/%(tenant_id)s"
@@ -153,8 +151,6 @@ cinder_v3_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn }
 cinder_v3_public_endpoint: "{{ public_protocol }}://{{ kolla_external_fqdn }}:{{ cinder_api_port }}/v3/%(tenant_id)s"
 
 cinder_logging_debug: "{{ openstack_logging_debug }}"
-
-cinder_keystone_user: "cinder"
 
 openstack_cinder_auth: "{{ openstack_auth }}"
 

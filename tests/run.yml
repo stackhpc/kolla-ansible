@@ -52,6 +52,13 @@
         - item.project.short_name == "kolla"
       with_items: "{{ zuul['items'] }}"
 
+    - name: Ensure tox is installed
+      pip:
+        name: tox
+        virtualenv: "{{ ansible_env.HOME }}/tox-venv"
+      when: need_build_image
+      become: true
+
     - name: generate global.yml file
       template:
         src: "{{ kolla_ansible_full_src_dir }}/tests/templates/globals-default.j2"
@@ -138,6 +145,7 @@
           export BUILD_IMAGE={{ need_build_image }}
           export KOLLA_SRC_DIR={{ ansible_env.HOME }}/src/opendev.org/openstack/kolla
           export ACTION={{ scenario }}
+          export UPPER_CONSTRAINTS={{ ansible_env.HOME }}/src/opendev.org/openstack/requirements/upper-constraints.txt
 
           tools/setup_gate.sh
         executable: /bin/bash
