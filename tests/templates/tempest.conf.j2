@@ -1,0 +1,16 @@
+[auth]
+admin_username = "{{ lookup('env','OS_USERNAME') }}"
+admin_project_name = "{{ lookup('env','OS_PROJECT_NAME') }}"
+admin_password = "{{ lookup('env','OS_PASSWORD') }}"
+admin_domain_name = "{{ lookup('env','OS_PROJECT_DOMAIN_NAME') }}"
+
+[identity]
+uri_v3 = "{{ lookup('env','OS_AUTH_URL') }}"
+
+[monitoring]
+log_query_message_field="log.message"
+catalog_type_log_query="log-storage"
+catalog_type_logs="logging"
+log_uri_path="v2.0/logs"
+log_api_max_log_size=10485760
+log_project_id_path: _source, meta, tenantId

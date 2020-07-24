@@ -4,56 +4,39 @@ set -o xtrace
 set -o errexit
 
 
-function test_monasca_metrics {
-    # Check that the monitoring endpoints are registered
-    openstack endpoint list -f value --service monitoring --interface internal -c URL || true
-    openstack endpoint list -f value --service monitoring --interface public -c URL || true
+function test_monasca {
+    # Run Monasca Tempest plugin against deployment
+
+    # TODO(dszumski): Investigate
+    openstack role create monasca-user
+
+    source tempest-venv/bin/activate
+    pip install tempest
+    # TODO(dszumski): Remove fork when patch is merged
+    pip install git+https://github.com/stackhpc/monasca-tempest-plugin.git@feature/configuration
+    tempest init monasca_tempest
+
+    # Run metrics tests
+    # TODO(dszumski): A small number of these fail occasionally since InfluxDB doesn't always
+    # immediately return dimensions after a metric is written. Need to patch Monasca Tempest
+    # plugin.
+    tempest run --workspace monasca_tempest --regex monasca_tempest_tests.tests.api
+
+    # Run logging tests
+    tempest run --workspace monasca_tempest --regex monasca_tempest_tests.tests.log
 
     # Run some CLI commands
     MONASCA_PROJECT_ID=$(openstack project list --user monasca-agent -f value -c ID)
     monasca metric-list --tenant-id "$MONASCA_PROJECT_ID"
     monasca alarm-list
     monasca notification-list
-
-    # Test the metric pipeline by waiting for some metrics to arrive from the
-    # Monasca Agent. If the metric doesn't yet exist, nothing is returned.
-    METRIC_STATS_CMD="monasca metric-statistics mem.free_mb --tenant-id $MONASCA_PROJECT_ID COUNT -1"
-    for i in {1..60}; do
-        if $METRIC_STATS_CMD | grep 'mem.free_mb'; then
-            break
-        fi
-        sleep 1
-    done
-}
-
-function test_monasca_logs {
-    # Check that the logging endpoints are registered
-    openstack endpoint list -f value --service logging --interface internal -c URL
-    openstack endpoint list -f value --service logging --interface public -c URL
-
-    # Test the logging pipeline by waiting for some logs to arrive from
-    # Fluentd into the Monasca Elasticsearch index
-    # TODO: Use index name set in config
-
-    # Test the metric pipeline by waiting for some metrics to arrive from the
-    # Monasca Agent. If the metric doesn't yet exist, nothing is returned.
-    # NOTE(dszumski): When querying logs via the Monasca Log API *is*
-    # supported, we can replace this in favour of calling querying the Log API.
-    ELASTICSEARCH_URL=${OS_AUTH_URL%:*}:9200
-    for i in {1..60}; do
-        if curl -s -X GET "$ELASTICSEARCH_URL/_cat/indices?v" | grep 'monasca-'; then
-            break
-        fi
-        sleep 1
-    done
 }
 
 function test_monasca_logged {
     . /etc/kolla/admin-openrc.sh
     # Activate virtualenv to access Monasca client
     . ~/openstackclient-venv/bin/activate
-    test_monasca_metrics
-    test_monasca_logs
+    test_monasca
 }
 
 function test_monasca {

@@ -97,6 +97,13 @@
         state: directory
       become: true
 
+    - name: Ensure /etc/tempest exists
+      file:
+        path: "/etc/tempest"
+        state: directory
+      become: true
+      when: "{{ scenario == 'monasca' }}"
+
     - name: Ensure configuration directories exist
       file:
         path: "/etc/kolla/config/{{ item }}"
@@ -145,6 +152,10 @@
         - src: "tests/templates/ceph-ansible.j2"
           dest: /etc/kolla/ceph-ansible.yml
           when: "{{ scenario == 'ceph-ansible' }}"
+        # tempest.conf
+        - src: "tests/templates/tempest.conf.j2"
+          dest: /etc/tempest/tempest.conf
+          when: "{{ scenario == 'monasca' }}"
 
       when: item.when | default(true)
 
