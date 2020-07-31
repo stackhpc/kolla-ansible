@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Elasticsearch is now registered as an internal service in the Keystone
+    Catalogue.

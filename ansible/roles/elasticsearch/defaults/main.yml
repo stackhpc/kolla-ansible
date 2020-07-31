@@ -70,6 +70,20 @@ elasticsearch_curator_soft_retention_period_days: 30
 # Duration after which an index is permanently erased from the cluster.
 elasticsearch_curator_hard_retention_period_days: 60
 
+elasticsearch_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ elasticsearch_port }}"
+
+####################
+# Keystone
+####################
+elasticsearch_openstack_auth: "{{ openstack_auth }}"
+
+elasticsearch_ks_services:
+  - name: "elasticsearch"
+    type: "log-storage"
+    description: "Elasticsearch"
+    endpoints:
+      - {'interface': 'internal', 'url': '{{ elasticsearch_internal_endpoint }}'}
+
 ####################
 # Docker
 ####################
