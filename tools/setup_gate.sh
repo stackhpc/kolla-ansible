@@ -17,6 +17,9 @@ function setup_openstack_clients {
     if [[ $ACTION == ironic ]]; then
         packages+=(python-ironicclient)
     fi
+    if [[ $SCENARIO == scenario_nfv ]]; then
+        packages+=(python-tackerclient python-barbicanclient python-mistralclient)
+    fi
     virtualenv ~/openstackclient-venv
     ~/openstackclient-venv/bin/pip install -U pip
     ~/openstackclient-venv/bin/pip install -c $UPPER_CONSTRAINTS ${packages[@]}
@@ -112,12 +115,12 @@ function setup_ansible {
 
     # Test latest ansible version on Ubuntu, minimum supported on others.
     if [[ $BASE_DISTRO == "ubuntu" ]]; then
-        ANSIBLE_VERSION=">=2.5,<2.10"
+        ANSIBLE_VERSION=">=2.5,<2.10,!=2.9.12"
         # When upgrading from Rocky and earlier, we have to limit the version
         # due to version_compare being gone from Ansible 2.9
         # see https://review.opendev.org/692575 for change in Rocky
         if [[ $ACTION =~ "upgrade" ]]; then
-            ANSIBLE_VERSION="$ANSIBLE_VERSION,<2.9"
+            ANSIBLE_VERSION="$ANSIBLE_VERSION,<2.9,!=2.8.14"
         fi
     else
         ANSIBLE_VERSION="<2.6"
@@ -150,7 +153,7 @@ function prepare_images {
     fi
     sudo docker run -d -p 4000:5000 --restart=always -v /opt/kolla_registry/:/var/lib/registry --name registry registry:2
     pushd "${KOLLA_SRC_DIR}"
-    sudo tox -e "build-${BASE_DISTRO}-${INSTALL_TYPE}"
+    sudo $TOX_VENV/bin/tox -e "build-${BASE_DISTRO}-${INSTALL_TYPE}"
     popd
 }
 

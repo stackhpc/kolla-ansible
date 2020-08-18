@@ -20,22 +20,21 @@
        buffer_path /var/lib/fluentd/data/elasticsearch.buffer/{{ syslog_swift_facility }}.*
   </store>
 {% elif enable_monasca | bool %}
-    type copy
-    <store>
-       @type monasca
-       keystone_url {{ keystone_internal_url }}
-       monasca_log_api {{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ monasca_log_api_port }}
-       monasca_log_api_version v3.0
-       username {{ monasca_agent_user }}
-       password {{ monasca_agent_password }}
-       domain_id default
-       project_name {{ monasca_control_plane_project }}
-       message_field_name Payload
-       buffer_type file
-       buffer_path /var/lib/fluentd/data/syslog-swift-monasca.*.buffer
-       max_retry_wait 1800s
-       disable_retry_limit true
-    </store>
+  <store>
+     @type monasca
+     keystone_url {{ keystone_internal_url }}
+     monasca_log_api {{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ monasca_log_api_port }}
+     monasca_log_api_version v3.0
+     username {{ monasca_agent_user }}
+     password {{ monasca_agent_password }}
+     domain_id default
+     project_name {{ monasca_control_plane_project }}
+     message_field_name Payload
+     buffer_type file
+     buffer_path /var/lib/fluentd/data/syslog-swift-monasca.*.buffer
+     max_retry_wait 1800s
+     disable_retry_limit true
+  </store>
 {% endif %}
 </match>
 
@@ -63,21 +62,20 @@
        buffer_path /var/lib/fluentd/data/elasticsearch.buffer/{{ syslog_haproxy_facility }}.*
   </store>
 {% elif enable_monasca | bool %}
-    type copy
-    <store>
-       @type monasca
-       keystone_url {{ keystone_internal_url }}
-       monasca_log_api {{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ monasca_log_api_port }}
-       monasca_log_api_version v3.0
-       username {{ monasca_agent_user }}
-       password {{ monasca_agent_password }}
-       domain_id default
-       project_name {{ monasca_control_plane_project }}
-       message_field_name Payload
-       buffer_type file
-       buffer_path /var/lib/fluentd/data/syslog-haproxy-monasca.*.buffer
-       max_retry_wait 1800s
-       disable_retry_limit true
-    </store>
+  <store>
+     @type monasca
+     keystone_url {{ keystone_internal_url }}
+     monasca_log_api {{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ monasca_log_api_port }}
+     monasca_log_api_version v3.0
+     username {{ monasca_agent_user }}
+     password {{ monasca_agent_password }}
+     domain_id default
+     project_name {{ monasca_control_plane_project }}
+     message_field_name Payload
+     buffer_type file
+     buffer_path /var/lib/fluentd/data/syslog-haproxy-monasca.*.buffer
+     max_retry_wait 1800s
+     disable_retry_limit true
+  </store>
 {% endif %}
 </match>
