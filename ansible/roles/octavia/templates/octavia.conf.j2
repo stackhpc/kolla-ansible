@@ -13,6 +13,10 @@ bind_port = {{ octavia_api_listen_port }}
 ca_private_key_passphrase = {{ octavia_ca_password }}
 ca_private_key = /etc/octavia/certs/private/cakey.pem
 ca_certificate = /etc/octavia/certs/ca_01.pem
+{% if enable_barbican | bool %}
+region_name = {{ openstack_region_name }}
+endpoint_type = internal
+{% endif %}
 
 [haproxy_amphora]
 server_ca = /etc/octavia/certs/ca_01.pem
@@ -28,7 +32,7 @@ auth_type = password
 username = {{ octavia_keystone_user }}
 password = {{ octavia_keystone_password }}
 user_domain_name = {{ default_user_domain_name }}
-project_name = {{ openstack_auth.project_name }}
+project_name = {{ octavia_service_auth_project }}
 project_domain_name = {{ default_project_domain_name }}
 
 memcache_security_strategy = ENCRYPT
@@ -54,6 +58,9 @@ bind_port = {{ octavia_health_manager_port }}
 bind_ip = {{ octavia_network_interface_address }}
 heartbeat_key = insecure
 controller_ip_port_list = {% for host in groups['octavia-health-manager'] %}{{ hostvars[host]['ansible_' + hostvars[host]['octavia_network_interface']]['ipv4']['address'] }}:{{ octavia_health_manager_port }}{% if not loop.last %},{% endif %}{% endfor %}
+
+stats_update_threads = {{ openstack_service_workers }}
+health_update_threads = {{ openstack_service_workers }}
 
 [controller_worker]
 amp_boot_network_list = {{ octavia_amp_boot_network_list }}

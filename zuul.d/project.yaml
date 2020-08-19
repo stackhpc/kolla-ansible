@@ -26,7 +26,9 @@
         - kolla-ansible-ubuntu-source-zun:
             files: ^ansible\/roles\/(zun|kuryr)\/.*
         - kolla-ansible-centos-source-scenario-nfv:
-            files: ^ansible\/roles\/(barbican|heat|mistral|redis|tacker)\/.*
+            files:
+              - ^ansible/roles/(barbican|heat|mistral|redis|tacker)/
+              - ^tests/test-scenario-nfv.sh
         - kolla-ansible-centos-source-ironic
         - kolla-ansible-centos-binary-ironic
         - kolla-ansible-ubuntu-source-ironic
@@ -36,6 +38,14 @@
         - kolla-ansible-ubuntu-source-upgrade-ceph
         - kolla-ansible-centos-binary
         - kolla-ansible-ubuntu-binary
+        - kolla-ansible-centos-source-mariadb:
+            files:
+              - ^ansible/roles/mariadb/
+              - ^tests/test-mariadb.sh
+        - kolla-ansible-ubuntu-source-mariadb:
+            files:
+              - ^ansible/roles/mariadb/
+              - ^tests/test-mariadb.sh
     gate:
       queue: kolla
       jobs:
@@ -57,3 +67,5 @@
         - kolla-ansible-ubuntu-source-upgrade
         - kolla-ansible-centos-source-upgrade-ceph
         - kolla-ansible-ubuntu-source-upgrade-ceph
+        - kolla-ansible-centos-source-mariadb
+        - kolla-ansible-ubuntu-source-mariadb

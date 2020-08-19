@@ -10,6 +10,7 @@ mariadb_services:
     volumes:
       - "{{ node_config_directory }}/mariadb/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
+      - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
       - "mariadb:/var/lib/mysql"
       - "kolla_logs:/var/log/kolla/"
     dimensions: "{{ mariadb_dimensions }}"
@@ -27,7 +28,7 @@ mariadb_services:
           - "option mysql-check user haproxy post-41"
         custom_member_list: "{{ internal_haproxy_members.split(';') }}"
       mariadb_external_lb:
-        enabled: "{{ enable_mariadb|bool and enable_external_mariadb_load_balancer|bool }}"
+        enabled: "{{ enable_external_mariadb_load_balancer|bool }}"
         mode: "tcp"
         port: "{{ mariadb_port }}"
         frontend_tcp_extra:
@@ -67,9 +68,9 @@ mariadb_service: "{{ mariadb_services['mariadb'] }}"
 ####################
 # Backups
 ####################
-xtrabackup_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ mariadb_install_type }}-xtrabackup"
-xtrabackup_tag: "{{ openstack_release }}"
-xtrabackup_image_full: "{{ xtrabackup_image }}:{{ xtrabackup_tag }}"
+mariabackup_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ mariadb_install_type }}-mariadb"
+mariabackup_tag: "{{ openstack_release }}"
+mariabackup_image_full: "{{ mariabackup_image }}:{{ mariabackup_tag }}"
 
 mariadb_backup_host: "{{ groups['mariadb'][0] }}"
 mariadb_backup_database_schema: "PERCONA_SCHEMA"

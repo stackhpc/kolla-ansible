@@ -23,10 +23,14 @@ user_domain_id = {{ default_user_domain_id }}
 project_name = service
 username = {{ cloudkitty_keystone_user }}
 password = {{ cloudkitty_keystone_password }}
+region_name = {{ openstack_region_name }}
 
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = {{ memcache_secret_key }}
 memcached_servers = {% for host in groups['memcached'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}
+
+[oslo_middleware]
+enable_proxy_headers_parsing = True
 
 [oslo_concurrency]
 lock_path = /var/lib/cloudkitty/tmp
@@ -43,10 +47,12 @@ services = compute,image{% if enable_cinder | bool %},volume{% endif %},network.
 [keystone_fetcher]
 keystone_version = 3
 auth_section = keystone_authtoken
+region_name = {{ openstack_region_name }}
 
 {% if cloudkitty_collector_backend == "gnocchi" %}
 [gnocchi_collector]
 auth_section = keystone_authtoken
+region_name = {{ openstack_region_name }}
 {% endif %}
 
 [api]

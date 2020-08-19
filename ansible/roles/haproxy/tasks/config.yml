@@ -1,14 +1,4 @@
 ---
-- name: Setting sysctl values
-  sysctl: name={{ item.name }} value={{ item.value }} sysctl_set=yes
-  become: true
-  with_items:
-    - { name: "net.ipv4.ip_nonlocal_bind", value: 1}
-    - { name: "net.ipv6.ip_nonlocal_bind", value: 1}
-    - { name: "net.unix.max_dgram_qlen", value: 128}
-  when:
-    - set_sysctl | bool
-
 - name: Ensuring config directories exist
   file:
     path: "{{ node_config_directory }}/{{ item.key }}"
@@ -67,12 +57,21 @@
   notify:
     - Restart haproxy container
 
-- name: Load and persist keepalived module
-  import_role:
-    role: module-load
+- name: Copying over custom haproxy services configuration
   vars:
-    modules:
-      - {'name': ip_vs }
+    service: "{{ haproxy_services['haproxy'] }}"
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/haproxy/services.d/"
+    mode: "0660"
+  become: true
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+  with_fileglob:
+    - "{{ node_custom_config }}/haproxy/services.d/*.cfg"
+  notify:
+    - Restart haproxy container
 
 - name: Copying over keepalived.conf
   vars:

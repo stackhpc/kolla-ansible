@@ -1,4 +1,6 @@
 ---
+- include_tasks: config-host.yml
+
 - include_tasks: config.yml
 
 - include_tasks: bootstrap_service.yml
@@ -26,3 +28,6 @@
 
 - name: Flush handlers
   meta: flush_handlers
+
+# Restart of nova services is needed for correct RPC version selection.
+- include_tasks: reload.yml

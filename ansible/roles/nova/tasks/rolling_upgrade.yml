@@ -1,4 +1,6 @@
 ---
+- include_tasks: config-host.yml
+
 # Create new set of configs on nodes
 - include_tasks: config.yml
 
@@ -24,6 +26,9 @@
 
 - name: Flush handlers
   meta: flush_handlers
+
+# Restart of nova services is needed for correct RPC version selection.
+- include_tasks: reload.yml
 
 - name: Migrate Nova database
   vars:

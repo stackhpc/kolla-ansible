@@ -10,6 +10,7 @@ kibana_services:
     volumes:
       - "{{ node_config_directory }}/kibana/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
+      - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
       - "kolla_logs:/var/log/kolla/"
     dimensions: "{{ kibana_dimensions }}"
     haproxy:
@@ -37,16 +38,6 @@ kibana_elasticsearch_request_timeout: 300000
 kibana_elasticsearch_shard_timeout: 0
 kibana_elasticsearch_ssl_verify: false
 
-
-####################
-# Default index
-####################
-kibana_default_index_pattern: "{{ kibana_log_prefix }}-*"
-kibana_default_index:
-  title: "{{ kibana_default_index_pattern }}"
-  timeFieldName: "@timestamp"
-kibana_default_index_options:
-  index.mapper.dynamic: true
 
 ####################
 # Docker

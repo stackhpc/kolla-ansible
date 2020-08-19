@@ -10,15 +10,19 @@ GIT_PROJECT_DIR=$(mktemp -d)
 
 function setup_openstack_clients {
     # Prepare virtualenv for openstack deployment tests
-    virtualenv ~/openstackclient-venv
-    ~/openstackclient-venv/bin/pip install -U pip
-    ~/openstackclient-venv/bin/pip install python-openstackclient
+    local packages=(python-openstackclient)
     if [[ $ACTION == zun ]]; then
-        ~/openstackclient-venv/bin/pip install python-zunclient
+        packages+=(python-zunclient)
     fi
     if [[ $ACTION == ironic ]]; then
-        ~/openstackclient-venv/bin/pip install python-ironicclient
+        packages+=(python-ironicclient)
     fi
+    if [[ $SCENARIO == scenario_nfv ]]; then
+        packages+=(python-tackerclient python-barbicanclient python-mistralclient)
+    fi
+    virtualenv ~/openstackclient-venv
+    ~/openstackclient-venv/bin/pip install -U pip
+    ~/openstackclient-venv/bin/pip install -c $UPPER_CONSTRAINTS ${packages[@]}
 }
 
 function setup_config {
@@ -57,6 +61,10 @@ EOF
     fi
     if [[ $ACTION == "ironic" ]]; then
         GATE_IMAGES+=",dnsmasq,ironic,iscsid"
+    fi
+
+    if [[ $ACTION == "mariadb" ]]; then
+        GATE_IMAGES="cron,haproxy,keepalived,kolla-toolbox,mariadb"
     fi
 
     cat <<EOF | sudo tee /etc/kolla/kolla-build.conf
@@ -107,13 +115,19 @@ function setup_ansible {
 
     # Test latest ansible version on Ubuntu, minimum supported on others.
     if [[ $BASE_DISTRO == "ubuntu" ]]; then
-        ANSIBLE_VERSION=">=2.5"
+        ANSIBLE_VERSION=">=2.5,<2.10,!=2.9.12"
+        # When upgrading from Rocky and earlier, we have to limit the version
+        # due to version_compare being gone from Ansible 2.9
+        # see https://review.opendev.org/692575 for change in Rocky
+        if [[ $ACTION =~ "upgrade" ]]; then
+            ANSIBLE_VERSION="$ANSIBLE_VERSION,<2.9,!=2.8.14"
+        fi
     else
         ANSIBLE_VERSION="<2.6"
     fi
 
     # TODO(SamYaple): Move to virtualenv
-    sudo pip install -U "ansible${ANSIBLE_VERSION}" "ara<1.0.0"
+    sudo pip install -U "ansible${ANSIBLE_VERSION}" "ara<1.0.0" "pyfakefs<4"
 
     detect_distro
 
@@ -139,7 +153,7 @@ function prepare_images {
     fi
     sudo docker run -d -p 4000:5000 --restart=always -v /opt/kolla_registry/:/var/lib/registry --name registry registry:2
     pushd "${KOLLA_SRC_DIR}"
-    sudo tox -e "build-${BASE_DISTRO}-${INSTALL_TYPE}"
+    sudo $TOX_VENV/bin/tox -e "build-${BASE_DISTRO}-${INSTALL_TYPE}"
     popd
 }
 

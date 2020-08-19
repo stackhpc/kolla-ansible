@@ -10,6 +10,7 @@ octavia_services:
     volumes:
       - "{{ node_config_directory }}/octavia-api/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
+      - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
       - "kolla_logs:/var/log/kolla/"
     dimensions: "{{ octavia_api_dimensions }}"
     haproxy:
@@ -31,6 +32,7 @@ octavia_services:
     volumes:
       - "{{ node_config_directory }}/octavia-health-manager/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
+      - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
       - "kolla_logs:/var/log/kolla/"
     dimensions: "{{ octavia_health_manager_dimensions }}"
   octavia-housekeeping:
@@ -41,6 +43,7 @@ octavia_services:
     volumes:
       - "{{ node_config_directory }}/octavia-housekeeping/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
+      - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
       - "kolla_logs:/var/log/kolla/"
     dimensions: "{{ octavia_housekeeping_dimensions }}"
   octavia-worker:
@@ -51,6 +54,7 @@ octavia_services:
     volumes:
       - "{{ node_config_directory }}/octavia-worker/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
+      - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
       - "kolla_logs:/var/log/kolla/"
     dimensions: "{{ octavia_worker_dimensions }}"
 
@@ -108,5 +112,9 @@ octavia_public_endpoint: "{{ public_protocol }}://{{ octavia_external_fqdn }}:{{
 octavia_logging_debug: "{{ openstack_logging_debug }}"
 
 octavia_keystone_user: "octavia"
+
+# Project that Octavia will use to interact with other services.  Note that in
+# Ussuri and later releases this will change to "service".
+octavia_service_auth_project: "admin"
 
 openstack_octavia_auth: "{{ openstack_auth }}"

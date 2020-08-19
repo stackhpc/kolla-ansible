@@ -10,15 +10,11 @@ influxdb_services:
     volumes:
       - "{{ node_config_directory }}/influxdb/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
+      - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
       - "influxdb:/var/lib/influxdb"
       - "kolla_logs:/var/log/kolla/"
     dimensions: "{{ influxdb_dimensions }}"
     haproxy:
-      influxdb_admin:
-        enabled: "{{ enable_influxdb }}"
-        mode: "http"
-        external: false
-        port: "{{ influxdb_admin_port }}"
       influxdb_http:
         enabled: "{{ enable_influxdb }}"
         mode: "http"

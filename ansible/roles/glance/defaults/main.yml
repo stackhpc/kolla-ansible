@@ -8,12 +8,17 @@ glance_services:
     enabled: true
     image: "{{ glance_api_image_full }}"
     environment: "{{ container_proxy }}"
+    privileged: "{{ enable_cinder | bool and enable_cinder_backend_iscsi | bool }}"
     volumes:
       - "{{ node_config_directory }}/glance-api/:{{ container_config_directory }}/:ro"
       - "/etc/localtime:/etc/localtime:ro"
+      - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
       - "{{ glance_file_datadir_volume }}:/var/lib/glance/"
       - "{{ kolla_dev_repos_directory ~ '/glance/glance:/var/lib/kolla/venv/lib/python2.7/site-packages/glance' if glance_dev_mode | bool else '' }}"
       - "kolla_logs:/var/log/kolla/"
+      # NOTE(yoctozepto): below to support Cinder iSCSI backends
+      - "{% if enable_cinder | bool and enable_cinder_backend_iscsi | bool %}iscsi_info:/etc/iscsi{% endif %}"
+      - "{% if enable_cinder | bool and enable_cinder_backend_iscsi | bool %}/dev:/dev{% endif %}"
     dimensions: "{{ glance_api_dimensions }}"
     haproxy:
       glance_api:
@@ -108,7 +113,7 @@ glance_registry_dimensions: "{{ default_container_dimensions }}"
 ####################
 glance_backends:
   - name: file
-    enabled: true
+    enabled: "{{ glance_backend_file | bool }}"
   - name: http
     enabled: true
   - name: "rbd"
