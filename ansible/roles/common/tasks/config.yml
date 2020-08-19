@@ -303,6 +303,7 @@
     - { name: "designate", enabled: "{{ enable_designate }}" }
     - { name: "elasticsearch", enabled: "{{ enable_elasticsearch }}" }
     - { name: "etcd", enabled: "{{ enable_etcd }}" }
+    - { name: "fluentd", enabled: "yes" }
     - { name: "freezer", enabled: "{{ enable_freezer }}" }
     - { name: "glance", enabled: "{{ enable_glance }}" }
     - { name: "global", enabled: "yes" }
@@ -400,5 +401,5 @@
   when:
     api_address_family == "ipv6"
 
-- include_tasks: check-containers.yml
+- import_tasks: check-containers.yml
   when: kolla_action != "config"
