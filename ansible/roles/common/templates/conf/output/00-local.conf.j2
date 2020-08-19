@@ -38,7 +38,7 @@
 {% endif %}
 </match>
 
-<match syslog.{{ syslog_haproxy_facility }}.**>
+<match infra.haproxy.**>
   @type copy
   <store>
     @type file
