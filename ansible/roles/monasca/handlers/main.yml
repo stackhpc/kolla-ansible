@@ -74,7 +74,8 @@
   when:
     - kolla_action != "config"
 
-- name: Restart monasca-notification container
+- name: Restart first monasca-notification container
+  listen: Restart monasca-notification container
   vars:
     service_name: "monasca-notification"
     service: "{{ monasca_services[service_name] }}"
@@ -88,8 +89,38 @@
     dimensions: "{{ service.dimensions }}"
   when:
     - kolla_action != "config"
+    - inventory_hostname == groups[service.group]|first
 
-- name: Restart monasca-persister container
+- name: Wait for first monasca-notification container
+  listen: Restart monasca-notification container
+  become: true
+  wait_for:
+    path: "/var/log/kolla/monasca/monasca-notification.log"
+    search_regex: "notification ready"
+    timeout: 60
+  run_once: True
+  when:
+    - inventory_hostname == groups[service.group]|first
+
+- name: Restart remaining monasca-notification containers
+  listen: Restart monasca-notification container
+  vars:
+    service_name: "monasca-notification"
+    service: "{{ monasca_services[service_name] }}"
+  become: true
+  kolla_docker:
+    action: "recreate_or_restart_container"
+    common_options: "{{ docker_common_options }}"
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    volumes: "{{ service.volumes }}"
+    dimensions: "{{ service.dimensions }}"
+  when:
+    - kolla_action != "config"
+    - inventory_hostname != groups[service.group]|first
+
+- name: Restart first monasca-persister container
+  listen: Restart monasca-persister container
   vars:
     service_name: "monasca-persister"
     service: "{{ monasca_services[service_name] }}"
@@ -103,6 +134,35 @@
     dimensions: "{{ service.dimensions }}"
   when:
     - kolla_action != "config"
+    - inventory_hostname == groups[service.group]|first
+
+- name: Wait for first monasca-persister container
+  listen: Restart monasca-persister container
+  become: true
+  wait_for:
+    path: "/var/log/kolla/monasca/monasca-persister.log"
+    search_regex: "start process"
+    timeout: 60
+  run_once: True
+  when:
+    - inventory_hostname == groups[service.group]|first
+
+- name: Restart remaining monasca-persister containers
+  listen: Restart monasca-persister container
+  vars:
+    service_name: "monasca-persister"
+    service: "{{ monasca_services[service_name] }}"
+  become: true
+  kolla_docker:
+    action: "recreate_or_restart_container"
+    common_options: "{{ docker_common_options }}"
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    volumes: "{{ service.volumes }}"
+    dimensions: "{{ service.dimensions }}"
+  when:
+    - kolla_action != "config"
+    - inventory_hostname != groups[service.group]|first
 
 - name: Restart monasca-agent-collector container
   vars:
