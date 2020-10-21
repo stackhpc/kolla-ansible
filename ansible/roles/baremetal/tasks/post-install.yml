@@ -152,6 +152,9 @@
   when:
     - not docker_custom_option
     - not docker_configure_for_zun | bool or 'zun-compute' not in group_names
+    - not docker_http_proxy
+    - not docker_https_proxy
+    - not docker_no_proxy
 
 - name: Ensure docker service directory exists
   become: True
@@ -162,6 +165,9 @@
   when: >
     docker_custom_option | length > 0 or
     (docker_configure_for_zun | bool and 'zun-compute' in group_names)
+    docker_http_proxy | length > 0 or
+    docker_https_proxy | length > 0 or
+    docker_no_proxy | length > 0
 
 - name: Configure docker service
   become: True
@@ -171,6 +177,9 @@
   when: >
     docker_custom_option | length > 0 or
     (docker_configure_for_zun | bool and 'zun-compute' in group_names)
+    docker_http_proxy | length > 0 or
+    docker_https_proxy | length > 0 or
+    docker_no_proxy | length > 0
 
 - name: Reload docker service file
   become: True
