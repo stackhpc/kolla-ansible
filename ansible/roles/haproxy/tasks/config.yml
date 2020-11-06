@@ -138,6 +138,7 @@
     src: "{{ haproxy_extra_cert_directory }}/"
     dest: "{{ node_config_directory }}/haproxy/certs/"
     mode: "0660"
+    directory_mode: "0770"
   become: true
   when:
     - haproxy_extra_cert_dir.stat.exists
