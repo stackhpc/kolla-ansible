@@ -135,7 +135,7 @@
   vars:
     service: "{{ haproxy_services['haproxy'] }}"
   copy:
-    src: "{{ haproxy_extra_cert_dir }}/"
+    src: "{{ haproxy_extra_cert_directory }}/"
     dest: "{{ node_config_directory }}/haproxy/certs/"
     mode: "0660"
   become: true
