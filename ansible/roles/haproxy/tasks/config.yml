@@ -125,6 +125,29 @@
   notify:
     - Restart haproxy container
 
+- name: Checking if haproxy-extra certificates dir exists
+  run_once: true
+  local_action: stat path={{ haproxy_extra_cert_directory }}
+  register: haproxy_extra_cert_dir
+  changed_when: false
+
+- name: Copying over haproxy-extra certificates
+  vars:
+    service: "{{ haproxy_services['haproxy'] }}"
+  copy:
+    src: "{{ haproxy_extra_cert_directory }}/"
+    dest: "{{ node_config_directory }}/haproxy/certs/"
+    mode: "0660"
+    directory_mode: "0770"
+  become: true
+  when:
+    - haproxy_extra_cert_dir.stat.exists
+    - haproxy_extra_cert_dir.stat.isdir
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+  notify:
+    - Restart haproxy container
+
 - name: Copying over haproxy start script
   vars:
     service: "{{ haproxy_services['haproxy'] }}"
