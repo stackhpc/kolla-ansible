@@ -127,7 +127,9 @@
 
 - name: Checking if haproxy-extra certificates dir exists
   run_once: true
-  local_action: stat path={{ haproxy_extra_cert_directory }}
+  stat:
+    path: "{{ haproxy_extra_cert_directory }}"
+  delegate_to: localhost
   register: haproxy_extra_cert_dir
   changed_when: false
 
