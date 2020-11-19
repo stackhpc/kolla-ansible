@@ -98,8 +98,8 @@
     service: "{{ prometheus_services['prometheus-mysqld-exporter']}}"
   merge_configs:
     sources:
-      - "{{ node_custom_config }}/prometheus-mysqld-exporter/{{ inventory_hostname }}/my.cnf"
-      - "{{ node_custom_config }}/prometheus-mysqld-exporter/my.cnf"
+      - "{{ node_custom_config }}/prometheus/prometheus-mysqld-exporter/{{ inventory_hostname }}/my.cnf"
+      - "{{ node_custom_config }}/prometheus/prometheus-mysqld-exporter/my.cnf"
       - "{{ role_path }}/templates/my.cnf.j2"
     dest: "{{ node_config_directory }}/prometheus-mysqld-exporter/my.cnf"
     mode: "0660"
@@ -123,8 +123,8 @@
     - inventory_hostname in groups[service.group]
     - service.enabled | bool
   with_first_found:
-    - "{{ node_custom_config }}/prometheus-openstack-exporter/{{ inventory_hostname }}/clouds.yml"
-    - "{{ node_custom_config }}/prometheus-openstack-exporter/clouds.yml"
+    - "{{ node_custom_config }}/prometheus/prometheus-openstack-exporter/{{ inventory_hostname }}/clouds.yml"
+    - "{{ node_custom_config }}/prometheus/prometheus-openstack-exporter/clouds.yml"
     - "{{ role_path }}/templates/clouds.yml.j2"
   notify:
     - Restart prometheus-openstack-exporter container
