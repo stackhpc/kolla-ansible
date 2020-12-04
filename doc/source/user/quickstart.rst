@@ -108,7 +108,7 @@ If installing Kolla Ansible in a virtual environment, skip this section.
 
    .. code-block:: console
 
-      sudo pip install -U pip
+      sudo pip3 install -U pip
 
 #. Install `Ansible <http://www.ansible.com>`__. Kolla Ansible requires at least
    Ansible ``2.8`` and supports up to ``2.9``.
@@ -151,7 +151,7 @@ Install Kolla-ansible for deployment or evaluation
 
    .. code-block:: console
 
-      sudo pip install kolla-ansible
+      sudo pip3 install kolla-ansible
 
 #. Create the ``/etc/kolla`` directory.
 
@@ -168,13 +168,7 @@ Install Kolla-ansible for deployment or evaluation
 
       cp -r /path/to/venv/share/kolla-ansible/etc_examples/kolla/* /etc/kolla
 
-   If not using a virtual environment on CentOS or RHEL, run:
-
-   .. code-block:: console
-
-      cp -r /usr/share/kolla-ansible/etc_examples/kolla/* /etc/kolla
-
-   If not using a virtual environment on Ubuntu, run:
+   If not using a virtual environment, run:
 
    .. code-block:: console
 
@@ -189,13 +183,7 @@ Install Kolla-ansible for deployment or evaluation
 
       cp /path/to/venv/share/kolla-ansible/ansible/inventory/* .
 
-   If not using a virtual environment on CentOS or RHEL, run:
-
-   .. code-block:: console
-
-      cp /usr/share/kolla-ansible/ansible/inventory/* .
-
-   If not using a virtual environment on Ubuntu, run:
+   If not using a virtual environment, run:
 
    .. code-block:: console
 
@@ -224,8 +212,8 @@ Install Kolla for development
 
    .. code-block:: console
 
-      sudo pip install ./kolla
-      sudo pip install ./kolla-ansible
+      sudo pip3 install ./kolla
+      sudo pip3 install ./kolla-ansible
 
 #. Create the ``/etc/kolla`` directory.
 
@@ -521,7 +509,7 @@ Using OpenStack
 
    .. code-block:: console
 
-      pip install python-openstackclient
+      pip install python3-openstackclient
 
 #. OpenStack requires an openrc file where credentials for admin user
    are set. To generate this file:
@@ -545,13 +533,7 @@ Using OpenStack
    create example networks, images, and so on.
 
    * For deployment or evaluation,
-     run ``init-runonce`` script on CentOS or RHEL:
-
-     .. code-block:: console
-
-        /usr/share/kolla-ansible/init-runonce
-
-     Run ``init-runonce`` script on Ubuntu:
+     run ``init-runonce`` script:
 
      .. code-block:: console
 

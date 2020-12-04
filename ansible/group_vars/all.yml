@@ -57,10 +57,15 @@ container_http_proxy: ""
 container_https_proxy: ""
 container_no_proxy: "localhost,127.0.0.1"
 
+container_proxy_no_proxy_entries:
+  - "{{ container_no_proxy }}"
+  - "{{ api_interface_address }}"
+  - "{{ kolla_internal_vip_address | default('') }}"
+
 container_proxy:
   http_proxy: "{{ container_http_proxy }}"
   https_proxy: "{{ container_https_proxy }}"
-  no_proxy: "{{ container_no_proxy }},{{ api_interface_address }},{{ kolla_internal_vip_address }}"
+  no_proxy: "{{ container_proxy_no_proxy_entries | select | join(',') }}"
 
 # By default, Kolla API services bind to the network address assigned
 # to the api_interface.  Allow the bind address to be an override.
@@ -85,6 +90,8 @@ external_ntp_servers:
 database_address: "{{ kolla_internal_fqdn }}"
 database_user: "root"
 database_port: "3306"
+database_connection_recycle_time: 10
+database_max_pool_size: 1
 
 
 ####################
@@ -835,6 +842,8 @@ glance_backend_swift: "{{ enable_swift | bool }}"
 glance_file_datadir_volume: "glance"
 glance_enable_rolling_upgrade: "no"
 glance_api_hosts: "{{ [groups['glance-api']|first] if glance_backend_file | bool and glance_file_datadir_volume == 'glance' else groups['glance-api'] }}"
+# NOTE(mnasiadka): For use in common role
+glance_enable_tls_backend: "{{ kolla_enable_tls_backend }}"
 
 #######################
 # Barbican options
