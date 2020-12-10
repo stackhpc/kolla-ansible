@@ -90,10 +90,10 @@
       jobs:
         - kolla-ansible-centos-source
         - kolla-ansible-centos8-source
-        - kolla-ansible-centos-mixed-7-8-source
         - kolla-ansible-ubuntu-source
         - kolla-ansible-centos-source-upgrade
         - kolla-ansible-ubuntu-source-upgrade
+<<<<<<< HEAD
     periodic:
       jobs:
         - kolla-ansible-bifrost-centos-source
@@ -116,3 +116,5 @@
         - kolla-ansible-centos-source-mariadb
         - kolla-ansible-centos8-source-mariadb
         - kolla-ansible-ubuntu-source-mariadb
+=======
+>>>>>>> 190d8a1... [CI] Drop periodics and multinode gating
