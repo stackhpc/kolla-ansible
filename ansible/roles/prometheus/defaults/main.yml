@@ -15,7 +15,7 @@ prometheus_services:
         mode: "http"
         external: false
         port: "{{ prometheus_port }}"
-        custom_member_list: "{{ prometheus_haproxy_members }}"
+        custom_member_list: "{{ prometheus_haproxy_members.split(';') }}"
   prometheus-node-exporter:
     container_name: prometheus_node_exporter
     group: prometheus-node-exporter
