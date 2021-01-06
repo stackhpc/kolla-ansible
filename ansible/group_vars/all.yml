@@ -1086,6 +1086,11 @@ influxdb_datadir_volume: "influxdb"
 #################
 kafka_datadir_volume: "kafka"
 
+# The number of brokers in a Kafka cluster. This is used for automatically
+# setting quantities such as topic replicas and it is not recommended to
+# change it unless you know what you are doing.
+kafka_broker_count: "{{ groups['kafka'] | length }}"
+
 #########################
 # Internal Image options
 #########################
