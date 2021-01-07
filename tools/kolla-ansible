@@ -127,12 +127,14 @@ Environment variables:
     EXTRA_OPTS                         Additional arguments to pass to ansible-playbook
 
 Commands:
+<<<<<<< HEAD
     prechecks           Do pre-deployment checks for hosts
     check               Do post-deployment smoke tests
     mariadb_recovery    Recover a completely stopped mariadb cluster
     mariadb_backup      Take a backup of MariaDB databases
                             --full (default)
                             --incremental
+    monasca_cleanup      Remove unused containers for the Monasca service
     bootstrap-servers   Bootstrap servers with kolla deploy dependencies
     destroy             Destroy Kolla containers, volumes and host configuration
                             --include-images to also destroy Kolla images
@@ -174,6 +176,7 @@ prechecks
 check
 mariadb_recovery
 mariadb_backup
+monasca_cleanup
 bootstrap-servers
 destroy
 deploy
@@ -356,6 +359,11 @@ case "$1" in
         ACTION="Backup MariaDB databases"
         EXTRA_OPTS="$EXTRA_OPTS -e kolla_action=backup -e mariadb_backup_type=${BACKUP_TYPE} -e common_run=true"
         PLAYBOOK="${BASEDIR}/ansible/mariadb_backup.yml"
+        ;;
+(monasca_cleanup)
+        ACTION="Cleanup unused Monasca services"
+        EXTRA_OPTS="$EXTRA_OPTS -e kolla_action=cleanup"
+        PLAYBOOK="${BASEDIR}/ansible/monasca_cleanup.yml"
         ;;
 (destroy)
         ACTION="Destroy Kolla containers, volumes and host configuration"
