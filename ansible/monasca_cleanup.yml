@@ -1,0 +1,6 @@
+---
+- name: Cleanup unused Monasca services
+  hosts: monasca
+  roles:
+    - { role: monasca,
+        tags: monasca }
