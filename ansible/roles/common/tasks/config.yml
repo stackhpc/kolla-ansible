@@ -122,7 +122,6 @@
     log_direct_to_elasticsearch: "{{ ( enable_elasticsearch | bool or
                 ( elasticsearch_address != kolla_internal_vip_address )) and
                 not enable_monasca | bool }}"
->>>>>>> bab6818... Add role to deploy cASO
 
 - name: Find custom fluentd filter config files
   local_action:
@@ -131,15 +130,6 @@
     pattern: "*.conf"
   run_once: True
   register: find_custom_fluentd_filters
-  when: common_services.fluentd.enabled | bool
-
-- name: Find custom fluentd format config files
-  local_action:
-    module: find
-    path: "{{ node_custom_config }}/fluentd/format"
-    pattern: "*.conf"
-  run_once: True
-  register: find_custom_fluentd_formats
   when: common_services.fluentd.enabled | bool
 
 - name: Find custom fluentd output config files
