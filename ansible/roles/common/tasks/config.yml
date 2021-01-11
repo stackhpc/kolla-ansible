@@ -106,6 +106,16 @@
     - Restart fluentd container
   when: enable_fluentd | bool and enable_caso | bool and inventory_hostname in groups['caso']
 
+- name: Copying over cASO input config file
+  template:
+    src: "conf/input/10-caso.conf.j2"
+    dest: "{{ node_config_directory }}/fluentd/input/10-caso.conf"
+    mode: "0660"
+  become: true
+  notify:
+    - Restart fluentd container
+  when: enable_fluentd | bool and enable_caso | bool and inventory_hostname in groups['caso']
+
 - name: Copying over custom fluentd input config files
   template:
     src: "{{ item.path }}"
