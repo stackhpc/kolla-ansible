@@ -4,7 +4,6 @@
         {
             "source": "{{ container_config_directory }}/elasticsearch.yml",
             "dest": "{% if elasticsearch_use_v6 | bool %}/etc/elasticsearch/elasticsearch.yml{% else %}/usr/share/elasticsearch/config/elasticsearch.yml{% endif %}",
-            "dest": "/etc/elasticsearch/elasticsearch.yml",
             "owner": "elasticsearch",
             "perm": "0600"
         }
