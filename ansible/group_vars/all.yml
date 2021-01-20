@@ -91,6 +91,12 @@ database_max_pool_size: 1
 
 
 ####################
+# Container engine options
+####################
+container_binary: "docker"
+
+
+####################
 # Docker options
 ####################
 docker_registry_email:

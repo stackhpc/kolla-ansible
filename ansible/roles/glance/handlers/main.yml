@@ -4,16 +4,10 @@
     service_name: "glance-api"
     service: "{{ glance_services[service_name] }}"
   become: true
-  kolla_docker:
-    action: "recreate_or_restart_container"
-    common_options: "{{ docker_common_options }}"
-    name: "{{ service.container_name }}"
-    image: "{{ service.image }}"
-    privileged: "{{ service.privileged }}"
-    environment: "{{ service.environment }}"
-    volumes: "{{ service.volumes|reject('equalto', '')|list }}"
-    dimensions: "{{ service.dimensions }}"
-    healthcheck: "{{ service.healthcheck | default(omit) }}"
+  service:
+    name: "{{ service_name }}"
+    state: restarted
+    enabled: true
   when:
     - kolla_action != "config"
 
@@ -22,13 +16,9 @@
     service_name: "glance-tls-proxy"
     service: "{{ glance_services[service_name] }}"
   become: true
-  kolla_docker:
-    action: "recreate_or_restart_container"
-    common_options: "{{ docker_common_options }}"
-    name: "{{ service.container_name }}"
-    image: "{{ service.image }}"
-    volumes: "{{ service.volumes|reject('equalto', '')|list }}"
-    dimensions: "{{ service.dimensions }}"
-    healthcheck: "{{ service.healthcheck | default(omit) }}"
+  service:
+    name: "{{ service_name }}"
+    state: restarted
+    enabled: true
   when:
     - kolla_action != "config"

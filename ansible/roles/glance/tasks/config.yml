@@ -66,6 +66,22 @@
   notify:
     - Restart {{ item.key }} container
 
+- name: Copying over systemd unit files
+  become: true
+  merge_configs:
+    sources:
+      - "{{ role_path }}/templates/{{ item.key }}.service.j2"
+      - "{{ node_custom_config }}/glance/{{ item.key }}.service"
+      - "{{ node_custom_config }}/glance/{{ inventory_hostname }}/{{ item.key }}.service"
+    dest: "/etc/systemd/system/{{ item.key }}.service"
+    mode: "0660"
+  when:
+    - item.value.enabled | bool
+    - item.value.host_in_groups | bool
+  with_dict: "{{ glance_services }}"
+  notify:
+    - Restart {{ item.key }} container
+
 - name: Copying over glance-api.conf
   vars:
     glance_api: "{{ glance_services['glance-api'] }}"
