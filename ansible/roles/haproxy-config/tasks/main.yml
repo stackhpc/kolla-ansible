@@ -21,3 +21,17 @@
   with_dict: "{{ project_services }}"
   notify:
     - Restart haproxy container
+
+- name: "Configuring firewall for {{ project_name }}"
+  vars:
+    service: "{{ item.value }}"
+  firewalld:
+    offline: "yes"
+    permanent: "yes"
+    port: "{{ item.port }}"
+    state: "enabled"
+    zone: "{{ firewalld_public_zone }}"
+  become: true
+  when:
+    - enable_haproxy | bool
+  with_dict: "{{ (project_services | select_services_enabled_and_mapped_to_host).values() | selectattr('haproxy', 'defined') | map(attribute='haproxy') | flatten | selectattr('enabled') | selectattr(''external') | list }}"
