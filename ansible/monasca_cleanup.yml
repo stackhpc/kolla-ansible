@@ -4,3 +4,9 @@
   roles:
     - { role: monasca,
         tags: monasca }
+
+- name: Cleanup unused Storm services
+  hosts: storm
+  roles:
+    - { role: storm,
+        tags: storm }

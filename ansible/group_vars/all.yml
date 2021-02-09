@@ -710,6 +710,7 @@ enable_destroy_images: "no"
 ####################
 # Monasca options
 ####################
+monasca_enable_alerting_pipeline: True
 
 # The OpenStack username used by the Monasca Agent and the Fluentd Monasca
 # plugin to post logs and metrics from the control plane to Monasca.
