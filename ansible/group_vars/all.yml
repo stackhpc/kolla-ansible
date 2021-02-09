@@ -712,6 +712,11 @@ enable_destroy_images: "no"
 ####################
 monasca_enable_alerting_pipeline: True
 
+# Send logs from the control plane to the Monasca API. Monasca will then persist
+# them in Elasticsearch. If this is disabled, control plane logs will be sent
+# directly to Elasticsearch.
+monasca_ingest_control_plane_logs: True
+
 # The OpenStack username used by the Monasca Agent and the Fluentd Monasca
 # plugin to post logs and metrics from the control plane to Monasca.
 monasca_agent_user: "monasca-agent"
