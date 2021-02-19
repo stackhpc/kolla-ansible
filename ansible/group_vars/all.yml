@@ -243,6 +243,10 @@ barbican_api_listen_port: "{{ barbican_api_port }}"
 
 blazar_api_port: "1234"
 
+ceph_rgw_internal_fqdn: "{{ kolla_internal_fqdn }}"
+ceph_rgw_external_fqdn: "{{ kolla_external_fqdn }}"
+ceph_rgw_port: "6780"
+
 cinder_internal_fqdn: "{{ kolla_internal_fqdn }}"
 cinder_external_fqdn: "{{ kolla_external_fqdn }}"
 cinder_api_port: "8776"
@@ -1022,7 +1026,7 @@ ceph_osd_mount_options: "defaults,noatime"
 ceph_pool_type: "replicated"
 
 # Integrate Ceph Rados Object Gateway with OpenStack keystone
-enable_ceph_rgw_keystone: "no"
+enable_ceph_rgw_keystone: "{{ enable_ceph_rgw | bool }}"
 
 # Enable/disable ceph-rgw compatibility with OpenStack Swift
 # Valid options are [ True, False ]
