@@ -38,6 +38,40 @@ Enable Monasca in ``/etc/kolla/globals.yml``:
 
    enable_monasca: "yes"
 
+If you wish to disable the alerting and notification pipeline to reduce
+resource usage you can set ``/etc/kolla/globals.yml``:
+
+.. code-block:: yaml
+
+   monasca_enable_alerting_pipeline: "no"
+
+You can optionally bypass Monasca for control plane logs, and instead have
+them sent directly to Elasticsearch. This should be avoided if you have
+deployed Monasca as a standalone service for the purpose of storing
+logs in a protected silo for security purposes. However, if this is not
+a relevant consideration, for example you have deployed Monasca alongside the
+existing Openstack control plane, then you may free up some resources by
+setting:
+
+.. code-block:: yaml
+
+   monasca_ingest_control_plane_logs: "no"
+
+You should note that when making this change with the default
+``kibana_log_prefix`` prefix of ``flog-``, you will need to create a new
+index pattern in Kibana accordingly. If you wish to continue to search all
+logs using the same index pattern in Kibana, then you can override
+``kibana_log_prefix`` to ``monasca`` or similar in ``/etc/kolla/globals.yml``:
+
+.. code-block:: yaml
+
+   kibana_log_prefix: "monasca"
+
+If you have enabled Elasticsearch Curator, it will be configured to rotate
+logs with index patterns matching either ``^flog-.*`` or ``^monasca-.*`` by
+default. If this is undesirable then you can update the
+``elasticsearch_curator_index_pattern`` variable accordingly.
+
 Currently Monasca is only supported using the ``source`` install type Kolla
 images. If you are using the ``binary`` install type you should set the
 following override in ``/etc/kolla/globals.yml``:
@@ -314,13 +348,57 @@ Apply the password changes by running the following command:
 
    kolla-ansible reconfigure -t monasca
 
+Cleanup
+~~~~~~~
+
+From time-to-time it may be necessary to manually invoke the Monasca cleanup
+command. If this is required during an upgrade it will be mentioned in the
+release notes. It may also be necessary to run the cleanup command when
+disabling certain parts of the Monasca pipeline. A full list of scenarios in
+which you must run the cleanup command is given below:
+
+- Upgrading from Victoria to Wallaby to remove the unused Monasca Log
+  Transformer service
+- Upgrading from Victoria to Wallaby to remove the Monasca Log Metrics
+  service, unless the option to disable it by default has been overridden in
+  Wallaby.
+- Upgrading from Wallaby to Xena to remove the Monasca Log Metrics service
+  if the option to disable it by default was overridden in Wallaby.
+- If you have disabled the alerting pipeline via the
+  `monasca_enable_alerting_pipeline` flag after you have deployed the alerting
+  services.
+
+The cleanup command can be invoked from the Kolla Ansible CLI, for example:
+
+.. code-block:: console
+
+   kolla-ansible monasca_cleanup
+
+Following cleanup, you may also choose to remove unused container volumes.
+It is recommended to run this manually on each Monasca service host. Note
+that `docker prune` will indiscriminately remove all unused volumes,
+which may not always be what you want. If you wish to keep a subset of
+unused volumes, you can remove them individually.
+
+To remove all unused volumes on a host:
+
+.. code-block:: console
+
+   docker prune
+
+To remove a single unused volume, run for example:
+
+.. code-block:: console
+
+   docker volume rm monasca_log_transformer_data
+
 System requirements and performance impact
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Monasca will deploy the following Docker containers:
 
 * Apache Kafka
-* Apache Storm
+* Apache Storm (optional)
 * Apache Zookeeper
 * Elasticsearch
 * Grafana
@@ -331,12 +409,11 @@ Monasca will deploy the following Docker containers:
 * Monasca Agent Statsd
 * Monasca API
 * Monasca Log API
-* Monasca Log Transformer (Logstash)
-* Monasca Log Metrics (Logstash)
-* Monasca Log Perister (Logstash)
-* Monasca Notification
+* Monasca Log Metrics (Logstash, optional, deprecated)
+* Monasca Log Persister (Logstash)
+* Monasca Notification (optional)
 * Monasca Persister
-* Monasca Thresh (Apache Storm topology)
+* Monasca Thresh (Apache Storm topology, optional)
 
 In addition to these, Monasca will also utilise Kolla deployed MariaDB,
 Keystone, Memcached and HAProxy/Keepalived. The Monasca Agent containers
@@ -352,6 +429,10 @@ in a production environment, you will need at least 32GB RAM and a recent
 multi-core CPU. You will also need enough space to store metrics and logs,
 and to buffer these in Kafka. Whilst Kafka is happy with spinning disks,
 you will likely want to use SSDs to back InfluxDB and Elasticsearch.
+
+If resources are tight, it is possible to disable the alerting and
+notification pipeline which removes the need for Apache Storm, Monasca
+Thresh and Monasca Notification. This can have a significant effect.
 
 Security impact
 ~~~~~~~~~~~~~~~
