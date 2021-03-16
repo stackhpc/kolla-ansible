@@ -101,6 +101,7 @@ openstack_projects = [
     'keystone',
     'kolla',
     'kolla-ansible',
+    'magnum',
     'manila',
     'networking-sfc',
     'neutron-vpnaas',
@@ -109,4 +110,5 @@ openstack_projects = [
     'octavia',
     'oslotest',
     'swift',
+    'watcher',
 ]
