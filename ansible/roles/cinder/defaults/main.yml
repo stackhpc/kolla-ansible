@@ -93,10 +93,6 @@ cinder_database_name: "cinder"
 cinder_database_user: "{% if use_preconfigured_databases | bool and use_common_mariadb_user | bool %}{{ database_user }}{% else %}cinder{% endif %}"
 cinder_database_address: "{{ database_address | put_address_in_context('url') }}:{{ database_port }}"
 
-# Max number of object to consider
-# when run online data migration
-# cinder_max_number_osm: ""
-
 ####################
 # Docker
 ####################
@@ -127,13 +123,13 @@ cinder_volume_dimensions: "{{ default_container_dimensions }}"
 cinder_api_default_volumes:
   - "{{ node_config_directory }}/cinder-api/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
   - "{{ kolla_dev_repos_directory ~ '/cinder/cinder:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/cinder' if cinder_dev_mode | bool else '' }}"
 cinder_backup_default_volumes:
   - "{{ node_config_directory }}/cinder-backup/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
   - "/dev/:/dev/"
   - "/lib/modules:/lib/modules:ro"
   - "/run/:/run/:shared"
@@ -144,13 +140,13 @@ cinder_backup_default_volumes:
 cinder_scheduler_default_volumes:
   - "{{ node_config_directory }}/cinder-scheduler/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
   - "{{ kolla_dev_repos_directory ~ '/cinder/cinder:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/cinder' if cinder_dev_mode | bool else '' }}"
 cinder_volume_default_volumes:
   - "{{ node_config_directory }}/cinder-volume/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
   - "/dev/:/dev/"
   - "/lib/modules:/lib/modules:ro"
   - "/run/:/run/:shared"

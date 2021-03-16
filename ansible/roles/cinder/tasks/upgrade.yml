@@ -4,9 +4,11 @@
 - include_tasks: config.yml
   when: inventory_hostname == groups["cinder-api"][0]
 
-- include_tasks: bootstrap_service.yml
+- import_tasks: bootstrap_service.yml
 
-- include_tasks: config.yml
+- import_tasks: config.yml
+
+- import_tasks: check-containers.yml
 
 - name: Flush handlers
   meta: flush_handlers
@@ -22,7 +24,6 @@
     environment:
       KOLLA_OSM:
       KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
-      MAX_NUMBER: "{{ cinder_max_number_osm | default(10) }}"
     image: "{{ cinder_api.image }}"
     labels:
       BOOTSTRAP:

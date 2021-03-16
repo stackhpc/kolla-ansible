@@ -3,9 +3,11 @@
   <store>
     @type file
     path /var/log/kolla/swift/swift_latest.*.log
-    utc
     append true
     compress gzip
+    <buffer>
+      timekey_use_utc
+    </buffer>
   </store>
 {% if log_direct_to_elasticsearch %}
   <store>
@@ -19,6 +21,9 @@
 {% if fluentd_elasticsearch_scheme == 'https' %}
        ssl_version {{ fluentd_elasticsearch_ssl_version }}
        ssl_verify {{ fluentd_elasticsearch_ssl_verify }}
+{% if fluentd_elasticsearch_cacert | length > 0 %}
+       ca_file {{ fluentd_elasticsearch_cacert }}
+{% endif %}
 {% endif %}
 {% if fluentd_elasticsearch_user != '' and fluentd_elasticsearch_password != ''%}
        user {{ fluentd_elasticsearch_user }}
@@ -32,18 +37,17 @@
        buffer_path /var/lib/fluentd/data/elasticsearch.buffer/{{ syslog_swift_facility }}.*
   </store>
 {% elif enable_monasca | bool %}
-    type copy
-    <store>
-       @type monasca
-       keystone_url {{ keystone_internal_url }}
-       monasca_log_api {{ internal_protocol }}://{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ monasca_log_api_port }}
-       monasca_log_api_version v3.0
-       username {{ monasca_agent_user }}
-       password {{ monasca_agent_password }}
-       domain_id default
-       project_name {{ monasca_control_plane_project }}
-       message_field_name Payload
-    </store>
+  <store>
+     @type monasca
+     keystone_url {{ keystone_internal_url }}
+     monasca_log_api {{ internal_protocol }}://{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ monasca_log_api_port }}
+     monasca_log_api_version v3.0
+     username {{ monasca_agent_user }}
+     password {{ monasca_agent_password }}
+     domain_id default
+     project_name {{ monasca_control_plane_project }}
+     message_field_name Payload
+  </store>
 {% endif %}
 </match>
 
@@ -54,9 +58,11 @@
     path /var/log/kolla/haproxy/haproxy_latest.*.log
     output_tag false
     output_time false
-    utc
     append true
     compress gzip
+    <buffer>
+      timekey_use_utc
+    </buffer>
   </store>
 {% if log_direct_to_elasticsearch %}
   <store>
@@ -70,6 +76,9 @@
 {% if fluentd_elasticsearch_scheme == 'https' %}
        ssl_version {{ fluentd_elasticsearch_ssl_version }}
        ssl_verify {{ fluentd_elasticsearch_ssl_verify }}
+{% if fluentd_elasticsearch_cacert | length > 0 %}
+       ca_file {{ fluentd_elasticsearch_cacert }}
+{% endif %}
 {% endif %}
 {% if fluentd_elasticsearch_user != '' and fluentd_elasticsearch_password != ''%}
        user {{ fluentd_elasticsearch_user }}
@@ -83,17 +92,16 @@
        buffer_path /var/lib/fluentd/data/elasticsearch.buffer/{{ syslog_haproxy_facility }}.*
   </store>
 {% elif enable_monasca | bool %}
-    type copy
-    <store>
-       @type monasca
-       keystone_url {{ keystone_internal_url }}
-       monasca_log_api {{ internal_protocol }}://{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ monasca_log_api_port }}
-       monasca_log_api_version v3.0
-       username {{ monasca_agent_user }}
-       password {{ monasca_agent_password }}
-       domain_id default
-       project_name {{ monasca_control_plane_project }}
-       message_field_name Payload
-    </store>
+  <store>
+     @type monasca
+     keystone_url {{ keystone_internal_url }}
+     monasca_log_api {{ internal_protocol }}://{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ monasca_log_api_port }}
+     monasca_log_api_version v3.0
+     username {{ monasca_agent_user }}
+     password {{ monasca_agent_password }}
+     domain_id default
+     project_name {{ monasca_control_plane_project }}
+     message_field_name Payload
+  </store>
 {% endif %}
 </match>

@@ -1,25 +1,16 @@
 ---
-- include_tasks: register.yml
-  when: inventory_hostname in groups['cinder-api']
+- import_tasks: register.yml
 
-- include_tasks: config.yml
-  when: inventory_hostname in groups['ceph-mon'] or
-        inventory_hostname in groups['cinder-api'] or
-        inventory_hostname in groups['cinder-volume'] or
-        inventory_hostname in groups['cinder-scheduler'] or
-        inventory_hostname in groups['cinder-backup']
+- import_tasks: config.yml
+
+- import_tasks: check-containers.yml
 
 - include_tasks: clone.yml
   when: cinder_dev_mode | bool
 
-- include_tasks: bootstrap.yml
-  when: inventory_hostname in groups['cinder-api']
+- import_tasks: bootstrap.yml
 
 - name: Flush handlers
   meta: flush_handlers
 
-- include_tasks: check.yml
-  when: inventory_hostname in groups['cinder-api'] or
-        inventory_hostname in groups['cinder-volume'] or
-        inventory_hostname in groups['cinder-scheduler'] or
-        inventory_hostname in groups['cinder-backup']
+- import_tasks: check.yml

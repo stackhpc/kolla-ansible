@@ -24,6 +24,8 @@ server_ca = /etc/octavia/certs/server_ca.cert.pem
 
 [database]
 connection = mysql+pymysql://{{ octavia_database_user }}:{{ octavia_database_password }}@{{ octavia_database_address }}/{{ octavia_database_name }}
+connection_recycle_time = {{ database_connection_recycle_time }}
+max_pool_size = {{ database_max_pool_size }}
 max_retries = -1
 
 [service_auth]
@@ -32,7 +34,7 @@ auth_type = password
 username = {{ octavia_keystone_user }}
 password = {{ octavia_keystone_password }}
 user_domain_name = {{ default_user_domain_name }}
-project_name = {{ openstack_auth.project_name }}
+project_name = {{ octavia_service_auth_project }}
 project_domain_name = {{ default_project_domain_name }}
 
 memcache_security_strategy = ENCRYPT
@@ -58,6 +60,9 @@ bind_port = {{ octavia_health_manager_port }}
 bind_ip = {{ octavia_network_interface_address }}
 heartbeat_key = insecure
 controller_ip_port_list = {% for host in groups['octavia-health-manager'] %}{{ 'octavia_network' | kolla_address(host) | put_address_in_context('url') }}:{{ octavia_health_manager_port }}{% if not loop.last %},{% endif %}{% endfor %}
+
+stats_update_threads = {{ openstack_service_workers }}
+health_update_threads = {{ openstack_service_workers }}
 
 [controller_worker]
 amp_boot_network_list = {{ octavia_amp_boot_network_list }}

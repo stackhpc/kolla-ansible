@@ -89,6 +89,3 @@
     - service.enabled | bool
   notify:
     - "Restart aodh-api container"
-
-- include_tasks: check-containers.yml
-  when: kolla_action != "config"

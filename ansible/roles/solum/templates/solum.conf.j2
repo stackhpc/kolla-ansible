@@ -12,6 +12,9 @@ bind_port = {{ solum_application_deployment_port }}
 image_format = vm
 port = {{ solum_application_deployment_port }}
 workers = {{ openstack_service_workers }}
+{% if service_name == 'solum-api' %}
+host = {{ api_interface_address }}
+{% endif %}
 
 [conductor]
 topic = solum-conductor
@@ -40,6 +43,8 @@ host = {{ ansible_hostname }}_{{ item }}
 
 [database]
 connection = mysql+pymysql://{{ solum_database_user }}:{{ solum_database_password }}@{{ solum_database_address }}/{{ solum_database_name }}
+connection_recycle_time = {{ database_connection_recycle_time }}
+max_pool_size = {{ database_max_pool_size }}
 max_retries = -1
 
 [keystone_authtoken]

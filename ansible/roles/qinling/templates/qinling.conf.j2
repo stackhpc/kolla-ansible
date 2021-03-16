@@ -16,6 +16,8 @@ host = {{ api_interface_address }}
 
 [database]
 connection = mysql+pymysql://{{ qinling_database_user }}:{{ qinling_database_password }}@{{ qinling_database_address }}/{{ qinling_database_name }}
+connection_recycle_time = {{ database_connection_recycle_time }}
+max_pool_size = {{ database_max_pool_size }}
 max_retries = -1
 
 [keystone_authtoken]
@@ -40,7 +42,7 @@ file_system_dir = /var/lib/qinling/package
 {% if enable_etcd | bool %}
 host = {{ api_interface_address }}
 port = {{ etcd_client_port }}
-protocol = {{ internal_protocol }}
+protocol = {{ etcd_protocol }}
 {% endif %}
 
 [oslo_messaging_notifications]

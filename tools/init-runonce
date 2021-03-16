@@ -56,7 +56,7 @@ if ! [ -f "${IMAGE_PATH}/${IMAGE}" ]; then
     IMAGE_PATH='./'
     if ! [ -f "${IMAGE_PATH}/${IMAGE}" ]; then
         echo None found, downloading cirros image.
-        curl -L -o ${IMAGE_PATH}/${IMAGE} ${IMAGE_URL}/${IMAGE}
+        curl --fail -L -o ${IMAGE_PATH}/${IMAGE} ${IMAGE_URL}/${IMAGE}
     fi
 else
     echo Using cached cirros image from the nodepool node.
@@ -103,7 +103,7 @@ openstack security group rule create --ingress --ethertype IPv4 \
 
 if [ ! -f ~/.ssh/id_rsa.pub ]; then
     echo Generating ssh key.
-    ssh-keygen -t rsa -f ~/.ssh/id_rsa
+    ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa
 fi
 if [ -r ~/.ssh/id_rsa.pub ]; then
     echo Configuring nova public key and quotas.

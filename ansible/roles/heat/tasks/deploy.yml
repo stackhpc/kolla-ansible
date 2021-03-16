@@ -1,21 +1,15 @@
 ---
-- include_tasks: register.yml
-  when: inventory_hostname in groups['heat-api']
+- import_tasks: register.yml
 
-- include_tasks: config.yml
-  when: inventory_hostname in groups['heat-api'] or
-        inventory_hostname in groups['heat-api-cfn'] or
-        inventory_hostname in groups['heat-engine']
+- import_tasks: config.yml
+
+- import_tasks: check-containers.yml
 
 - include_tasks: clone.yml
   when:
     - heat_dev_mode | bool
-    - inventory_hostname in groups['heat-api'] or
-      inventory_hostname in groups['heat-api-cfn'] or
-      inventory_hostname in groups['heat-engine']
 
-- include_tasks: bootstrap.yml
-  when: inventory_hostname in groups['heat-api']
+- import_tasks: bootstrap.yml
 
 - name: Flush handlers
   meta: flush_handlers

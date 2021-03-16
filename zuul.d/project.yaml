@@ -18,15 +18,8 @@
         - kolla-ansible-ubuntu-source-multinode-ipv6
         - kolla-ansible-ubuntu-source-ceph
         - kolla-ansible-centos-source-ceph
-        - kolla-ansible-bifrost-centos-source:
-            files:
-              - ^ansible/roles/bifrost/
-              - ^tests/test-bifrost.sh
-        # FIXME(mgoddard): Bifrost CentOS 8 support in progress.
-        # - kolla-ansible-centos8-source-bifrost
-        #     files:
-        #       - ^ansible/roles/bifrost/
-        #       - ^tests/test-bifrost.sh
+        - kolla-ansible-bifrost-centos-source
+        - kolla-ansible-centos8-source-bifrost
         - kolla-ansible-centos-source-zun
         - kolla-ansible-centos8-source-zun
         - kolla-ansible-ubuntu-source-zun
@@ -84,6 +77,9 @@
             files:
               - ^ansible/roles/mariadb/
               - ^tests/test-mariadb.sh
+        - kolla-ansible-centos-source-prometheus-efk
+        - kolla-ansible-centos8-source-prometheus-efk
+        - kolla-ansible-ubuntu-source-prometheus-efk
     gate:
       queue: kolla
       jobs:
@@ -92,28 +88,3 @@
         - kolla-ansible-ubuntu-source
         - kolla-ansible-centos-source-upgrade
         - kolla-ansible-ubuntu-source-upgrade
-<<<<<<< HEAD
-    periodic:
-      jobs:
-        - kolla-ansible-bifrost-centos-source
-        - kolla-ansible-centos-source-zun
-        - kolla-ansible-centos8-source-zun
-        - kolla-ansible-ubuntu-source-zun
-        - kolla-ansible-centos8-source-masakari
-        - kolla-ansible-ubuntu-source-masakari
-        - kolla-ansible-centos-source-masakari
-        - kolla-ansible-centos-source-scenario-nfv
-        - kolla-ansible-centos8-source-ironic
-        - kolla-ansible-centos-source-ironic
-        - kolla-ansible-centos-binary-ironic
-        - kolla-ansible-ubuntu-source-ironic
-        - kolla-ansible-centos-source-upgrade
-        - kolla-ansible-centos8-source-upgrade
-        - kolla-ansible-ubuntu-source-upgrade
-        - kolla-ansible-centos-source-upgrade-ceph
-        - kolla-ansible-ubuntu-source-upgrade-ceph
-        - kolla-ansible-centos-source-mariadb
-        - kolla-ansible-centos8-source-mariadb
-        - kolla-ansible-ubuntu-source-mariadb
-=======
->>>>>>> 190d8a1... [CI] Drop periodics and multinode gating

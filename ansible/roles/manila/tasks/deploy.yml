@@ -2,17 +2,13 @@
 - include_tasks: clone.yml
   when: manila_dev_mode | bool
 
-- include_tasks: register.yml
-  when: inventory_hostname in groups['manila-api']
+- import_tasks: register.yml
 
-- include_tasks: config.yml
-  when: inventory_hostname in groups['manila-api'] or
-        inventory_hostname in groups['manila-data'] or
-        inventory_hostname in groups['manila-share'] or
-        inventory_hostname in groups['manila-scheduler']
+- import_tasks: config.yml
 
-- include_tasks: bootstrap.yml
-  when: inventory_hostname in groups['manila-api']
+- import_tasks: check-containers.yml
+
+- import_tasks: bootstrap.yml
 
 - name: Flush handlers
   meta: flush_handlers

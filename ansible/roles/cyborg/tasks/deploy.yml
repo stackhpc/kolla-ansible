@@ -1,14 +1,11 @@
 ---
-- include_tasks: register.yml
-  when: inventory_hostname in groups['cyborg-api']
+- import_tasks: register.yml
 
-- include_tasks: config.yml
-  when: inventory_hostname in groups['cyborg-api'] or
-        inventory_hostname in groups['cyborg-conductor'] or
-        inventory_hostname in groups['cyborg-agent']
+- import_tasks: config.yml
 
-- include_tasks: bootstrap.yml
-  when: inventory_hostname in groups['cyborg-api']
+- import_tasks: check-containers.yml
+
+- import_tasks: bootstrap.yml
 
 - name: Flush handlers
   meta: flush_handlers

@@ -129,6 +129,3 @@
   when: inventory_hostname in groups['cinder-volume']
   notify:
     - Restart cinder-volume container
-
-- include_tasks: check-containers.yml
-  when: kolla_action != "config"

@@ -305,6 +305,7 @@
   register: neutron_policy
 
 - name: Copying over nsx.ini
+  become: true
   vars:
     service_name: "neutron-server"
     neutron_server: "{{ neutron_services[service_name] }}"
@@ -386,6 +387,3 @@
     - "{{ check_extra_ml2_plugins.files }}"
   notify:
     - "Restart {{ item.0 }} container"
-
-- include_tasks: check-containers.yml
-  when: kolla_action != "config"

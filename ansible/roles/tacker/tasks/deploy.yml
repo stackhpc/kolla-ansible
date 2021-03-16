@@ -1,19 +1,15 @@
 ---
-- include_tasks: register.yml
-  when: inventory_hostname in groups['tacker-server']
+- import_tasks: register.yml
 
-- include_tasks: config.yml
-  when: inventory_hostname in groups['tacker-server'] or
-        inventory_hostname in groups['tacker-conductor']
+- import_tasks: config.yml
+
+- import_tasks: check-containers.yml
 
 - include_tasks: clone.yml
   when:
     - tacker_dev_mode | bool
-    - inventory_hostname in groups['tacker-server'] or
-      inventory_hostname in groups['tacker-conductor']
 
-- include_tasks: bootstrap.yml
-  when: inventory_hostname in groups['tacker-server']
+- import_tasks: bootstrap.yml
 
 - name: Flush handlers
   meta: flush_handlers

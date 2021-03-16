@@ -7,9 +7,11 @@
 - include_tasks: clone.yml
   when: nova_dev_mode | bool
 
-- include_tasks: config-host.yml
+- import_tasks: config-host.yml
 
-- include_tasks: config.yml
+- import_tasks: config.yml
+
+- import_tasks: check-containers.yml
 
 - include_tasks: config-nova-fake.yml
   when:
