@@ -85,6 +85,3 @@
     - service.enabled | bool
   notify:
     - Restart elasticsearch-curator container
-
-- import_tasks: check-containers.yml
-  when: kolla_action != "config"
