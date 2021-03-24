@@ -33,7 +33,9 @@
     action: "ensure_image"
     common_options: "{{ docker_common_options }}"
     image: "{{ service.image }}"
-  when: enable_fluentd | bool
+  when:
+    - fluentd_version is not defined or fluentd_binary is not defined
+    - enable_fluentd | bool
 
 - name: Fetch fluentd image labels
   vars:
@@ -43,12 +45,16 @@
   docker_image_facts:
     name: "{{ service.image }}"
   register: fluentd_labels
-  when: enable_fluentd | bool
+  when:
+     - fluentd_version is not defined or fluentd_binary is not defined
+     - enable_fluentd | bool
 
 - name: Set fluentd facts
   set_fact:
     fluentd_binary: "{% if fluentd_labels.images.0.ContainerConfig.Labels.fluentd_binary is not defined %}{% if kolla_base_distro in 'ubuntu' and ansible_architecture == 'x86_64' %}td-agent{% else %}fluentd{% endif %}{% else %}{{ fluentd_labels.images.0.ContainerConfig.Labels.fluentd_binary }}{% endif %}"
-  when: enable_fluentd | bool
+  when:
+     - fluentd_binary is not defined
+     - enable_fluentd | bool
 
 - name: Copying over config.json files for services
   template:
