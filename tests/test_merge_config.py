@@ -26,8 +26,6 @@ PROJECT_DIR = os.path.abspath(os.path.join(os. path.dirname(__file__), '../'))
 MERGE_CONFIG_FILE = os.path.join(PROJECT_DIR,
                                  'ansible/action_plugins/merge_configs.py')
 
-sys.modules['ansible.plugins'] = mock.MagicMock()
-
 merge_configs = imp.load_source('merge_configs', MERGE_CONFIG_FILE)
 
 TESTA = '''[DEFAULT]

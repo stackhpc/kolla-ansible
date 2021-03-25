@@ -52,14 +52,38 @@
   notify:
     - Restart prometheus-server container
 
+- name: Find prometheus common config overrides
+  find:
+    # NOTE(wszumski): Non-existent paths don't produce a failure
+    paths:
+      - "{{ node_custom_config }}/prometheus/prometheus.yml.d"
+    patterns: "*.yml"
+  delegate_to: localhost
+  register: prometheus_common_config_overrides_result
+  run_once: true
+
+- name: Find prometheus host config overrides
+  find:
+    # NOTE(wszumski): Non-existent paths don't produce a failure
+    paths:
+      - "{{ node_custom_config }}/prometheus/{{ inventory_hostname }}/prometheus.yml.d"
+    patterns: "*.yml"
+  delegate_to: localhost
+  register: prometheus_host_config_overrides_result
+  # NOTE(yoctozepto): this cannot be run_once
+  run_once: false
+
 - name: Copying over prometheus config file
   become: true
   vars:
-    service: "{{ prometheus_services['prometheus-server']}}"
-  template:
-    src: "{{ item }}"
+    service: "{{ prometheus_services['prometheus-server'] }}"
+    common_overrides: "{{ prometheus_common_config_overrides_result.files | map(attribute='path') | list }}"
+    host_overrides: "{{ prometheus_host_config_overrides_result.files | map(attribute='path') | list }}"
+  merge_yaml:
+    sources: "{{ [item] + common_overrides + host_overrides }}"
     dest: "{{ node_config_directory }}/prometheus-server/prometheus.yml"
     mode: "0660"
+    extend_lists: true
   when:
     - inventory_hostname in groups[service.group]
     - service.enabled | bool
@@ -140,6 +164,50 @@
     - "{{ role_path }}/templates/prometheus-blackbox-exporter.yml.j2"
   notify:
     - Restart prometheus-blackbox-exporter container
+
+- block:
+    - name: Find extra prometheus server config files
+      find:
+        paths: "{{ node_custom_config }}/prometheus/extras/"
+        patterns: "*"
+        recurse: true
+      delegate_to: localhost
+      register: prometheus_config_extras_result
+      run_once: true
+
+    - name: Create subdirectories for extra config files
+      become: true
+      vars:
+        dirs: >-
+          {{ prometheus_config_extras_result.files | default([])
+          | map(attribute='path') | map('dirname') | unique
+          | map('relpath', base) | list }}
+      file:
+        path: "{{ node_config_directory }}/prometheus-server/{{ item }}"
+        state: "directory"
+        owner: "{{ config_owner_user }}"
+        group: "{{ config_owner_group }}"
+        mode: "0770"
+        recurse: true
+      with_items: "{{ dirs }}"
+
+    - name: Template extra prometheus server config files
+      become: true
+      vars:
+        relpath: "{{ item | relpath(base) }}"
+      template:
+        src: "{{ item }}"
+        dest: "{{ node_config_directory }}/prometheus-server/{{ relpath }}"
+        mode: "0660"
+      with_items: "{{ prometheus_config_extras_result.files | default([]) | map(attribute='path') | list }}"
+      notify:
+        - Restart prometheus-server container
+  vars:
+    base: "{{ node_custom_config }}/prometheus/"
+    service: "{{ prometheus_services['prometheus-server']}}"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
 
 - name: Copying over built in mtail progs
   vars:

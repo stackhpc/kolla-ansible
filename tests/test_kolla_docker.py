@@ -29,9 +29,6 @@ from docker.types import Ulimit
 from oslotest import base
 
 this_dir = os.path.dirname(sys.modules[__name__].__file__)
-sys.modules['ansible'] = mock.MagicMock()
-sys.modules['ansible.module_utils'] = mock.MagicMock()
-sys.modules['ansible.module_utils.basic'] = mock.MagicMock()
 kolla_docker_file = os.path.join(this_dir, '..', 'ansible',
                                  'library', 'kolla_docker.py')
 kd = imp.load_source('kolla_docker', kolla_docker_file)
