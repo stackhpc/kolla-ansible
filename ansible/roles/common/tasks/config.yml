@@ -114,7 +114,8 @@
          not enable_monasca | bool }}
     fluentd_version: "{{ fluentd_labels.images.0.ContainerConfig.Labels.fluentd_version | default('0.12') }}"
     # Inputs
-    fluentd_input_files: "{{ default_input_files | customise_fluentd(customised_input_files) }}"
+    fluentd_input_files: "{{ default_input_files_enabled | customise_fluentd(customised_input_files) }}"
+    default_input_files_enabled: "{{ default_input_files | selectattr('enabled') | map(attribute='name') | list }}"
     default_input_files:
       - name: "conf/input/00-global.conf.j2"
         enabled: true
