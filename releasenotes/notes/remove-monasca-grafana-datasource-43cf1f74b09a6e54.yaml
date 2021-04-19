@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Due to the removal of the Monasca Grafana fork, the Monasca datasource
+    is now included with vanilla Grafana.

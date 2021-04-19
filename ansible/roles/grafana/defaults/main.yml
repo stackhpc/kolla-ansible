@@ -53,6 +53,13 @@ grafana_data_sources:
       jsonData:
         esVersion: 5
         timeField: "@timestamp"
+  monasca:
+    enabled: "{{ enable_monasca | bool }}"
+    data:
+      name: "monasca"
+      type: "monasca"
+      access: "proxy"
+      url: "{{ monasca_api_internal_base_endpoint }}"
 
 ##########
 # Grafana
