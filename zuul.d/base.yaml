@@ -15,7 +15,16 @@
       - ^doc/.*
       - ^lower-constraints.txt$
       - ^releasenotes/.*$
+      - ^deploy-guide/.*$
       - ^test-requirements.txt$
+      - ^etc/kolla/globals.yml$
+      - ^tox.ini$
+      - ^\..+
+      - ^LICENSE$
+      - ^contrib/
+      - ^specs/
+      - ^kolla_ansible/tests/
+      - ^zuul\.d/
     vars:
       scenario: aio
       enable_core_openstack: yes
@@ -32,6 +41,7 @@
 - job:
     name: kolla-ansible-upgrade-base
     parent: kolla-ansible-base
+    voting: false
     vars:
       previous_release: rocky
       scenario: upgrade
