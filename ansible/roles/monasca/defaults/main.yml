@@ -16,7 +16,7 @@ monasca_services:
         external: false
         port: "{{ monasca_api_port }}"
       monasca_api_external:
-        enabled: "{{ enable_monasca }}"
+        enabled: False
         mode: "http"
         external: true
         port: "{{ monasca_api_port }}"
@@ -34,7 +34,7 @@ monasca_services:
         external: false
         port: "{{ monasca_log_api_port }}"
       monasca_log_api_external:
-        enabled: "{{ enable_monasca }}"
+        enabled: False
         mode: "http"
         external: true
         port: "{{ monasca_log_api_port }}"
@@ -116,7 +116,7 @@ monasca_services:
         external: false
         port: "{{ monasca_grafana_server_port }}"
       monasca_grafana_server_external:
-        enabled: "{{ enable_monasca }}"
+        enabled: False
         mode: "http"
         external: true
         port: "{{ monasca_grafana_server_port }}"
