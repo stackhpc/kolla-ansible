@@ -149,6 +149,8 @@
     default_input_files:
       - name: "conf/input/00-global.conf.j2"
         enabled: true
+      - name: "conf/input/99-caso.conf.j2"
+        enabled: true
       - name: "conf/input/01-syslog.conf.j2"
         enabled: true
       - name: "conf/input/02-mariadb.conf.j2"
@@ -215,6 +217,7 @@
       - { name: "barbican", enabled: "{{ enable_barbican | bool }}" }
       - { name: "blazar", enabled: "{{ enable_blazar | bool }}" }
       - { name: "ceilometer", enabled: "{{ enable_ceilometer | bool }}" }
+      - { name: "caso", enabled: "{{ enable_caso | bool }}" }
       - { name: "cinder", enabled: "{{ enable_cinder | bool }}" }
       - { name: "cloudkitty", enabled: "{{ enable_cloudkitty | bool }}" }
       - { name: "collectd", enabled: "{{ enable_collectd | bool }}" }
