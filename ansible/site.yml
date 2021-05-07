@@ -1009,3 +1009,12 @@
   roles:
     - { role: venus,
         tags: venus }
+
+- name: Apply role caso
+  gather_facts: false
+  hosts:
+    - caso
+  serial: '{{ kolla_serial|default("0") }}'
+  roles:
+    - { role: caso,
+        tags: caso}
