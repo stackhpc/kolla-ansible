@@ -116,6 +116,7 @@
     # Inputs
     fluentd_input_files: "{{ default_input_files | customise_fluentd(customised_input_files) }}"
     default_input_files:
+      - "conf/input/99-caso.conf.j2"
       - "conf/input/00-global.conf.j2"
       - "conf/input/01-syslog.conf.j2"
       - "conf/input/02-mariadb.conf.j2"
@@ -173,6 +174,7 @@
       - { name: "barbican", enabled: "{{ enable_barbican | bool }}" }
       - { name: "blazar", enabled: "{{ enable_blazar | bool }}" }
       - { name: "ceilometer", enabled: "{{ enable_ceilometer | bool }}" }
+      - { name: "caso", enabled: "{{ enable_caso | bool }}" }
       - { name: "chrony", enabled: "{{ enable_chrony | bool }}" }
       - { name: "cinder", enabled: "{{ enable_cinder | bool }}" }
       - { name: "cloudkitty", enabled: "{{ enable_cloudkitty | bool }}" }
