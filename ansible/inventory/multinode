@@ -750,6 +750,9 @@ compute
 network
 storage
 
+[prometheus-libvirt-exporter:children]
+compute
+
 [prometheus-mysqld-exporter:children]
 mariadb
 
