@@ -2,7 +2,7 @@
 features:
   - |
     Deploys and configures the prometheus-libvirt-exporter image as
-    (https://github.com/kumina/libvirt_exporter) as part of the
+    (https://github.com/AlexZzz/libvirt-exporter) as part of the
     Prometheus monitoring stack.
 upgrade:
   - |
