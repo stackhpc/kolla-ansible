@@ -158,6 +158,7 @@ Commands:
     deploy              Deploy and start all kolla containers
     deploy-bifrost      Deploy and start bifrost container
     deploy-servers      Enroll and deploy servers with bifrost
+    gather-facts        Gather Ansible facts
     deploy-containers   Only deploy and start containers (no config updates or bootstrapping)
     post-deploy         Do post deploy on deploy node
     pull                Pull all images for containers (only pulls, no running container changes)
@@ -198,6 +199,7 @@ deploy
 deploy-bifrost
 deploy-containers
 deploy-servers
+gather-facts
 post-deploy
 pull
 reconfigure
@@ -416,6 +418,10 @@ EOF
         ACTION="Deploying servers with bifrost"
         PLAYBOOK="${BASEDIR}/ansible/bifrost.yml"
         EXTRA_OPTS="$EXTRA_OPTS -e kolla_action=deploy-servers"
+        ;;
+(gather-facts)
+        ACTION="Gathering Ansible facts"
+        PLAYBOOK="${BASEDIR}/ansible/gather-facts.yml"
         ;;
 (post-deploy)
         ACTION="Post-Deploying Playbooks"
