@@ -103,7 +103,5 @@
     volumes: "{{ service.volumes }}"
     dimensions: "{{ service.dimensions }}"
     environment: "{{ service.environment }}"
-  when:
-    - kolla_action != "config"
   listen:
     - restart mariadb-clustercheck
