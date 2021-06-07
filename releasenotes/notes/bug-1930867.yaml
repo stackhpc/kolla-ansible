@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixes an issue with logs going missing in the Fluentd pipeline.
+    `LP#1930867 <https://launchpad.net/bugs/1930867>`__
