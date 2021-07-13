@@ -60,7 +60,7 @@ function prepare_images {
     fi
 
     if [[ $SCENARIO == "scenario_nfv" ]]; then
-        GATE_IMAGES+=",^tacker,^mistral,^redis,^barbican"
+        GATE_IMAGES+=",^aodh,^tacker,^mistral,^redis,^barbican"
     fi
     if [[ $SCENARIO == "ironic" ]]; then
         GATE_IMAGES+=",^dnsmasq,^ironic,^iscsid"
@@ -119,6 +119,6 @@ EOF
 setup_openstack_clients
 
 RAW_INVENTORY=/etc/kolla/inventory
-tools/kolla-ansible -i ${RAW_INVENTORY} -e ansible_user=$USER -vvv bootstrap-servers &> /tmp/logs/ansible/bootstrap-servers
+kolla-ansible -i ${RAW_INVENTORY} -e ansible_user=$USER -vvv bootstrap-servers &> /tmp/logs/ansible/bootstrap-servers
 
 prepare_images
