@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixes an issue where a failure of any Nova compute service to register
+    itself would cause Kolla Ansible to fail all hosts. This can lead to issues
+    at scale where failures are more frequent. `LP#1940119
+    <https://bugs.launchpad.net/kolla-ansible/+bug/1940119>`__
