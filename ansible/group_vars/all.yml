@@ -20,6 +20,21 @@ node_config_directory: "/etc/kolla"
 config_owner_user: "root"
 config_owner_group: "root"
 
+###################
+# Ansible options
+###################
+
+# This variable is used as the "filter" argument for the setup module.  For
+# instance, if one wants to remove/ignore all Neutron interface facts:
+# kolla_ansible_setup_filter: "ansible_[!qt]*"
+# By default, we do not provide a filter.
+kolla_ansible_setup_filter: "{{ omit }}"
+
+# This variable is used as the "gather_subset" argument for the setup module.
+# For instance, if one wants to avoid collecting facts via facter:
+# kolla_ansible_setup_gather_subset: "all,!facter"
+# By default, we do not provide a gather subset.
+kolla_ansible_setup_gather_subset: "{{ omit }}"
 
 ###################
 # Kolla options
@@ -105,6 +120,8 @@ docker_client_timeout: 120
 
 # Docker networking options
 docker_disable_default_iptables_rules: "no"
+docker_disable_default_network: "no"
+docker_disable_ip_forward: "no"
 
 # Retention settings for Docker logs
 docker_log_max_file: "5"
@@ -325,7 +342,7 @@ heat_api_cfn_listen_port: "{{ heat_api_cfn_port }}"
 
 horizon_port: "80"
 horizon_tls_port: "443"
-horizon_listen_port: "{{ horizon_port }}"
+horizon_listen_port: "{{ horizon_tls_port if horizon_enable_tls_backend | bool else horizon_port }}"
 
 influxdb_http_port: "8086"
 
@@ -538,8 +555,8 @@ supported_policy_format_list:
 multiple_regions_names:
   - "{{ openstack_region_name }}"
 
-openstack_service_workers: "{{ [ansible_processor_vcpus, 5]|min }}"
-openstack_service_rpc_workers: "{{ [ansible_processor_vcpus, 3]|min }}"
+openstack_service_workers: "{{ [ansible_facts.processor_vcpus, 5]|min }}"
+openstack_service_rpc_workers: "{{ [ansible_facts.processor_vcpus, 3]|min }}"
 
 # Optionally allow Kolla to set sysctl values
 set_sysctl: "yes"
@@ -708,6 +725,7 @@ nova_keystone_user: "nova"
 placement_keystone_user: "placement"
 murano_keystone_user: "murano"
 cinder_keystone_user: "cinder"
+glance_keystone_user: "glance"
 
 # Nova fake driver and the number of fake driver per compute node
 enable_nova_fake: "no"
@@ -757,7 +775,7 @@ skip_stop_containers: []
 ####################
 
 elasticsearch_address: "{{ kolla_internal_fqdn }}"
-enable_elasticsearch: "{{ 'yes' if enable_central_logging | bool or enable_osprofiler | bool or enable_skydive | bool or enable_monasca | bool else 'no' }}"
+enable_elasticsearch: "{{ 'yes' if enable_central_logging | bool or enable_osprofiler | bool or enable_skydive | bool or enable_monasca | bool or (enable_cloudkitty | bool and cloudkitty_storage_backend == 'elasticsearch') else 'no' }}"
 
 # If using Curator an actions file will need to be defined. Please see
 # the documentation.
@@ -923,7 +941,7 @@ gnocchi_metric_datadir_volume: "gnocchi"
 cinder_backend_ceph: "no"
 cinder_backend_vmwarevc_vmdk: "no"
 cinder_volume_group: "cinder-volumes"
-cinder_target_helper: "{{ 'lioadm' if ansible_os_family == 'RedHat' else 'tgtadm' }}"
+cinder_target_helper: "{{ 'lioadm' if ansible_facts.os_family == 'RedHat' else 'tgtadm' }}"
 # Valid options are [ '', redis, etcd ]
 cinder_coordination_backend: "{{ 'redis' if enable_redis|bool else 'etcd' if enable_etcd|bool else '' }}"
 

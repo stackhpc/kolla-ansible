@@ -94,7 +94,7 @@
 - name: Warn about docker default iptables
   debug:
     msg: >-
-      Docker default iptables rules will be disabled by default from the Victoria 11.0.0
+      Docker default iptables rules will be disabled by default from the Wallaby 12.0.0
       release. If you have any non-Kolla containers that need this functionality, you should
       plan a migration for this change, or set docker_disable_default_iptables_rules to false.
   when: not docker_disable_default_iptables_rules | bool
@@ -103,6 +103,34 @@
   set_fact:
     docker_config: "{{ docker_config | combine({'iptables': false}) }}"
   when: docker_disable_default_iptables_rules | bool
+
+- name: Warn about docker default networking
+  debug:
+    msg: >-
+      Docker default network on docker0 will be disabled by default from the
+      Wallaby 12.0.0 release. If you have any non-Kolla containers that need
+      this functionality, you should plan a migration for this change, or set
+      docker_disable_default_network to false.
+  when: not docker_disable_default_network | bool
+
+- name: Disable docker default network on docker0
+  set_fact:
+    docker_config: "{{ docker_config | combine({'bridge': 'none'}) }}"
+  when: docker_disable_default_network | bool
+
+- name: Warn about docker ip_forward
+  debug:
+    msg: >-
+      Docker ip_forward will be disabled by default from the
+      Wallaby 12.0.0 release. If you have any non-Kolla containers that need
+      this functionality, you should plan a migration for this change, or set
+      docker_disable_ip_forward to false.
+  when: not docker_disable_ip_forward | bool
+
+- name: Disable docker ip_forward
+  set_fact:
+    docker_config: "{{ docker_config | combine({'ip-forward': false}) }}"
+  when: docker_disable_ip_forward | bool
 
 - name: Merge custom docker config
   set_fact:
@@ -155,13 +183,13 @@
   stat:
     path: /etc/apparmor.d/usr.sbin.libvirtd
   register: apparmor_libvirtd_profile
-  when: ansible_distribution == "Ubuntu"
+  when: ansible_facts.distribution == "Ubuntu"
 
 - name: Remove apparmor profile for libvirt
   command: apparmor_parser -R /etc/apparmor.d/usr.sbin.libvirtd
   become: True
   when:
-    - ansible_distribution == "Ubuntu"
+    - ansible_facts.distribution == "Ubuntu"
     - apparmor_libvirtd_profile.stat.exists
 
 - name: Get stat of chronyd apparmor profile
@@ -169,14 +197,14 @@
     path: /etc/apparmor.d/usr.sbin.chronyd
   register: apparmor_chronyd_profile
   when:
-    - ansible_os_family == "Debian"
+    - ansible_facts.os_family == "Debian"
     - enable_chrony | bool
 
 - name: Remove apparmor profile for chrony
   command: apparmor_parser -R /etc/apparmor.d/usr.sbin.chronyd
   become: True
   when:
-    - ansible_os_family == "Debian"
+    - ansible_facts.os_family == "Debian"
     - enable_chrony | bool
     - apparmor_chronyd_profile.stat.exists
 
@@ -221,7 +249,7 @@
     state: stopped
   become: True
   when:
-    - ansible_os_family == "Debian"
+    - ansible_facts.os_family == "Debian"
     - enable_host_ntp | bool
 
 - name: Stop time service
@@ -230,7 +258,7 @@
     state: stopped
   become: True
   when:
-    - ansible_os_family == "RedHat"
+    - ansible_facts.os_family == "RedHat"
     - enable_host_ntp | bool
 
 - name: Synchronizing time one-time
@@ -245,7 +273,7 @@
     enabled: yes
   become: True
   when:
-    - ansible_os_family == "Debian"
+    - ansible_facts.os_family == "Debian"
     - enable_host_ntp | bool
 
 - name: Start time sync service
@@ -255,7 +283,7 @@
     enabled: yes
   become: True
   when:
-    - ansible_os_family == "RedHat"
+    - ansible_facts.os_family == "RedHat"
     - enable_host_ntp | bool
 
 - name: Change state of selinux
@@ -265,4 +293,4 @@
   become: true
   when:
     - change_selinux | bool
-    - ansible_os_family == "RedHat"
+    - ansible_facts.os_family == "RedHat"
