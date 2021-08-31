@@ -164,7 +164,7 @@
     recurse: yes
   when: >
     docker_custom_option | length > 0 or
-    (docker_configure_for_zun | bool and 'zun-compute' in group_names)
+    (docker_configure_for_zun | bool and 'zun-compute' in group_names) or
     docker_http_proxy | length > 0 or
     docker_https_proxy | length > 0 or
     docker_no_proxy | length > 0
@@ -176,7 +176,7 @@
     dest: /etc/systemd/system/docker.service.d/kolla.conf
   when: >
     docker_custom_option | length > 0 or
-    (docker_configure_for_zun | bool and 'zun-compute' in group_names)
+    (docker_configure_for_zun | bool and 'zun-compute' in group_names) or
     docker_http_proxy | length > 0 or
     docker_https_proxy | length > 0 or
     docker_no_proxy | length > 0
