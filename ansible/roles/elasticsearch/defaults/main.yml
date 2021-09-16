@@ -62,9 +62,15 @@ elasticsearch_curator_cron_schedule: "0 {{ elasticsearch_curator_instance_id }} 
 # useful way of checking that Curator actions are working as expected.
 elasticsearch_curator_dry_run: false
 
+# List of elasticsearch index names to be managed by Curator.
+elasticsearch_curator_index_names:
+  - "{{ kibana_log_prefix }}"
+  - "{{ (enable_monasca | bool) | ternary('monasca', '') }}"
+  - "{{ (cloudkitty_storage_backend == 'elasticsearch') | ternary(cloudkitty_elasticsearch_alias_name, '') }}"
+
 # Index prefix pattern. Any indices matching this regex will
 # be managed by Curator.
-elasticsearch_curator_index_pattern: "^{{ '(monasca|' + kibana_log_prefix + ')' if enable_monasca|bool else kibana_log_prefix }}-.*"
+elasticsearch_curator_index_pattern: "^({{ elasticsearch_curator_index_names | reject('eq', '') | unique | join('|') }})-.*"
 
 # Duration after which an index is staged for deletion. This is
 # implemented by closing the index. Whilst in this state the index
@@ -74,6 +80,24 @@ elasticsearch_curator_soft_retention_period_days: 30
 
 # Duration after which an index is permanently erased from the cluster.
 elasticsearch_curator_hard_retention_period_days: 60
+
+# Enable rollover of elasticsearch indices.
+elasticsearch_curator_rollover: "{{ cloudkitty_storage_backend == 'elasticsearch' }}"
+
+# Dict containing elasticsearch rollover options.
+# For help with options see curator docs:
+# https://www.elastic.co/guide/en/elasticsearch/client/curator/5.8/rollover.html
+elasticsearch_curator_rollover_options:
+  - name: "{{ cloudkitty_elasticsearch_alias_name }}"
+    conditions:
+      max_age: "{{ elasticsearch_curator_rollover_default_max_age }}"
+      max_docs: "{{ elasticsearch_curator_rollover_default_max_docs }}"
+
+# Elasticsearch index max age before rollover.
+elasticsearch_curator_rollover_default_max_age: "1d"
+
+# Elasticsearch index max number of docs before rollover.
+elasticsearch_curator_rollover_default_max_docs: "100000"
 
 ####################
 # Keystone

@@ -152,8 +152,21 @@ cloudkitty_storage_backend: "influxdb"
 
 cloudkitty_influxdb_name: "cloudkitty"
 
-# Set the elasticsearch index name.
-cloudkitty_elasticsearch_index_name: "cloudkitty"
+# Set the elasticsearch index alias name.
+cloudkitty_elasticsearch_alias_name: "cloudkitty"
+
+# Set the elasticsearch index name, will be URI encoded. eg, <cloudkitty-{now/d}-000001>.
+cloudkitty_elasticsearch_index_name: "<{{ cloudkitty_elasticsearch_alias_name }}-{now/d}-000001>"
+
+# Set the name of the elasticsearch component template to be created.
+cloudkitty_elasticsearch_component_template_name: "{{ cloudkitty_elasticsearch_alias_name }}_settings"
+
+# Set the elasticsearch component templates to include in the cloudkitty provided template.
+cloudkitty_elasticsearch_component_templates:
+  - "{{ cloudkitty_elasticsearch_component_template_name }}"
+
+# Set the number of replicas for cloudkitty indices.
+cloudkitty_elasticsearch_index_replicas: "{{ groups['elasticsearch'] | length -1 }}"
 
 # Set the elasticsearch host URL.
 cloudkitty_elasticsearch_url: "{{ internal_protocol }}://{{ elasticsearch_address }}:{{ elasticsearch_port }}"

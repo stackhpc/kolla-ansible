@@ -126,7 +126,8 @@ cafile = {{ cloudkitty_influxdb_cafile }}
 {% if cloudkitty_storage_backend == 'elasticsearch' %}
 [storage_elasticsearch]
 host = {{ cloudkitty_elasticsearch_url }}
-index_name = {{ cloudkitty_elasticsearch_index_name }}
+index_name = {{ cloudkitty_elasticsearch_alias_name }}
+component_templates = {{ cloudkitty_elasticsearch_component_templates | join(',') }}
 insecure = {{ cloudkitty_elasticsearch_insecure_connections }}
 
 {% if cloudkitty_elasticsearch_cafile is defined %}

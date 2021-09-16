@@ -31,3 +31,13 @@ actions:
       timestring: '%Y.%m.%d'
       unit: days
       unit_count: "{{ elasticsearch_curator_hard_retention_period_days }}"
+{% if elasticsearch_curator_rollover | bool %}
+{% for index in elasticsearch_curator_rollover_options %}
+  {{ 2 + loop.index }}:
+    action: rollover
+    description: >-
+      Rollover index associated with {{ index.name }} alias
+    options:
+      {{ index | to_nice_yaml | indent(6, false) }}
+{% endfor %}
+{% endif %}
