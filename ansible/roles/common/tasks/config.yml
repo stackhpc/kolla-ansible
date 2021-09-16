@@ -149,7 +149,7 @@
       - name: "conf/output/01-es.conf.j2"
         enabled: "{{ log_direct_to_elasticsearch }}"
       - name: "conf/output/02-monasca.conf.j2"
-        enabled: "{{ enable_monasca | bool }}"
+        enabled: "{{ enable_monasca | bool and monasca_ingest_control_plane_logs | bool }}"
     customised_output_files: "{{ find_custom_fluentd_outputs.files | map(attribute='path') | list }}"
   template:
     src: "td-agent.conf.j2"

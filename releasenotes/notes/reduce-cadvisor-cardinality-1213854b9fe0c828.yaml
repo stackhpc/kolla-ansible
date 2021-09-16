@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Adds support for passing extra runtime options to cAdvisor via
+    ``prometheus_cadvisor_cmdline_extras`` new variable. By default
+    system cgroups' metrics are disabled, plus container labels
+    don't get exposed to Prometheus. This creates savings in resources
+    usage by both cAdvisor and Prometheus.
