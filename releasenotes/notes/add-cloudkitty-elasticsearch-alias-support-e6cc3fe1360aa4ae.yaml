@@ -1,0 +1,13 @@
+---
+features:
+  - |
+    Improves support for elasticsearch as the cloudkitty storage backend.
+    Enforces using an elasticsearch index alias with cloudkitty.
+    Provides an elasticsearch index component template to manage replicas.
+    Adds elasicsearch curator config to prune cloudkitty indices.
+upgrade:
+  - |
+    Enforces using an elasticsearch index alias with cloudkitty.
+    If elasticsearch is used as the cloudkitty storage backend this will
+    reindex the data into a dated index and delete the old copy. The old index
+    name is used as an alias for the dated indices.

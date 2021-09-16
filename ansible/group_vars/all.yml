@@ -945,12 +945,15 @@ cinder_backup_mount_options_nfs: ""
 #######################
 # Valid option is gnocchi
 cloudkitty_collector_backend: "gnocchi"
-# Valid options are 'sqlalchemy' or 'influxdb'. The default value is
+# Valid options are 'sqlalchemy', 'elasticsearch' or 'influxdb'. The default value is
 # 'influxdb', which matches the default in Cloudkitty since the Stein release.
 # When the backend is "influxdb", we also enable Influxdb.
-# Also, when using 'influxdb' as the backend, we trigger the configuration/use
+# Also, when using 'influxdb' or 'elasticsearch' as the backend, we trigger the configuration/use
 # of Cloudkitty storage backend version 2.
 cloudkitty_storage_backend: "influxdb"
+
+# Elasticsearch index alias name when cloudkitty_storage_backend is 'elasticsearch'.
+cloudkitty_elasticsearch_alias_name: "cloudkitty"
 
 #######################
 # Designate options
