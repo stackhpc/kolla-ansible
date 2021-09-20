@@ -32,30 +32,37 @@ endpoint_type = publicURL
 [heat_client]
 region_name = {{ openstack_region_name }}
 endpoint_type = internalURL
+ca_file = {{ openstack_cacert }}
 
 [octavia_client]
 region_name = {{ openstack_region_name }}
 endpoint_type = internalURL
+ca_file = {{ openstack_cacert }}
 
 [cinder_client]
 region_name = {{ openstack_region_name }}
 endpoint_type = internalURL
+ca_file = {{ openstack_cacert }}
 
 [barbican_client]
 region_name = {{ openstack_region_name }}
 endpoint_type = internalURL
+ca_file = {{ openstack_cacert }}
 
 [glance_client]
 region_name = {{ openstack_region_name }}
 endpoint_type = internalURL
+ca_file = {{ openstack_cacert }}
 
 [neutron_client]
 region_name = {{ openstack_region_name }}
 endpoint_type = internalURL
+ca_file = {{ openstack_cacert }}
 
 [nova_client]
 region_name = {{ openstack_region_name }}
 endpoint_type = internalURL
+ca_file = {{ openstack_cacert }}
 
 [keystone_auth]
 auth_url = {{ keystone_internal_url }}/v3
@@ -65,6 +72,7 @@ project_name = service
 password = {{ magnum_keystone_password }}
 username = {{ magnum_keystone_user }}
 auth_type = password
+region_name = {{ openstack_region_name }}
 
 [keystone_authtoken]
 auth_version = v3
@@ -77,6 +85,7 @@ project_name = service
 username = {{ magnum_keystone_user }}
 password = {{ magnum_keystone_password }}
 cafile = {{ openstack_cacert }}
+region_name = {{ openstack_region_name }}
 
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = {{ memcache_secret_key }}

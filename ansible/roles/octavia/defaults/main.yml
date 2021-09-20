@@ -88,22 +88,22 @@ octavia_worker_dimensions: "{{ default_container_dimensions }}"
 octavia_api_default_volumes:
   - "{{ node_config_directory }}/octavia-api/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
 octavia_health_manager_default_volumes:
   - "{{ node_config_directory }}/octavia-health-manager/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
 octavia_housekeeping_default_volumes:
   - "{{ node_config_directory }}/octavia-housekeeping/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
 octavia_worker_default_volumes:
   - "{{ node_config_directory }}/octavia-worker/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
 
 octavia_extra_volumes: "{{ default_extra_volumes }}"
@@ -143,6 +143,13 @@ octavia_ks_services:
 
 octavia_ks_users:
   - project: "service"
+    user: "{{ octavia_keystone_user }}"
+    password: "{{ octavia_keystone_password }}"
+    role: "admin"
+  # NOTE(mgoddard): The default for the service auth project is service, but
+  # may be customised. Ensure the project exists, and assign the octavia user
+  # the admin role in it.
+  - project: "{{ octavia_service_auth_project }}"
     user: "{{ octavia_keystone_user }}"
     password: "{{ octavia_keystone_password }}"
     role: "admin"

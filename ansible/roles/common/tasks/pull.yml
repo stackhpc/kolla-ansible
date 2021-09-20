@@ -1,10 +1,13 @@
 ---
-- name: Pulling common images
-  become: true
-  kolla_docker:
-    action: "pull_image"
-    common_options: "{{ docker_common_options }}"
-    image: "{{ item.value.image }}"
-  when:
-    - item.value.enabled | bool
-  with_dict: "{{ common_services }}"
+# NOTE(yoctozepto): this has to be in block to avoid leaking the variable
+# below to other imports (see the next comment as well)
+- block:
+    - import_role:
+        name: service-images-pull
+  vars:
+    # NOTE(yoctozepto): we need this in Ussuri for the common role because
+    # it is imported via meta and it could happen that it gets imported by
+    # nova-cell first (a very common case - separate computes) which sets
+    # this variable and makes pull action work for nova_cell twice instead
+    # due to how variable precedence and shadowing work in Ansible.
+    kolla_role_name: "common"

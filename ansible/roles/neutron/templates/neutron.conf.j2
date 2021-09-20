@@ -31,7 +31,7 @@ interface_driver = linuxbridge
 
 {% if enable_nova_fake | bool %}
 ovs_integration_bridge = br-int-{{ item }}
-host = {{ ansible_hostname }}_{{ item }}
+host = {{ ansible_facts.hostname }}_{{ item }}
 {% endif %}
 
 allow_overlapping_ips = true
@@ -111,6 +111,7 @@ project_name = service
 username = {{ neutron_keystone_user }}
 password = {{ neutron_keystone_password }}
 cafile = {{ openstack_cacert }}
+region_name = {{ openstack_region_name }}
 
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = {{ memcache_secret_key }}
@@ -142,11 +143,6 @@ drivers = ovs
 drivers = ovs
 {% endif %}
 
-{% if enable_octavia | bool %}
-[octavia]
-base_url = {{ internal_protocol }}://{{ octavia_internal_fqdn | put_address_in_context('url') }}:{{ octavia_api_port }}
-{% endif %}
-
 {% if enable_designate | bool %}
 [designate]
 url = {{ internal_protocol }}://{{ designate_internal_fqdn | put_address_in_context('url') }}:{{ designate_api_port }}/v2
@@ -162,6 +158,7 @@ allow_reverse_dns_lookup = True
 ipv4_ptr_zone_prefix_size = 24
 ipv6_ptr_zone_prefix_size = 116
 cafile = {{ openstack_cacert }}
+region_name = {{ openstack_region_name }}
 {% endif %}
 
 {% if enable_osprofiler | bool %}
@@ -183,6 +180,7 @@ project_domain_name = {{ default_project_domain_name }}
 os_region_name = {{ openstack_region_name }}
 os_interface = internal
 cafile = {{ openstack_cacert }}
+region_name = {{ openstack_region_name }}
 
 [privsep]
 helper_command=sudo neutron-rootwrap /etc/neutron/rootwrap.conf privsep-helper
