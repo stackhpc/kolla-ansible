@@ -538,7 +538,7 @@ admin_protocol: "{{ 'https' if kolla_enable_tls_internal | bool else 'http' }}"
 openstack_release: "victoria"
 # Docker image tag used by default.
 openstack_tag: "{{ openstack_release ~ openstack_tag_suffix }}"
-openstack_tag_suffix: ""
+openstack_tag_suffix: "{{ '-centos8s' if 'Stream' in (kolla_centos_release['content'] | default() | b64decode ) else '' }}"
 openstack_logging_debug: "False"
 
 openstack_region_name: "RegionOne"
@@ -1074,7 +1074,7 @@ ceph_cinder_user: "cinder"
 ceph_glance_user: "glance"
 ceph_gnocchi_user: "gnocchi"
 ceph_manila_user: "manila"
-ceph_nova_user: "nova"
+ceph_nova_user: "{{ ceph_cinder_user }}"
 
 # External Ceph keyrings
 ceph_cinder_keyring: "ceph.client.cinder.keyring"
@@ -1122,6 +1122,7 @@ enable_prometheus_rabbitmq_exporter: "{{ enable_prometheus | bool and enable_rab
 
 prometheus_alertmanager_user: "admin"
 prometheus_openstack_exporter_interval: "60s"
+prometheus_openstack_exporter_timeout: "10s"
 prometheus_elasticsearch_exporter_interval: "60s"
 prometheus_cmdline_extras:
 prometheus_ceph_mgr_exporter_endpoints: []
