@@ -2,8 +2,6 @@ global:
   scrape_interval: 60s
   scrape_timeout: 10s
   evaluation_interval: 15s
-  external_labels:
-    monitor: 'kolla'
 
 {% if prometheus_alert_rules.files is defined and prometheus_alert_rules.files | length  > 0 %}
 rule_files:
@@ -17,16 +15,24 @@ scrape_configs:
     static_configs:
       - targets:
 {% for host in groups['prometheus'] %}
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ prometheus_port }}'
+        - '{{ host }}:{{ prometheus_port }}'
 {% endfor %}
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: "([^:]+):\\d+"
+      target_label: instance
 
 {% if enable_prometheus_node_exporter | bool %}
   - job_name: node
     static_configs:
       - targets:
 {% for host in groups['prometheus-node-exporter'] %}
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_node_exporter_port'] }}'
+        - '{{ host }}:{{ hostvars[host]['prometheus_node_exporter_port'] }}'
 {% endfor %}
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: "([^:]+):\\d+"
+      target_label: instance
 {% endif %}
 
 {% if enable_prometheus_mysqld_exporter | bool %}
@@ -34,8 +40,12 @@ scrape_configs:
     static_configs:
       - targets:
 {% for host in groups['prometheus-mysqld-exporter'] %}
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_mysqld_exporter_port'] }}'
+        - '{{ host }}:{{ hostvars[host]['prometheus_mysqld_exporter_port'] }}'
 {% endfor %}
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: "([^:]+):\\d+"
+      target_label: instance
 {% endif %}
 
 {% if enable_prometheus_haproxy_exporter | bool %}
@@ -43,8 +53,12 @@ scrape_configs:
     static_configs:
       - targets:
 {% for host in groups['prometheus-haproxy-exporter'] %}
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_haproxy_exporter_port'] }}'
+        - '{{ host }}:{{ hostvars[host]['prometheus_haproxy_exporter_port'] }}'
 {% endfor %}
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: "([^:]+):\\d+"
+      target_label: instance
 {% endif %}
 
 {% if enable_prometheus_rabbitmq_exporter | bool %}
@@ -52,8 +66,12 @@ scrape_configs:
     static_configs:
       - targets:
 {% for host in groups['rabbitmq'] %}
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_rabbitmq_exporter_port'] }}'
+        - '{{ host }}:{{ hostvars[host]['prometheus_rabbitmq_exporter_port'] }}'
 {% endfor %}
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: "([^:]+):\\d+"
+      target_label: instance
 {% endif %}
 
 {% if enable_prometheus_memcached_exporter | bool %}
@@ -61,8 +79,12 @@ scrape_configs:
     static_configs:
       - targets:
 {% for host in groups['prometheus-memcached-exporter'] %}
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_memcached_exporter_port'] }}'
+        - '{{ host }}:{{ hostvars[host]['prometheus_memcached_exporter_port'] }}'
 {% endfor %}
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: "([^:]+):\\d+"
+      target_label: instance
 {% endif %}
 
 {% if enable_prometheus_cadvisor | bool %}
@@ -70,8 +92,12 @@ scrape_configs:
     static_configs:
       - targets:
 {% for host in groups["prometheus-cadvisor"] %}
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_cadvisor_port'] }}'
+        - '{{ host }}:{{ hostvars[host]['prometheus_cadvisor_port'] }}'
 {% endfor %}
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: "([^:]+):\\d+"
+      target_label: instance
 {% endif %}
 
 {% if enable_prometheus_ceph_mgr_exporter | bool %}
@@ -82,6 +108,10 @@ scrape_configs:
 {% for exporter in prometheus_ceph_mgr_exporter_endpoints %}
         - '{{ exporter }}'
 {% endfor %}
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: "([^:]+):\\d+"
+      target_label: instance
 {% endif %}
 
 {% if enable_prometheus_openstack_exporter | bool %}
@@ -92,8 +122,12 @@ scrape_configs:
     static_configs:
       - targets:
 {% for host in groups["prometheus-openstack-exporter"] %}
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_openstack_exporter_port'] }}'
+        - '{{ host }}:{{ hostvars[host]['prometheus_openstack_exporter_port'] }}'
 {% endfor %}
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: "([^:]+):\\d+"
+      target_label: instance
 {% endif %}
 
 {% if enable_prometheus_elasticsearch_exporter | bool %}
@@ -102,8 +136,12 @@ scrape_configs:
     static_configs:
       - targets:
 {% for host in groups["prometheus-elasticsearch-exporter"] %}
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_elasticsearch_exporter_port'] }}'
+        - '{{ host }}:{{ hostvars[host]['prometheus_elasticsearch_exporter_port'] }}'
 {% endfor %}
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: "([^:]+):\\d+"
+      target_label: instance
 {% endif %}
 
 {% if enable_prometheus_blackbox_exporter | bool and prometheus_blackbox_exporter_endpoints | length > 0 | bool %}
@@ -137,11 +175,22 @@ scrape_configs:
 {% endif %}
 
 {% if enable_prometheus_alertmanager | bool %}
+  - job_name: alertmanager
+    static_configs:
+      - targets:
+{% for host in groups['prometheus-alertmanager'] %}
+        - '{{ host }}:{{ hostvars[host]['prometheus_alertmanager_port'] }}'
+{% endfor %}
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: "([^:]+):\\d+"
+      target_label: instance
+
 alerting:
   alertmanagers:
   - static_configs:
     - targets:
 {% for host in groups["prometheus-alertmanager"] %}
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_alertmanager_port'] }}'
+        - '{{ host }}:{{ hostvars[host]['prometheus_alertmanager_port'] }}'
 {% endfor %}
 {% endif %}
