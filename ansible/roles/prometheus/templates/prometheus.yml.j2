@@ -2,8 +2,6 @@ global:
   scrape_interval: 60s
   scrape_timeout: 10s
   evaluation_interval: 15s
-  external_labels:
-    monitor: 'kolla'
 
 {% if prometheus_alert_rules.files is defined and prometheus_alert_rules.files | length  > 0 %}
 rule_files:
