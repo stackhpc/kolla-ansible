@@ -94,6 +94,13 @@ prometheus_services:
     image: "{{ prometheus_blackbox_exporter_image_full }}"
     volumes: "{{ prometheus_blackbox_exporter_default_volumes + prometheus_blackbox_exporter_extra_volumes }}"
     dimensions: "{{ prometheus_blackbox_exporter_dimensions }}"
+  prometheus-jiralert:
+    container_name: "prometheus_jiralert"
+    group: "prometheus-jiralert"
+    enabled: "{{ enable_prometheus_jiralert | bool }}"
+    image: "{{ prometheus_jiralert_image_full }}"
+    volumes: "{{ prometheus_jiralert_default_volumes + prometheus_jiralert_extra_volumes }}"
+    dimensions: "{{ prometheus_jiralert_dimensions }}"
 
 ####################
 # Database
@@ -120,6 +127,11 @@ prometheus_blackbox_exporter_endpoints: []
 # Whether to keep using Prometheus server v1 (due to no data-preserving migration path to v2)
 # NOTE(piotrp): Deprecated in Wallaby and will be removed in Xena
 prometheus_use_v1: no
+
+###################
+# Jiralert
+###################
+prometheus_jiralert_default_receiver_name: 'jira'
 
 ####################
 # Docker
@@ -168,6 +180,10 @@ prometheus_blackbox_exporter_image: "{{ docker_registry ~ '/' if docker_registry
 prometheus_blackbox_exporter_tag: "{{ prometheus_tag }}"
 prometheus_blackbox_exporter_image_full: "{{ prometheus_blackbox_exporter_image }}:{{ prometheus_blackbox_exporter_tag }}"
 
+prometheus_jiralert_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ prometheus_install_type }}-prometheus-jiralert"
+prometheus_jiralert_tag: "{{ prometheus_tag }}"
+prometheus_jiralert_image_full: "{{ prometheus_jiralert_image }}:{{ prometheus_jiralert_tag }}"
+
 prometheus_server_dimensions: "{{ default_container_dimensions }}"
 prometheus_haproxy_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_mysqld_exporter_dimensions: "{{ default_container_dimensions }}"
@@ -178,6 +194,7 @@ prometheus_alertmanager_dimensions: "{{ default_container_dimensions }}"
 prometheus_openstack_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_elasticsearch_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_blackbox_exporter_dimensions: "{{ default_container_dimensions }}"
+prometheus_jiralert_dimensions: "{{ default_container_dimensions }}"
 
 prometheus_server_default_volumes:
   - "{{ node_config_directory }}/prometheus-server/:{{ container_config_directory }}/:ro"
@@ -239,6 +256,11 @@ prometheus_blackbox_exporter_default_volumes:
   - "/etc/localtime:/etc/localtime:ro"
   - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
+prometheus_jiralert_default_volumes:
+  - "{{ node_config_directory }}/prometheus-jiralert/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
+  - "kolla_logs:/var/log/kolla/"
 
 prometheus_extra_volumes: "{{ default_extra_volumes }}"
 prometheus_server_extra_volumes: "{{ prometheus_extra_volumes }}"
@@ -251,6 +273,7 @@ prometheus_alertmanager_extra_volumes: "{{ prometheus_extra_volumes }}"
 prometheus_openstack_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
 prometheus_elasticsearch_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
 prometheus_blackbox_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
+prometheus_jiralert_extra_volumes: "{{ prometheus_extra_volumes }}"
 
 prometheus_openstack_exporter_disabled_volume: "{{ '--disable-service.volume' if not enable_cinder | bool else '' }}"
 prometheus_openstack_exporter_disabled_dns: "{{ '--disable-service.dns' if not enable_designate | bool else '' }}"
