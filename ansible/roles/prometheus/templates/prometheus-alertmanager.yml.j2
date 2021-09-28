@@ -8,6 +8,11 @@ route:
   repeat_interval: 3h
 receivers:
   - name: default-receiver
+{% if enable_prometheus_jiralert | bool %}
+  - name: 'jira'
+    webhook_configs:
+    - url: 'http://localhost:{{ prometheus_jiralert_port }}/alert'
+{% endif %}
 {% if enable_vitrage | bool and enable_vitrage_prometheus_datasource | bool %}
     webhook_configs:
       - send_resolved: true
