@@ -459,6 +459,7 @@ prometheus_fluentd_integration_port: "24231"
 prometheus_alertmanager_port: "9093"
 prometheus_alertmanager_cluster_port: "9094"
 prometheus_jiralert_port: "9097"
+prometheus_msteams_port: "9098"
 
 # Prometheus openstack-exporter ports
 prometheus_openstack_exporter_port: "9198"
@@ -1128,6 +1129,10 @@ enable_prometheus_jiralert: "no"
 prometheus_jiralert_api_url:
 prometheus_jiralert_user:
 prometheus_jiralert_project:
+
+# Prometheus MSTeams settings
+enable_prometheus_msteams: "no"
+prometheus_msteams_webhook_url:
 
 prometheus_alertmanager_user: "admin"
 prometheus_openstack_exporter_interval: "60s"
