@@ -101,6 +101,13 @@ prometheus_services:
     image: "{{ prometheus_jiralert_image_full }}"
     volumes: "{{ prometheus_jiralert_default_volumes + prometheus_jiralert_extra_volumes }}"
     dimensions: "{{ prometheus_jiralert_dimensions }}"
+  prometheus-msteams:
+    container_name: "prometheus_msteams"
+    group: "prometheus-msteams"
+    enabled: "{{ enable_prometheus_msteams | bool }}"
+    image: "{{ prometheus_msteams_image_full }}"
+    volumes: "{{ prometheus_msteams_default_volumes + prometheus_msteams_extra_volumes }}"
+    dimensions: "{{ prometheus_msteams_dimensions }}"
 
 ####################
 # Database
@@ -184,6 +191,10 @@ prometheus_jiralert_image: "{{ docker_registry ~ '/' if docker_registry else '' 
 prometheus_jiralert_tag: "{{ prometheus_tag }}"
 prometheus_jiralert_image_full: "{{ prometheus_jiralert_image }}:{{ prometheus_jiralert_tag }}"
 
+prometheus_msteams_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ prometheus_install_type }}-prometheus-msteams"
+prometheus_msteams_tag: "{{ prometheus_tag }}"
+prometheus_msteams_image_full: "{{ prometheus_msteams_image }}:{{ prometheus_msteams_tag }}"
+
 prometheus_server_dimensions: "{{ default_container_dimensions }}"
 prometheus_haproxy_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_mysqld_exporter_dimensions: "{{ default_container_dimensions }}"
@@ -195,6 +206,7 @@ prometheus_openstack_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_elasticsearch_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_blackbox_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_jiralert_dimensions: "{{ default_container_dimensions }}"
+prometheus_msteams_dimensions: "{{ default_container_dimensions }}"
 
 prometheus_server_default_volumes:
   - "{{ node_config_directory }}/prometheus-server/:{{ container_config_directory }}/:ro"
@@ -261,6 +273,11 @@ prometheus_jiralert_default_volumes:
   - "/etc/localtime:/etc/localtime:ro"
   - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
+prometheus_msteams_default_volumes:
+  - "{{ node_config_directory }}/prometheus-msteams/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
+  - "kolla_logs:/var/log/kolla/"
 
 prometheus_extra_volumes: "{{ default_extra_volumes }}"
 prometheus_server_extra_volumes: "{{ prometheus_extra_volumes }}"
@@ -274,6 +291,7 @@ prometheus_openstack_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
 prometheus_elasticsearch_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
 prometheus_blackbox_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
 prometheus_jiralert_extra_volumes: "{{ prometheus_extra_volumes }}"
+prometheus_msteams_extra_volumes: "{{ prometheus_extra_volumes }}"
 
 prometheus_openstack_exporter_disabled_volume: "{{ '--disable-service.volume' if not enable_cinder | bool else '' }}"
 prometheus_openstack_exporter_disabled_dns: "{{ '--disable-service.dns' if not enable_designate | bool else '' }}"

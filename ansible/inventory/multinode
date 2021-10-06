@@ -750,6 +750,9 @@ monitoring
 [prometheus-jiralert:children]
 prometheus-alertmanager
 
+[prometheus-msteams:children]
+prometheus-alertmanager
+
 [masakari-api:children]
 control
 
