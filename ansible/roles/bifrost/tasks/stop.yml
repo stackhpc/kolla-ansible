@@ -19,6 +19,7 @@
             - ironic-inspector
             - mariadb
             - nginx
+          failed_when: false
 
         - name: Stopping bifrost_deploy container
           become: true
