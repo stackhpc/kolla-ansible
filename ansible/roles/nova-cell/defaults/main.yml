@@ -1,6 +1,10 @@
 ---
 project_name: "nova"
 
+# NOTE(yoctozepto): we need this for the nova-cell role because this role's
+# vars prefix does not match "{{ project_name }}"
+kolla_role_name: "nova_cell"
+
 nova_cell_services:
   nova-libvirt:
     container_name: nova_libvirt
@@ -234,7 +238,17 @@ nova_compute_ironic_image: "{{ docker_registry ~ '/' if docker_registry else '' 
 nova_compute_ironic_tag: "{{ nova_tag }}"
 nova_compute_ironic_image_full: "{{ nova_compute_ironic_image }}:{{ nova_compute_ironic_tag }}"
 
-nova_libvirt_dimensions: "{{ default_container_dimensions }}"
+nova_libvirt_default_dimensions:
+  ulimits:
+    # NOTE(yoctozepto): This limit bump is required for cgroupsv2 which use eBPF
+    # to filter devices. See also LP#1941940. The new value is said to support
+    # up to 4096 guests (see libvirtd systemd service file from Debian Bullseye
+    # libvirt-daemon-system package for details).
+    memlock:
+      soft: 67108864  # 64 MiB
+      hard: 67108864  # 64 MiB
+
+nova_libvirt_dimensions: "{{ default_container_dimensions | combine(nova_libvirt_default_dimensions, recursive=True) }}"
 nova_ssh_dimensions: "{{ default_container_dimensions }}"
 nova_novncproxy_dimensions: "{{ default_container_dimensions }}"
 nova_spicehtml5proxy_dimensions: "{{ default_container_dimensions }}"
@@ -328,6 +342,7 @@ nova_libvirt_default_volumes:
   - "/lib/modules:/lib/modules:ro"
   - "/run/:/run/:shared"
   - "/dev:/dev"
+  - "/sys/fs/cgroup:/sys/fs/cgroup"
   - "kolla_logs:/var/log/kolla/"
   - "libvirtd:/var/lib/libvirt"
   - "{{ nova_instance_datadir_volume }}:/var/lib/nova/"
@@ -409,6 +424,7 @@ nova_cell_bootstrap_extra_volumes: "{{ nova_extra_volumes }}"
 # HAProxy
 ####################
 haproxy_nova_serialconsole_proxy_tunnel_timeout: "10m"
+haproxy_nova_spicehtml5_proxy_tunnel_timeout: "1h"
 
 ####################
 # OpenStack

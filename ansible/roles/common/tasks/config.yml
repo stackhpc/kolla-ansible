@@ -111,7 +111,7 @@
   vars:
     log_direct_to_elasticsearch: >-
       {{ ( enable_elasticsearch | bool or
-           ( elasticsearch_address != kolla_internal_vip_address )) and
+           ( elasticsearch_address != kolla_internal_fqdn )) and
          ( not enable_monasca | bool or not monasca_ingest_control_plane_logs | bool ) }}
     fluentd_version: "{{ fluentd_labels.images.0.ContainerConfig.Labels.fluentd_version | default('0.12') }}"
     # Inputs
@@ -275,6 +275,7 @@
   become: true
   when:
     - common_services['kolla-toolbox'] | service_enabled_and_mapped_to_host
+    - enable_rabbitmq | bool
     - api_address_family == "ipv6"
 
 - name: Copy rabbitmq erl_intr to kolla toolbox
@@ -286,4 +287,5 @@
   become: true
   when:
     - common_services['kolla-toolbox'] | service_enabled_and_mapped_to_host
+    - enable_rabbitmq | bool
     - api_address_family == "ipv6"

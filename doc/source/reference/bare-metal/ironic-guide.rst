@@ -51,10 +51,10 @@ be used:
 
 .. code-block:: console
 
-   $ curl https://tarballs.openstack.org/ironic-python-agent/dib/files/ipa-centos8-master.kernel \
+   $ curl https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-centos8-master.kernel \
      -o /etc/kolla/config/ironic/ironic-agent.kernel
 
-   $ curl https://tarballs.openstack.org/ironic-python-agent/dib/files/ipa-centos8-master.initramfs \
+   $ curl https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-centos8-master.initramfs \
      -o /etc/kolla/config/ironic/ironic-agent.initramfs
 
 You may optionally pass extra kernel parameters to the inspection kernel using:
@@ -93,6 +93,28 @@ The following changes will occur if iPXE booting is enabled:
 - The DHCP servers will be configured to chainload iPXE from an existing PXE
   environment. You may also boot directly to iPXE by some other means e.g by
   burning it to the option rom of your ethernet card.
+
+Attach ironic to external keystone (optional)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In :kolla-ansible-doc:`multi-regional <user/multi-regions.html>` deployment
+keystone could be installed in one region (let's say region 1) and ironic -
+in another region (let's say region 2). In this case we don't install keystone
+together with ironic in region 2, but have to configure ironic to connect to
+existing keystone in region 1. To deploy ironic in this way we have to set
+variable ``enable_keystone`` to ``"no"``.
+
+.. code-block:: yaml
+
+    enable_keystone: "no"
+
+It will prevent keystone from being installed in region 2.
+
+To add keystone-related sections in ironic.conf, it is also needed to set
+variable ``ironic_enable_keystone_integration`` to ``"yes"``
+
+.. code-block:: yaml
+
+    ironic_enable_keystone_integration: "yes"
 
 Deployment
 ~~~~~~~~~~
