@@ -16,5 +16,7 @@ host_os_distributions:
     - "bullseye"
   RHEL:
     - "8"
+  Rocky:
+    - "8"
   Ubuntu:
     - "focal"
