@@ -44,9 +44,12 @@
       delegate_facts: True
       delegate_to: "{{ item }}"
       with_items: "{{ delegate_hosts }}"
-      # We gathered facts for all hosts in the batch during the first play.
       when:
+        # We gathered facts for all hosts in the batch during the first play.
+        # - item not in ansible_play_batch
         - not hostvars[item].ansible_facts
       # Don't fail the current host if delegated fact gathering fails.
+      # FIXME: Should this be conditional?
       failed_when: false
+      ignore_errors: true
   tags: always
