@@ -47,4 +47,6 @@
       # We gathered facts for all hosts in the batch during the first play.
       when:
         - not hostvars[item].ansible_facts
+      # Don't fail the current host if delegated fact gathering fails.
+      failed_when: false
   tags: always
