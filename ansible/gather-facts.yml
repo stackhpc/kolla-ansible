@@ -52,4 +52,5 @@
       # FIXME: Should this be conditional?
       failed_when: false
       ignore_errors: true
+      ignore_unreachable: true
   tags: always
