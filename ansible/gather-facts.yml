@@ -16,7 +16,7 @@
 
     - name: Group hosts to determine when using --limit
       group_by:
-        key: "all_using_limit_{{ (ansible_play_batch | length) != (groups['all'] | length) }}"
+        key: "all_using_limit_{{ (ansible_play_hosts_all | length) != (groups['all'] | length) }}"
       changed_when: false
   tags: always
 
@@ -46,11 +46,9 @@
       with_items: "{{ delegate_hosts }}"
       when:
         # We gathered facts for all hosts in the batch during the first play.
-        # - item not in ansible_play_batch
+        - item not in ansible_play_hosts_all
         - not hostvars[item].ansible_facts
-      # Don't fail the current host if delegated fact gathering fails.
-      # FIXME: Should this be conditional?
-      failed_when: false
-      ignore_errors: true
-      ignore_unreachable: true
+      # Optionally avoid failing the current host if delegated fact gathering fails.
+      ignore_errors: "{{ not delegated_fact_gathering_is_fatal | default(true) }}"
+      ignore_unreachable: "{{ not delegated_fact_gathering_is_fatal | default(true) }}"
   tags: always
