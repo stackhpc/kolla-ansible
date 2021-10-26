@@ -2,7 +2,7 @@ defaults:
   api_url: '{{ prometheus_jiralert_api_url }}'
   user: '{{ prometheus_jiralert_user }}'
   password: '{{ prometheus_jiralert_api_token }}'
-  issue_type: Bug
+  issue_type: Incident
 {% raw %}
   summary: '{{ template "jira.summary" . }}'
   description: '{{ template "jira.description" . }}'

@@ -1,5 +1,5 @@
 {
-    "command": "/opt/jiralert/jiralert -config /etc/jiralert/jiralert.yml -listen-address :9097 -log_dir /var/log/kolla/prometheus -alsologtostderr false",
+    "command": "/opt/jiralert/jiralert -config /etc/jiralert/jiralert.yml -listen-address :9097",
     "config_files": [
         {
             "source": "{{ container_config_directory }}/jiralert.yml",
