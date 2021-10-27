@@ -1,5 +1,5 @@
 {
-    "command": "/opt/jiralert/jiralert -config /etc/jiralert/jiralert.yml -listen-address :9097",
+    "command": "/opt/jiralert/jiralert -config /etc/jiralert/jiralert.yml -listen-address :9097{% if prometheus_logging_debug | bool %} -log.level debug{% endif %}",
     "config_files": [
         {
             "source": "{{ container_config_directory }}/jiralert.yml",

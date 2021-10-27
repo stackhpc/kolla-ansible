@@ -132,7 +132,6 @@ prometheus_blackbox_exporter_endpoints: []
 ####################
 
 # Whether to keep using Prometheus server v1 (due to no data-preserving migration path to v2)
-# NOTE(piotrp): Deprecated in Wallaby and will be removed in Xena
 prometheus_use_v1: no
 
 ###################
@@ -300,3 +299,5 @@ prometheus_openstack_exporter_disabled_lb: "{{ '--disable-service.load-balancer 
 prometheus_openstack_exporter_disabled_items: "{{ [prometheus_openstack_exporter_disabled_volume, prometheus_openstack_exporter_disabled_dns, prometheus_openstack_exporter_disabled_object, prometheus_openstack_exporter_disabled_lb|trim]|join(' ')|trim }}"
 
 prometheus_cadvisor_cmdline_extras: "--docker_only --store_container_labels=false --disable_metrics=percpu,referenced_memory,cpu_topology,resctrl,udp,advtcp,sched,hugetlb,memory_numa,tcp,process"
+
+prometheus_logging_debug: "{{ openstack_logging_debug }}"
