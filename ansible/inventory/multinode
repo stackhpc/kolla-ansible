@@ -747,6 +747,9 @@ elasticsearch
 [prometheus-blackbox-exporter:children]
 monitoring
 
+[prometheus-msteams:children]
+prometheus-alertmanager
+
 [masakari-api:children]
 control
 
