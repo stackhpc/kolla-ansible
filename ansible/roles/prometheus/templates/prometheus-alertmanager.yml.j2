@@ -35,6 +35,6 @@ receivers:
   - name: 'prometheus-msteams'
     webhook_configs:
     - send_resolved: true
-      url: 'http://{{ api_interface_address | put_address_in_context('url') }}:{{ prometheus_msteams_port }}/alertmanager'
+      url: 'http://localhost:{{ prometheus_msteams_port }}/alertmanager'
 {% endif %}
 templates: []
