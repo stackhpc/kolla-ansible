@@ -11,6 +11,7 @@
     virt_compute_service_hosts: >-
       {{ virt_computes_in_batch |
          map('extract', hostvars, 'ansible_nodename') |
+         map('lower') |
          list }}
     # For ironic, use {{ansible_hostname}}-ironic since this is what we
     # configure for [DEFAULT] host in nova.conf.
@@ -18,6 +19,7 @@
       {{ ironic_computes_in_batch |
          map('extract', hostvars, 'ansible_hostname') |
          map('regex_replace', '^(.*)$', '\1-ironic') |
+         map('lower') |
          list }}
   set_fact:
     expected_compute_service_hosts: "{{ virt_compute_service_hosts + ironic_compute_service_hosts }}"
