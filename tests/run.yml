@@ -188,7 +188,7 @@
 
         - name: download Ironic Python Agent (IPA) images
           get_url:
-            url: "https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/{{ item.src }}"
+            url: "https://tarballs.opendev.org/openstack/ironic-python-agent/tinyipa/files/{{ item.src }}"
             dest: "/etc/kolla/config/ironic/{{ item.dest }}"
           with_items:
             - src: "tinyipa-{{ zuul.branch | replace('/', '-') }}.gz"
@@ -206,22 +206,20 @@
     # NOTE(mgoddard): We need a recent pip to install the latest cryptography
     # library. See https://github.com/pyca/cryptography/issues/5753
     - name: install pip 19.1.1+
-      pip:
-        name: "pip>=19.1.1"
-        executable: "pip3"
-        extra_args: "--user"
+      command: >-
+        python3 -m pip install --user
+        pip>=19.1.1
 
     - name: install kolla-ansible and dependencies
       vars:
         # Test latest ansible version on Ubuntu, minimum supported on others.
         ansible_version_constraint: "==2.9.*"
-      pip:
-        name:
-          - "{{ kolla_ansible_src_dir }}"
-          - "ansible{{ ansible_version_constraint }}"
-          - "ara<1.0.0"
-        executable: "pip3"
-        extra_args: "-c {{ upper_constraints_file }} --user"
+      command: >-
+        python3 -m pip install --user
+        -c {{ upper_constraints_file }}
+        {{ kolla_ansible_src_dir }}
+        ansible{{ ansible_version_constraint }}
+        ara<1.0.0
 
     - name: get ARA callback plugin path
       command: "python3 -m ara.setup.callback_plugins"
@@ -279,7 +277,7 @@
     # same host being used by both)
     - name: create TLS certificates for octavia
       command: kolla-ansible octavia-certificates
-      when: scenario == 'magnum'
+      when: scenario in ['magnum', 'ovn']
 
     # NOTE(mgoddard): We are using the script module here and later to ensure
     # we use the local copy of these scripts, rather than the one on the remote
@@ -324,6 +322,10 @@
           environment:
             BASE_DISTRO: "{{ base_distro }}"
 
+        - name: Show free space
+          command:
+            cmd: df -h
+
         - name: Ensure required kolla config directories exist
           file:
             state: directory
@@ -352,7 +354,6 @@
           - { name: 'cinder/cinder-backup', keyring: "ceph.client.cinder.keyring" }
           - { name: 'cinder/cinder-backup', keyring: "ceph.client.cinder-backup.keyring" }
           - { name: 'glance', keyring: "ceph.client.glance.keyring" }
-          - { name: 'nova', keyring: "ceph.client.nova.keyring" }
           - { name: 'nova', keyring: "ceph.client.cinder.keyring" }
       when: scenario == "ceph-ansible"
 
@@ -386,8 +387,6 @@
             EXT_NET_CIDR: "{{ neutron_external_network_prefix }}0/{{ neutron_external_network_prefix_length }}"
             EXT_NET_RANGE: "start={{ neutron_external_network_prefix }}150,end={{ neutron_external_network_prefix }}199"
             EXT_NET_GATEWAY: "{{ neutron_external_network_prefix }}1"
-            EXT_NET_LOCAL_ADDR: "{{ neutron_external_network_prefix }}1/{{ neutron_external_network_prefix_length }}"
-            EXT_NET_SLAVE_DEVICE: "{{ neutron_external_interface_name }}"
             SCENARIO: "{{ scenario }}"
           when: openstack_core_tested or scenario in ['ironic', 'magnum', 'scenario_nfv', 'zun']
 
@@ -398,6 +397,8 @@
             chdir: "{{ kolla_ansible_src_dir }}"
           environment:
             SCENARIO: "{{ scenario }}"
+            HAS_UPGRADE: "{{ is_upgrade | bool | ternary('yes', 'no') }}"
+            PHASE: deploy
           when: openstack_core_tested
 
         - name: Run test-zun.sh script
@@ -406,6 +407,8 @@
             executable: /bin/bash
             chdir: "{{ kolla_ansible_src_dir }}"
           when: scenario == 'zun'
+          environment:
+            BASE_DISTRO: "{{ base_distro }}"
 
         - name: Run test-swift.sh script
           script:
@@ -537,10 +540,10 @@
           when: item.when | default(true)
 
         - name: upgrade kolla-ansible
-          pip:
-            name: "{{ kolla_ansible_src_dir }}"
-            executable: pip3
-            extra_args: "-c {{ upper_constraints_file }} --user"
+          command: >-
+            python3 -m pip install --user
+            -c {{ upper_constraints_file }}
+            {{ kolla_ansible_src_dir }}
 
         # Update passwords.yml to include any new passwords added in this
         # release.
@@ -587,6 +590,8 @@
             chdir: "{{ kolla_ansible_src_dir }}"
           environment:
             SCENARIO: "{{ scenario }}"
+            HAS_UPGRADE: 'yes'
+            PHASE: upgrade
           when: openstack_core_tested
       when: is_upgrade
 

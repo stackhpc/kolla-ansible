@@ -47,6 +47,15 @@ scrape_configs:
 {% endfor %}
 {% endif %}
 
+{% if enable_prometheus_rabbitmq_exporter | bool %}
+  - job_name: rabbitmq
+    static_configs:
+      - targets:
+{% for host in groups['rabbitmq'] %}
+        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_rabbitmq_exporter_port'] }}'
+{% endfor %}
+{% endif %}
+
 {% if enable_prometheus_memcached_exporter | bool %}
   - job_name: memcached
     static_configs:
@@ -78,6 +87,7 @@ scrape_configs:
 {% if enable_prometheus_openstack_exporter | bool %}
   - job_name: openstack_exporter
     scrape_interval: {{ prometheus_openstack_exporter_interval }}
+    scrape_timeout: {{ prometheus_openstack_exporter_timeout }}
     honor_labels: true
     static_configs:
       - targets:

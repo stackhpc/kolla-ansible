@@ -14,7 +14,6 @@
     - - service_name: "cron"
         paths:
           - "cron"
-          - "cron/logrotate"
       - service_name: "fluentd"
         paths:
           - "fluentd"
@@ -33,7 +32,9 @@
     action: "ensure_image"
     common_options: "{{ docker_common_options }}"
     image: "{{ service.image }}"
-  when: service | service_enabled_and_mapped_to_host
+  when:
+    - fluentd_version is not defined or fluentd_binary is not defined
+    - service | service_enabled_and_mapped_to_host
 
 - name: Fetch fluentd image labels
   vars:
@@ -43,12 +44,16 @@
   docker_image_info:
     name: "{{ service.image }}"
   register: fluentd_labels
-  when: service | service_enabled_and_mapped_to_host
+  when:
+    - fluentd_version is not defined or fluentd_binary is not defined
+    - service | service_enabled_and_mapped_to_host
 
 - name: Set fluentd facts
   set_fact:
     fluentd_binary: "{{ fluentd_labels.images.0.ContainerConfig.Labels.fluentd_binary }}"
-  when: common_services.fluentd | service_enabled_and_mapped_to_host
+  when:
+    - fluentd_binary is not defined
+    - common_services.fluentd | service_enabled_and_mapped_to_host
 
 - include_tasks: copy-certs.yml
   when:
@@ -105,8 +110,9 @@
   vars:
     log_direct_to_elasticsearch: >-
       {{ ( enable_elasticsearch | bool or
-           ( elasticsearch_address != kolla_internal_vip_address )) and
+           ( elasticsearch_address != kolla_internal_fqdn )) and
            ( not enable_monasca | bool or not monasca_ingest_control_plane_logs | bool ) }}
+         not enable_monasca | bool }}
     fluentd_version: "{{ fluentd_labels.images.0.ContainerConfig.Labels.fluentd_version | default('0.12') }}"
     # Inputs
     fluentd_input_files: "{{ default_input_files | customise_fluentd(customised_input_files) }}"
@@ -271,6 +277,7 @@
   become: true
   when:
     - common_services['kolla-toolbox'] | service_enabled_and_mapped_to_host
+    - enable_rabbitmq | bool
     - api_address_family == "ipv6"
 
 - name: Copy rabbitmq erl_intr to kolla toolbox
@@ -282,4 +289,5 @@
   become: true
   when:
     - common_services['kolla-toolbox'] | service_enabled_and_mapped_to_host
+    - enable_rabbitmq | bool
     - api_address_family == "ipv6"

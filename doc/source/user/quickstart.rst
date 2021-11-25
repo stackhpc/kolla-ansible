@@ -155,13 +155,13 @@ Install Kolla-ansible for deployment or evaluation
 
    .. code-block:: console
 
-      pip install kolla-ansible
+      pip install git+https://opendev.org/openstack/kolla-ansible@|KOLLA_BRANCH_NAME|
 
    If not using a virtual environment:
 
    .. code-block:: console
 
-      sudo pip3 install kolla-ansible
+      sudo pip3 install git+https://opendev.org/openstack/kolla-ansible@|KOLLA_BRANCH_NAME|
 
 #. Create the ``/etc/kolla`` directory.
 
@@ -206,8 +206,8 @@ Install Kolla for development
 
    .. code-block:: console
 
-      git clone https://github.com/openstack/kolla
-      git clone https://github.com/openstack/kolla-ansible
+      git clone --branch |KOLLA_BRANCH_NAME| https://opendev.org/openstack/kolla
+      git clone --branch |KOLLA_BRANCH_NAME| https://opendev.org/openstack/kolla-ansible
 
 #. Install requirements of ``kolla`` and ``kolla-ansible``:
 
@@ -375,6 +375,16 @@ There are a few options that are required to deploy Kolla-Ansible:
 
      kolla_base_distro: "centos"
 
+  You can also use CentOS Stream 8 - it's recommended for new installations
+  because CentOS Linux 8 will be supported only until `31st Dec 2021 <https://wiki.centos.org/About/Product>`__.
+
+  By default Kolla-Ansible will use ``-centos8s`` ``openstack_tag_suffix`` on CentOS Stream 8 hosts,
+  to override that behaviour please set ``openstack_tag_suffix`` to an empty/different value.
+
+  .. code-block:: yaml
+
+     openstack_tag_suffix: ""
+
   Next "type" of installation needs to be configured.
   Choices are:
 
@@ -534,7 +544,7 @@ Using OpenStack
 
    .. code-block:: console
 
-      pip install python3-openstackclient
+      pip install python-openstackclient -c https://releases.openstack.org/constraints/upper/|KOLLA_OPENSTACK_RELEASE|
 
 #. OpenStack requires an openrc file where credentials for admin user
    are set. To generate this file:
@@ -557,8 +567,15 @@ Using OpenStack
 #. Depending on how you installed Kolla-Ansible, there is a script that will
    create example networks, images, and so on.
 
-   * For deployment or evaluation,
-     run ``init-runonce`` script:
+   * For deployment or evaluation, run ``init-runonce`` script.
+
+     If using a virtual environment:
+
+     .. code-block:: console
+
+        /path/to/venv/share/kolla-ansible/init-runonce
+
+     If not using a virtual environment:
 
      .. code-block:: console
 

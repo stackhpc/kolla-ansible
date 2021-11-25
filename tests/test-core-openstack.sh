@@ -16,66 +16,126 @@ function test_smoke {
     fi
 }
 
-function test_instance_boot {
-    echo "TESTING: Server creation"
-    openstack server create --wait --image cirros --flavor m1.tiny --key-name mykey --network demo-net kolla_boot_test
-    openstack --debug server list
+function create_a_volume {
+    local volume_name=$1
+
+    local attempt
+
+    openstack volume create --size 2 $volume_name
+    attempt=1
+    while [[ $(openstack volume show $volume_name -f value -c status) != "available" ]]; do
+        echo "Volume $volume_name not available yet"
+        attempt=$((attempt+1))
+        if [[ $attempt -eq 10 ]]; then
+            echo "Volume $volume_name failed to become available"
+            openstack volume show $volume_name
+            return 1
+        fi
+        sleep 10
+    done
+}
+
+function attach_and_detach_a_volume {
+    local volume_name=$1
+    local instance_name=$2
+
+    local attempt
+
+    openstack server add volume $instance_name $volume_name --device /dev/vdb
+    attempt=1
+    while [[ $(openstack volume show $volume_name -f value -c status) != "in-use" ]]; do
+        echo "Volume $volume_name not attached yet"
+        attempt=$((attempt+1))
+        if [[ $attempt -eq 10 ]]; then
+            echo "Volume failed to attach"
+            openstack volume show $volume_name
+            return 1
+        fi
+        sleep 10
+    done
+
+    openstack server remove volume $instance_name $volume_name
+    attempt=1
+    while [[ $(openstack volume show $volume_name -f value -c status) != "available" ]]; do
+        echo "Volume $volume_name not detached yet"
+        attempt=$((attempt+1))
+        if [[ $attempt -eq 10 ]]; then
+            echo "Volume failed to detach"
+            openstack volume show $volume_name
+            return 1
+        fi
+        sleep 10
+    done
+}
+
+function delete_a_volume {
+    local volume_name=$1
+
+    local attempt
+    local result
+
+    openstack volume delete $volume_name
+
+    attempt=1
+    # NOTE(yoctozepto): This is executed outside of the `while` clause
+    # *on purpose*. You see, bash is evil (TM) and will silence any error
+    # happening in any "condition" clause (such as `if` or `while`) even with
+    # `errexit` being set.
+    result=$(openstack volume list --name $volume_name -f value -c ID)
+    while [[ -n "$result" ]]; do
+        echo "Volume $volume_name not deleted yet"
+        attempt=$((attempt+1))
+        if [[ $attempt -eq 10 ]]; then
+            echo "Volume failed to delete"
+            openstack volume show $volume_name
+            return 1
+        fi
+        sleep 10
+        result=$(openstack volume list --name $volume_name -f value -c ID)
+    done
+}
+
+function create_instance {
+    local name=$1
+    openstack server create --wait --image cirros --flavor m1.tiny --key-name mykey --network demo-net ${name}
     # If the status is not ACTIVE, print info and exit 1
-    if [[ $(openstack server show kolla_boot_test -f value -c status) != "ACTIVE" ]]; then
+    if [[ $(openstack server show ${name} -f value -c status) != "ACTIVE" ]]; then
         echo "FAILED: Instance is not active"
-        openstack --debug server show kolla_boot_test
+        openstack --debug server show ${name}
         return 1
     fi
-    echo "SUCCESS: Server creation"
+}
 
-    if [[ $SCENARIO == "ceph-ansible" ]] || [[ $SCENARIO == "zun" ]]; then
-        echo "TESTING: Cinder volume attachment"
-        openstack volume create --size 2 test_volume
-        attempt=1
-        while [[ $(openstack volume show test_volume -f value -c status) != "available" ]]; do
-            echo "Volume not available yet"
-            attempt=$((attempt+1))
-            if [[ $attempt -eq 10 ]]; then
-                echo "Volume failed to become available"
-                openstack volume show test_volume
-                return 1
-            fi
-            sleep 10
-        done
-        openstack server add volume kolla_boot_test test_volume --device /dev/vdb
-        attempt=1
-        while [[ $(openstack volume show test_volume -f value -c status) != "in-use" ]]; do
-            echo "Volume not attached yet"
-            attempt=$((attempt+1))
-            if [[ $attempt -eq 10 ]]; then
-                echo "Volume failed to attach"
-                openstack volume show test_volume
-                return 1
-            fi
-            sleep 10
-        done
-        openstack server remove volume kolla_boot_test test_volume
-        attempt=1
-        while [[ $(openstack volume show test_volume -f value -c status) != "available" ]]; do
-            echo "Volume not detached yet"
-            attempt=$((attempt+1))
-            if [[ $attempt -eq 10 ]]; then
-                echo "Volume failed to detach"
-                openstack volume show test_volume
-                return 1
-            fi
-            sleep 10
-        done
-        openstack volume delete test_volume
-        echo "SUCCESS: Cinder volume attachment"
-    fi
+function delete_instance {
+    local name=$1
+    openstack server delete --wait ${name}
+}
 
-    echo "TESTING: Floating ip allocation"
-    fip_addr=$(openstack floating ip create public1 -f value -c floating_ip_address)
-    openstack server add floating ip kolla_boot_test ${fip_addr}
-    echo "SUCCESS: Floating ip allocation"
+function create_fip {
+    openstack floating ip create public1 -f value -c floating_ip_address
+}
 
-    echo "TESTING: PING&SSH to floating ip"
+function delete_fip {
+    local fip_addr=$1
+    openstack floating ip delete ${fip_addr}
+}
+
+function attach_fip {
+    local instance_name=$1
+    local fip_addr=$2
+    openstack server add floating ip ${instance_name} ${fip_addr}
+}
+
+function detach_fip {
+    local instance_name=$1
+    local fip_addr=$2
+    openstack server remove floating ip ${instance_name} ${fip_addr}
+}
+
+function test_ssh {
+    local instance_name=$1
+    local fip_addr=$2
+    local attempts
     attempts=12
     for i in $(seq 1 ${attempts}); do
         if ping -c1 -W1 ${fip_addr} && ssh -v -o BatchMode=yes -o StrictHostKeyChecking=no cirros@${fip_addr} hostname; then
@@ -83,23 +143,86 @@ function test_instance_boot {
         elif [[ $i -eq ${attempts} ]]; then
             echo "Failed to access server via SSH after ${attempts} attempts"
             echo "Console log:"
-            openstack console log show kolla_boot_test
+            openstack console log show ${instance_name} || true
+            openstack --debug server show ${instance_name}
             return 1
         else
             echo "Cannot access server - retrying"
         fi
         sleep 10
     done
+}
+
+function test_instance_boot {
+    local fip_addr
+
+    echo "TESTING: Server creation"
+    create_instance kolla_boot_test
+    echo "SUCCESS: Server creation"
+
+    if [[ $SCENARIO == "ceph-ansible" ]] || [[ $SCENARIO == "zun" ]]; then
+        echo "TESTING: Cinder volume attachment"
+
+        create_a_volume test_volume
+        openstack volume show test_volume
+        attach_and_detach_a_volume test_volume kolla_boot_test
+        delete_a_volume test_volume
+
+        echo "SUCCESS: Cinder volume attachment"
+
+        if [[ $HAS_UPGRADE == 'yes' ]]; then
+            echo "TESTING: Cinder volume upgrade stability (PHASE: $PHASE)"
+
+            if [[ $PHASE == 'deploy' ]]; then
+                create_a_volume durable_volume
+                openstack volume show durable_volume
+            elif [[ $PHASE == 'upgrade' ]]; then
+                openstack volume show durable_volume
+                attach_and_detach_a_volume durable_volume kolla_boot_test
+                delete_a_volume durable_volume
+            fi
+
+            echo "SUCCESS: Cinder volume upgrade stability (PHASE: $PHASE)"
+        fi
+    fi
+
+    echo "TESTING: Floating ip allocation"
+    fip_addr=$(create_fip)
+    attach_fip kolla_boot_test ${fip_addr}
+    echo "SUCCESS: Floating ip allocation"
+
+    echo "TESTING: PING&SSH to floating ip"
+    test_ssh kolla_boot_test ${fip_addr}
     echo "SUCCESS: PING&SSH to floating ip"
 
     echo "TESTING: Floating ip deallocation"
-    openstack server remove floating ip kolla_boot_test ${fip_addr}
-    openstack floating ip delete ${fip_addr}
+    detach_fip kolla_boot_test ${fip_addr}
+    delete_fip ${fip_addr}
     echo "SUCCESS: Floating ip deallocation"
 
     echo "TESTING: Server deletion"
-    openstack server delete --wait kolla_boot_test
+    delete_instance kolla_boot_test
     echo "SUCCESS: Server deletion"
+
+    if [[ $HAS_UPGRADE == 'yes' ]]; then
+        echo "TESTING: Instance (Nova and Neutron) upgrade stability (PHASE: $PHASE)"
+
+        if [[ $PHASE == 'deploy' ]]; then
+            create_instance kolla_upgrade_test
+            fip_addr=$(create_fip)
+            attach_fip kolla_upgrade_test ${fip_addr}
+            test_ssh kolla_upgrade_test ${fip_addr}  # tested to see if the instance has not just failed booting already
+            echo ${fip_addr} > /tmp/kolla_ci_pre_upgrade_fip_addr
+        elif [[ $PHASE == 'upgrade' ]]; then
+            fip_addr=$(cat /tmp/kolla_ci_pre_upgrade_fip_addr)
+            test_ssh kolla_upgrade_test ${fip_addr}
+            detach_fip kolla_upgrade_test ${fip_addr}
+            delete_fip ${fip_addr}
+            delete_instance kolla_upgrade_test
+        fi
+
+        echo "SUCCESS: Instance (Nova and Neutron) upgrade stability (PHASE: $PHASE)"
+    fi
 }
 
 function test_openstack_logged {

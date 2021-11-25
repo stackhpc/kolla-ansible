@@ -26,6 +26,9 @@ function setup_openstack_clients {
     if [[ $SCENARIO == scenario_nfv ]]; then
         packages+=(python-tackerclient python-barbicanclient python-mistralclient)
     fi
+    if [[ $SCENARIO == ovn ]]; then
+        packages+=(python-octaviaclient)
+    fi
     if [[ "debian" == $BASE_DISTRO ]]; then
         sudo apt -y install python3-venv
     fi
@@ -57,7 +60,7 @@ function prepare_images {
     fi
 
     if [[ $SCENARIO == "scenario_nfv" ]]; then
-        GATE_IMAGES+=",^tacker,^mistral,^redis,^barbican"
+        GATE_IMAGES+=",^aodh,^tacker,^mistral,^redis,^barbican"
     fi
     if [[ $SCENARIO == "ironic" ]]; then
         GATE_IMAGES+=",^dnsmasq,^ironic,^iscsid"
@@ -74,7 +77,7 @@ function prepare_images {
     fi
 
     if [[ $SCENARIO == "ovn" ]]; then
-        GATE_IMAGES+=",^ovn"
+        GATE_IMAGES+=",^octavia,^ovn"
     fi
 
     if [[ $SCENARIO == "mariadb" ]]; then
@@ -116,6 +119,6 @@ EOF
 setup_openstack_clients
 
 RAW_INVENTORY=/etc/kolla/inventory
-tools/kolla-ansible -i ${RAW_INVENTORY} -e ansible_user=$USER -vvv bootstrap-servers &> /tmp/logs/ansible/bootstrap-servers
+kolla-ansible -i ${RAW_INVENTORY} -e ansible_user=$USER -vvv bootstrap-servers &> /tmp/logs/ansible/bootstrap-servers
 
 prepare_images
