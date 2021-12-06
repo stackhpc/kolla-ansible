@@ -155,13 +155,13 @@ Install Kolla-ansible for deployment or evaluation
 
    .. code-block:: console
 
-      pip install kolla-ansible
+      pip install git+https://opendev.org/openstack/kolla-ansible@|KOLLA_BRANCH_NAME|
 
    If not using a virtual environment:
 
    .. code-block:: console
 
-      sudo pip3 install kolla-ansible
+      sudo pip3 install git+https://opendev.org/openstack/kolla-ansible@|KOLLA_BRANCH_NAME|
 
 #. Create the ``/etc/kolla`` directory.
 
@@ -202,12 +202,11 @@ Install Kolla-ansible for deployment or evaluation
 Install Kolla for development
 -----------------------------
 
-#. Clone ``kolla`` and ``kolla-ansible`` repositories from git.
+#. Clone ``kolla-ansible`` repository from git.
 
    .. code-block:: console
 
-      git clone https://github.com/openstack/kolla
-      git clone https://github.com/openstack/kolla-ansible
+      git clone --branch |KOLLA_BRANCH_NAME| https://opendev.org/openstack/kolla-ansible
 
 #. Install requirements of ``kolla`` and ``kolla-ansible``:
 
@@ -215,14 +214,12 @@ Install Kolla for development
 
    .. code-block:: console
 
-      pip install ./kolla
       pip install ./kolla-ansible
 
    If not using a virtual environment:
 
    .. code-block:: console
 
-      sudo pip3 install ./kolla
       sudo pip3 install ./kolla-ansible
 
 #. Create the ``/etc/kolla`` directory.
@@ -534,7 +531,7 @@ Using OpenStack
 
    .. code-block:: console
 
-      pip install python3-openstackclient
+      pip install python-openstackclient -c https://releases.openstack.org/constraints/upper/|KOLLA_OPENSTACK_RELEASE|
 
 #. OpenStack requires an openrc file where credentials for admin user
    are set. To generate this file:
@@ -557,8 +554,15 @@ Using OpenStack
 #. Depending on how you installed Kolla Ansible, there is a script that will
    create example networks, images, and so on.
 
-   * For deployment or evaluation,
-     run ``init-runonce`` script:
+   * For deployment or evaluation, run ``init-runonce`` script.
+
+     If using a virtual environment:
+
+     .. code-block:: console
+
+        /path/to/venv/share/kolla-ansible/init-runonce
+
+     If not using a virtual environment:
 
      .. code-block:: console
 
