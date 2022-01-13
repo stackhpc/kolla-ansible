@@ -14,7 +14,7 @@
     - Restart {{ item }} container
 
 - name: Copy over ceph gnocchi keyring
-  copy:
+  template:
     src: "{{ node_custom_config }}/gnocchi/{{ ceph_gnocchi_keyring }}"
     dest: "{{ node_config_directory }}/{{ item }}/{{ ceph_gnocchi_keyring }}"
     mode: "0660"
