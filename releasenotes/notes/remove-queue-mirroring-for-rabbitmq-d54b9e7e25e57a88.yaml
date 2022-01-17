@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fixes an issue where OpenStack services were configured to use transient
+    mirrored queues (which is not supported by RabbitMQ) by removing the
+    replicas.
