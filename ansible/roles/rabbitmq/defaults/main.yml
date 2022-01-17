@@ -55,6 +55,8 @@ rabbitmq_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker
 rabbitmq_tag: "{{ openstack_tag }}"
 rabbitmq_image_full: "{{ rabbitmq_image }}:{{ rabbitmq_tag }}"
 rabbitmq_dimensions: "{{ default_container_dimensions }}"
+# Whether to remove the ha-all policy.
+rabbitmq_remove_ha_all_policy: false
 
 rabbitmq_default_volumes:
   - "{{ node_config_directory }}/{{ project_name }}/:{{ container_config_directory }}/:ro"
