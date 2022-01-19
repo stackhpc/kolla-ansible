@@ -106,6 +106,12 @@
   when:
     - kolla_action != "config"
 
+- name: Reload libvirtd
+  become: true
+  service:
+    name: libvirtd
+    state: reloaded
+
 - name: Restart nova-compute container
   vars:
     service_name: "nova-compute"

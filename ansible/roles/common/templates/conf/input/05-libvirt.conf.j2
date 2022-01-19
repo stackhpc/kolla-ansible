@@ -1,3 +1,4 @@
+{% if enable_nova | bool and enable_nova_libvirt_container | bool %}
 <source>
   @type tail
   path /var/log/kolla/libvirt/libvirtd.log
@@ -9,3 +10,4 @@
   enable_watch_timer false
   emit_unmatched_lines true
 </source>
+{% endif %}
