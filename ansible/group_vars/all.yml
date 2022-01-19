@@ -463,6 +463,9 @@ prometheus_fluentd_integration_port: "24231"
 prometheus_alertmanager_port: "9093"
 prometheus_alertmanager_cluster_port: "9094"
 
+# Prometheus MSTeams port
+prometheus_msteams_port: "9095"
+
 # Prometheus openstack-exporter ports
 prometheus_openstack_exporter_port: "9198"
 prometheus_elasticsearch_exporter_port: "9108"
@@ -1114,8 +1117,11 @@ enable_prometheus_openstack_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_elasticsearch_exporter: "{{ enable_prometheus | bool and enable_elasticsearch | bool }}"
 enable_prometheus_blackbox_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_rabbitmq_exporter: "{{ enable_prometheus | bool and enable_rabbitmq | bool }}"
+enable_prometheus_msteams: "no"
 
 prometheus_alertmanager_user: "admin"
+# Webhook URL used to post alerts to Microsoft Teams
+prometheus_msteams_webhook_url:
 prometheus_openstack_exporter_interval: "60s"
 prometheus_openstack_exporter_timeout: "10s"
 prometheus_elasticsearch_exporter_interval: "60s"
