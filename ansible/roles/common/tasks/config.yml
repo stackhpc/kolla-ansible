@@ -116,16 +116,28 @@
     # Inputs
     fluentd_input_files: "{{ default_input_files | customise_fluentd(customised_input_files) }}"
     default_input_files:
-      - "conf/input/99-caso.conf.j2"
-      - "conf/input/00-global.conf.j2"
-      - "conf/input/01-syslog.conf.j2"
-      - "conf/input/02-mariadb.conf.j2"
-      - "conf/input/03-rabbitmq.conf.j2"
-      - "conf/input/04-openstack-wsgi.conf.j2"
-      - "conf/input/05-libvirt.conf.j2"
-      - "conf/input/06-zookeeper.conf.j2"
-      - "conf/input/07-kafka.conf.j2"
-      - "conf/input/09-monasca.conf.j2"
+      - name: "conf/input/00-global.conf.j2"
+        enabled: true
+      - name: "conf/input/99-caso.conf.j2"
+        enabled: true
+      - name: "conf/input/01-syslog.conf.j2"
+        enabled: true
+      - name: "conf/input/02-mariadb.conf.j2"
+        enabled: true
+      - name: "conf/input/03-rabbitmq.conf.j2"
+        enabled: true
+      - name: "conf/input/04-openstack-wsgi.conf.j2"
+        enabled: true
+      - name: "conf/input/05-libvirt.conf.j2"
+        enabled: "{{ enable_nova | bool and enable_nova_libvirt_container | bool }}"
+      - name: "conf/input/06-zookeeper.conf.j2"
+        enabled: true
+      - name: "conf/input/07-kafka.conf.j2"
+        enabled: true
+      - name: "conf/input/08-prometheus.conf.j2"
+        enabled: "{{ enable_prometheus_fluentd_integration | bool }}"
+      - name: "conf/input/09-monasca.conf.j2"
+        enabled: true
     customised_input_files: "{{ find_custom_fluentd_inputs.files | map(attribute='path') | list }}"
     # Filters
     fluentd_filter_files: "{{ default_filter_files | customise_fluentd(customised_filter_files) }}"
@@ -213,7 +225,7 @@
       - { name: "neutron-tls-proxy", enabled: "{{ neutron_enable_tls_backend |
       bool }}" }
       - { name: "nova", enabled: "{{ enable_nova | bool }}" }
-      - { name: "nova-libvirt", enabled: "{{ enable_nova | bool and nova_compute_virt_type in ['kvm', 'qemu'] }}" }
+      - { name: "nova-libvirt", enabled: "{{ enable_nova | bool and enable_nova_libvirt_container | bool }}" }
       - { name: "octavia", enabled: "{{ enable_octavia | bool }}" }
       - { name: "openvswitch", enabled: "{{ enable_openvswitch | bool }}" }
       - { name: "outward-rabbitmq", enabled: "{{ enable_outward_rabbitmq | bool }}" }
