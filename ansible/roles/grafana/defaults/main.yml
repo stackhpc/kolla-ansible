@@ -1,6 +1,4 @@
 ---
-project_name: "grafana"
-
 grafana_services:
   grafana:
     container_name: grafana
@@ -80,6 +78,9 @@ grafana_default_volumes:
   - "grafana:/var/lib/grafana/"
   - "kolla_logs:/var/log/kolla/"
 grafana_extra_volumes: "{{ default_extra_volumes }}"
+
+grafana_start_first_node_delay: 10
+grafana_start_first_node_retries: 12
 
 ############
 # Prometheus

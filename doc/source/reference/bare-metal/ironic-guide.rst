@@ -74,10 +74,11 @@ true in ``/etc/kolla/globals.yml``:
 
 .. code-block:: yaml
 
-    enable_ironic_ipxe: "yes"
+   enable_ironic_ipxe: "yes"
 
-This will enable deployment of a docker container, called ironic_ipxe, running
-the web server which iPXE uses to obtain it's boot images.
+When iPXE booting is enabled, the ``ironic_ipxe`` container is used to serve
+the iPXE boot images as described below. Regardless of the setting above, the
+same container is used to support the ``direct`` deploy interface.
 
 The port used for the iPXE webserver is controlled via ``ironic_ipxe_port`` in
 ``/etc/kolla/globals.yml``:
@@ -94,6 +95,17 @@ The following changes will occur if iPXE booting is enabled:
 - The DHCP servers will be configured to chainload iPXE from an existing PXE
   environment. You may also boot directly to iPXE by some other means e.g by
   burning it to the option rom of your ethernet card.
+
+Note that due to a limitation in Kolla Ansible, PXE and iPXE cannot be used
+together in a single deployment.
+
+In order to enable the iPXE driver in Ironic, set the ``[DEFAULT]
+enabled_boot_interfaces`` option in ``/etc/kolla/config/ironic.conf``:
+
+.. code-block:: yaml
+
+   [DEFAULT]
+   enabled_boot_interfaces = ipxe
 
 Attach ironic to external keystone (optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -128,13 +140,6 @@ Run the deploy as usual:
 
 Post-deployment configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-A script named `init-runonce` is supplied as part of kolla-ansible to
-initialise the cloud with some defaults (only to be used for demo purposes):
-
-.. code-block:: console
-
-  tools/init-runonce
-
 The :ironic-doc:`Ironic documentation <install/configure-glance-images>`
 describes how to create the deploy kernel and ramdisk and register them with
 Glance. In this example we're reusing the same images that were fetched for the
@@ -198,12 +203,16 @@ Use the following commands to wait for the resources to become available:
 
 Booting the baremetal
 ~~~~~~~~~~~~~~~~~~~~~
-You can now use the following sample command to boot the baremetal instance:
+Assuming you have followed the examples above and created the demo resources
+as shown in the :doc:`../../user/quickstart`, you can now use the following
+example command to boot the baremetal instance:
 
 .. code-block:: console
 
   openstack server create --image cirros --flavor my-baremetal-flavor \
     --key-name mykey --network public1 demo1
+
+In other cases you will need to adapt the command to match your environment.
 
 Notes
 ~~~~~
