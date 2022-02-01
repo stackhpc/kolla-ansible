@@ -289,6 +289,7 @@
 #enable_ceilometer_ipmi: "no"
 #enable_cells: "no"
 #enable_central_logging: "no"
+#enable_ceph_rgw: "no"
 #enable_chrony: "yes"
 #enable_cinder: "no"
 #enable_cinder_backup: "yes"
