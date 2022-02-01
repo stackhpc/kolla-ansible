@@ -124,6 +124,11 @@ enable_cinder: "yes"
 glance_backend_ceph: "yes"
 cinder_backend_ceph: "yes"
 nova_backend_ceph: "yes"
+enable_ceph_rgw: {{ not is_upgrade or previous_release != 'victoria' }}
+ceph_rgw_hosts:
+{% for host in hostvars %}
+  - {{ hostvars[host]['ansible_host'] }}:6780
+{% endfor %}
 {% endif %}
 
 {% if tls_enabled %}

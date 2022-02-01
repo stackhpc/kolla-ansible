@@ -289,6 +289,7 @@
 #enable_ceilometer_ipmi: "no"
 #enable_cells: "no"
 #enable_central_logging: "no"
+#enable_ceph_rgw: "no"
 #enable_chrony: "yes"
 #enable_cinder: "no"
 #enable_cinder_backup: "yes"
@@ -674,6 +675,7 @@
 # Prometheus
 ############
 #enable_prometheus_server: "{{ enable_prometheus | bool }}"
+#enable_prometheus_libvirt_exporter: "no"
 #enable_prometheus_haproxy_exporter: "{{ enable_haproxy | bool }}"
 #enable_prometheus_mysqld_exporter: "{{ enable_mariadb | bool }}"
 #enable_prometheus_node_exporter: "{{ enable_prometheus | bool }}"

@@ -13,6 +13,7 @@ prometheus_services:
         mode: "http"
         external: false
         port: "{{ prometheus_port }}"
+        custom_member_list: "{{ prometheus_haproxy_members.split(';') }}"
   prometheus-node-exporter:
     container_name: prometheus_node_exporter
     group: prometheus-node-exporter
@@ -21,6 +22,13 @@ prometheus_services:
     pid_mode: "host"
     volumes: "{{ prometheus_node_exporter_default_volumes + prometheus_node_exporter_extra_volumes }}"
     dimensions: "{{ prometheus_node_exporter_dimensions }}"
+  prometheus-libvirt-exporter:
+    container_name: "prometheus_libvirt_exporter"
+    group: "prometheus-libvirt-exporter"
+    enabled: "{{ enable_prometheus_libvirt_exporter | bool }}"
+    image: "{{ prometheus_libvirt_exporter_image_full }}"
+    volumes: "{{ prometheus_libvirt_exporter_default_volumes + prometheus_libvirt_exporter_extra_volumes }}"
+    dimensions: "{{ prometheus_libvirt_exporter_dimensions }}"
   prometheus-mysqld-exporter:
     container_name: prometheus_mysqld_exporter
     group: prometheus-mysqld-exporter
@@ -99,6 +107,11 @@ prometheus_services:
 prometheus_mysql_exporter_database_user: "{% if use_preconfigured_databases | bool and use_common_mariadb_user | bool %}{{ database_user }}{% else %}prometheus{% endif %}"
 
 ####################
+# HAProxy
+####################
+prometheus_haproxy_members: "{% for host in groups['prometheus'] %}server {{ hostvars[host]['ansible_hostname'] }} {{ 'api' | kolla_address(host) }}:{{ prometheus_port }} check inter 2000 rise 2 fall 5{% if not loop.first %} backup{% endif %};{% endfor %}"
+
+####################
 # Blackbox
 ####################
 
@@ -120,6 +133,10 @@ prometheus_tag: "{{ openstack_tag }}"
 prometheus_server_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ prometheus_install_type }}-prometheus-server"
 prometheus_server_tag: "{{ prometheus_tag }}"
 prometheus_server_image_full: "{{ prometheus_server_image }}:{{ prometheus_server_tag }}"
+
+prometheus_libvirt_exporter_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ prometheus_install_type }}-prometheus-libvirt-exporter"
+prometheus_libvirt_exporter_tag: "{{ prometheus_tag }}"
+prometheus_libvirt_exporter_image_full: "{{ prometheus_libvirt_exporter_image }}:{{ prometheus_libvirt_exporter_tag }}"
 
 prometheus_haproxy_exporter_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ prometheus_install_type }}-prometheus-haproxy-exporter"
 prometheus_haproxy_exporter_tag: "{{ prometheus_tag }}"
@@ -159,6 +176,7 @@ prometheus_blackbox_exporter_tag: "{{ prometheus_tag }}"
 prometheus_blackbox_exporter_image_full: "{{ prometheus_blackbox_exporter_image }}:{{ prometheus_blackbox_exporter_tag }}"
 
 prometheus_server_dimensions: "{{ default_container_dimensions }}"
+prometheus_libvirt_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_haproxy_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_mysqld_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_node_exporter_dimensions: "{{ default_container_dimensions }}"
@@ -175,6 +193,10 @@ prometheus_server_default_volumes:
   - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "prometheus:/var/lib/prometheus"
   - "kolla_logs:/var/log/kolla/"
+prometheus_libvirt_exporter_default_volumes:
+  - "{{ node_config_directory }}/prometheus-libvirt-exporter/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "libvirtd_run:/var/run/libvirt:ro"
 prometheus_haproxy_exporter_default_volumes:
   - "{{ node_config_directory }}/prometheus-haproxy-exporter/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
@@ -231,6 +253,7 @@ prometheus_blackbox_exporter_default_volumes:
   - "kolla_logs:/var/log/kolla/"
 
 prometheus_extra_volumes: "{{ default_extra_volumes }}"
+prometheus_libvirt_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
 prometheus_server_extra_volumes: "{{ prometheus_extra_volumes }}"
 prometheus_haproxy_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
 prometheus_mysqld_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"

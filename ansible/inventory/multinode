@@ -42,6 +42,10 @@ monitoring
 [tls-backend:children]
 control
 
+# Caso
+[caso:children]
+monitoring
+
 # You can explicitly specify which hosts run each project by updating the
 # groups in the sections below. Common services are grouped together.
 
@@ -745,6 +749,9 @@ control
 compute
 network
 storage
+
+[prometheus-libvirt-exporter:children]
+compute
 
 [prometheus-mysqld-exporter:children]
 mariadb
