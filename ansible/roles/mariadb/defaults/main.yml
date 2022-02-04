@@ -1,6 +1,4 @@
 ---
-project_name: "mariadb"
-
 mariadb_services:
   mariadb:
     container_name: mariadb
@@ -117,4 +115,4 @@ mariadb_backup_type: "full"
 ####################
 # Clustercheck
 ####################
-enable_mariadb_clustercheck: "yes"
+enable_mariadb_clustercheck: "{{ enable_haproxy }}"

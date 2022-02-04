@@ -17,14 +17,15 @@ Enable Ironic in ``/etc/kolla/globals.yml``:
 
    enable_ironic: "yes"
 
-In the same file, define a network interface as the default NIC for dnsmasq,
-a range of IP addresses that will be available for use by Ironic inspector,
-as well as a network to be used for the Ironic cleaning network:
+In the same file, define a network interface as the default NIC for dnsmasq and
+a range of IP addresses that will be available for use by Ironic inspector.
+The optional netmask of the network should be provided in case when DHCP-relay
+is used. Finally, define a network to be used for the Ironic cleaning network:
 
 .. code-block:: yaml
 
    ironic_dnsmasq_interface: "eth1"
-   ironic_dnsmasq_dhcp_range: "192.168.5.100,192.168.5.110"
+   ironic_dnsmasq_dhcp_range: "192.168.5.100,192.168.5.110,255.255.255.0"
    ironic_cleaning_network: "public1"
 
 In the same file, optionally a default gateway to be used for the Ironic
@@ -51,10 +52,10 @@ be used:
 
 .. code-block:: console
 
-   $ curl https://tarballs.openstack.org/ironic-python-agent/dib/files/ipa-centos8-master.kernel \
+   $ curl https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-centos8-master.kernel \
      -o /etc/kolla/config/ironic/ironic-agent.kernel
 
-   $ curl https://tarballs.openstack.org/ironic-python-agent/dib/files/ipa-centos8-master.initramfs \
+   $ curl https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-centos8-master.initramfs \
      -o /etc/kolla/config/ironic/ironic-agent.initramfs
 
 You may optionally pass extra kernel parameters to the inspection kernel using:
