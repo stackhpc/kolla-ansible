@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Adds support for exposing Prometheus server on the external interface. This
+    is disabled by default and can be enabled by setting
+    ``enable_prometheus_server_external`` to ``true``. Basic auth is used to
+    protect the endpoint. The password is under the key ``prometheus_password``
+    in the Kolla passwords file. The username can be configured with
+    ``prometheus_user`` and defaults to ``admin``.
