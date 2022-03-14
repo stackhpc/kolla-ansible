@@ -185,12 +185,23 @@
   register: apparmor_libvirtd_profile
   when: ansible_facts.distribution == "Ubuntu"
 
+- name: Get stat of libvirtd apparmor disable profile
+  stat:
+    path: /etc/apparmor.d/disable/usr.sbin.libvirtd
+  register: apparmor_libvirtd_disable_profile
+  when: ansible_facts.distribution == "Ubuntu"
+
 - name: Remove apparmor profile for libvirt
-  command: apparmor_parser -R /etc/apparmor.d/usr.sbin.libvirtd
+  shell: |
+    apparmor_parser -v -R /etc/apparmor.d/usr.sbin.libvirtd && \
+    ln -vsf /etc/apparmor.d/usr.sbin.libvirtd /etc/apparmor.d/disable
+  args:
+    executable: /bin/bash
   become: True
   when:
     - ansible_facts.distribution == "Ubuntu"
     - apparmor_libvirtd_profile.stat.exists
+    - not apparmor_libvirtd_disable_profile.stat.exists
 
 - name: Get stat of chronyd apparmor profile
   stat:

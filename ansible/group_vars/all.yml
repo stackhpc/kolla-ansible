@@ -10,7 +10,7 @@ container_config_directory: "/var/lib/kolla/config_files"
 node_config: "{{ CONFIG_DIR | default('/etc/kolla') }}"
 
 # The directory to merge custom config files the kolla's config files
-node_custom_config: "/etc/kolla/config"
+node_custom_config: "{{ node_config }}/config"
 
 # The directory to store the config files on the destination node
 node_config_directory: "/etc/kolla"
@@ -526,6 +526,7 @@ zookeeper_quorum_port: "3888"
 
 zun_api_port: "9517"
 zun_wsproxy_port: "6784"
+zun_wsproxy_protocol: "{{ 'wss' if kolla_enable_tls_external | bool else 'ws' }}"
 zun_cni_daemon_port: "9036"
 
 vitrage_api_port: "8999"
