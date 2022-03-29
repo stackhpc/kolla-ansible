@@ -68,13 +68,13 @@ redhat_pkg_install:
 ubuntu_pkg_removals:
  - lxd
  - lxc
- - libvirt-bin
+ - "{% if enable_nova_libvirt_container | bool %}libvirt-bin{% endif %}"
  - open-iscsi
  - "{% if enable_chrony | bool %}chrony{% endif %}"
 
 redhat_pkg_removals:
- - libvirt
- - libvirt-daemon
+ - "{% if enable_nova_libvirt_container | bool %}libvirt{% endif %}"
+ - "{% if enable_nova_libvirt_container | bool %}libvirt-daemon{% endif %}"
  - iscsi-initiator-utils
  - "{% if enable_chrony | bool %}chrony{% endif %}"
 
@@ -86,3 +86,6 @@ virtualenv:
 # directory. This is typically required for modules such as yum and apt which
 # are not available on PyPI.
 virtualenv_site_packages: True
+
+# Whether to remove the AppArmor libvirt profile on Ubuntu hosts.
+apparmor_remove_libvirt_profile: "{{ enable_nova_libvirt_container | bool }}"
