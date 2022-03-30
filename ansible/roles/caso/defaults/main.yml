@@ -36,7 +36,7 @@ caso_ks_users_tmpl: >
     password: "{{ caso_keystone_password }}"
     role: "admin"
   {% endfor %}
-caso_ks_users: "{{ caso_ks_users_tmpl | from_yaml }}"
+caso_ks_users: "{{ caso_ks_users_tmpl | from_yaml if caso_projects else [] }}"
 
 ####################
 # Docker
