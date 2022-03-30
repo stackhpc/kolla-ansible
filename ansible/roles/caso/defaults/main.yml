@@ -28,11 +28,15 @@ caso_messengers:
 ####################
 caso_openstack_auth: "{{ openstack_auth }}"
 caso_keystone_user: "caso"
-caso_ks_users:
-  - project: "service"
+caso_projects: []
+caso_ks_users_tmpl: >
+  {%- for project in caso_projects -%}
+  - project: "{{ project }}"
     user: "{{ caso_keystone_user }}"
     password: "{{ caso_keystone_password }}"
     role: "admin"
+  {% endfor %}
+caso_ks_users: "{{ caso_users_tmpl | from_yaml }}"
 
 ####################
 # Docker
