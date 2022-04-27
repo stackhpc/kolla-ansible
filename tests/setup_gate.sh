@@ -97,7 +97,8 @@ EOF
     # supported.
     if [[ $BASE_DISTRO == "centos" ]] && [[ $BASE_DISTRO_MAJOR_VERSION -eq 8 ]]; then
         sudo tee -a /etc/kolla/kolla-build.conf <<EOF
-base_tag = 8
+base_tag = stream8
+base_image = quay.io/centos/centos
 EOF
     fi
 
@@ -119,7 +120,12 @@ EOF
 
     pip install -c $UPPER_CONSTRAINTS "${KOLLA_SRC_DIR}"
 
-    sudo ~/kolla-venv/bin/kolla-build
+    # NOTE(hrw): REQUESTS_CA_BUNDLE is to get Let's Encrypt certificates trusted
+    if [[ $BASE_DISTRO == "centos" ]]; then
+        export REQUESTS_CA_BUNDLE="/etc/pki/tls/certs/ca-bundle.crt"
+    fi
+
+    sudo --preserve-env=REQUESTS_CA_BUNDLE ~/kolla-venv/bin/kolla-build
 
     # NOTE(yoctozepto): due to debian buster we push after images are built
     # see https://github.com/docker/for-linux/issues/711
