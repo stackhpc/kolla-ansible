@@ -183,7 +183,7 @@
     state: stopped
   when:
     - container_facts['prometheus_jiralert'] is not defined
-    - inventory_hostname in groups['prometheus-jiralert']
+    - inventory_hostname in groups['prometheus-jiralert'] | default([])
     - enable_prometheus_jiralert | bool
   with_items:
     - "{{ prometheus_jiralert_port }}"
