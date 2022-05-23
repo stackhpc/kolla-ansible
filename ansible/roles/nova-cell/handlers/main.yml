@@ -125,6 +125,8 @@
       saslpasswd2 -c -p -a libvirt {{ libvirt_sasl_authname }}
     executable: /bin/bash
   changed_when: true
+  when:
+    - kolla_action != "config"
   no_log: true
 
 - name: Reload libvirtd
@@ -132,6 +134,8 @@
   service:
     name: libvirtd
     state: reloaded
+  when:
+    - kolla_action != "config"
 
 - name: Restart nova-compute container
   vars:
