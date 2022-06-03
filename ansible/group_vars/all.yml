@@ -677,6 +677,8 @@ enable_manila_backend_cephfs_nfs: "no"
 enable_manila_backend_glusterfs_nfs: "no"
 enable_mariabackup: "no"
 enable_masakari: "no"
+enable_masakari_instancemonitor: "{{ enable_masakari | bool }}"
+enable_masakari_hostmonitor: "{{ enable_masakari | bool }}"
 enable_mistral: "no"
 enable_monasca: "no"
 enable_multipathd: "no"
@@ -798,7 +800,8 @@ enable_kibana: "{{ 'yes' if enable_central_logging | bool or enable_monasca | bo
 ####################
 # Redis options
 ####################
-redis_connection_string: "redis://{% for host in groups['redis'] %}{% if host == groups['redis'][0] %}admin:{{ redis_master_password }}@{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ redis_sentinel_port }}?sentinel=kolla{% else %}&sentinel_fallback={{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ redis_sentinel_port }}{% endif %}{% endfor %}&db=0&socket_timeout=60&retry_on_timeout=yes"
+redis_connection_string: "redis://{% for host in groups['redis'] %}{% if host == groups['redis'][0] %}admin:{{ redis_master_password }}@{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ redis_sentinel_port }}?sentinel=kolla{% else %}&sentinel_fallback={{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ redis_sentinel_port }}{% endif %}{% endfor %}{{ redis_connection_string_extras }}"
+redis_connection_string_extras: "&db=0&socket_timeout=60&retry_on_timeout=yes"
 
 ####################
 # Osprofiler options
