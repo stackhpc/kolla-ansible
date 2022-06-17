@@ -28,6 +28,16 @@
       tls_enabled: true
 
 - job:
+    name: kolla-ansible-rocky8-source
+    parent: kolla-ansible-base
+    nodeset: kolla-ansible-rocky-8
+    voting: false
+    vars:
+      base_distro: centos
+      install_type: source
+      tls_enabled: true
+
+- job:
     name: kolla-ansible-ubuntu-source
     parent: kolla-ansible-base
     nodeset: kolla-ansible-focal
@@ -270,6 +280,14 @@
     vars:
       base_distro: centos
       install_type: binary
+
+- job:
+    name: kolla-ansible-debian-source-ironic
+    parent: kolla-ansible-ironic-base
+    nodeset: kolla-ansible-debian-bullseye
+    vars:
+      base_distro: debian
+      install_type: source
 
 - job:
     name: kolla-ansible-ubuntu-source-ironic

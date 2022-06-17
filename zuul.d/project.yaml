@@ -12,6 +12,7 @@
       jobs:
         - kolla-ansible-centos8s-source
         - kolla-ansible-debian-source
+        - kolla-ansible-rocky8-source
         - kolla-ansible-ubuntu-source
         - kolla-ansible-centos8s-source-kvm
         - kolla-ansible-ubuntu-source-kvm
@@ -32,6 +33,7 @@
         - kolla-ansible-ubuntu-source-masakari
         - kolla-ansible-centos8s-source-ironic
         - kolla-ansible-centos8s-binary-ironic
+        - kolla-ansible-debian-source-ironic
         - kolla-ansible-ubuntu-source-ironic
         - kolla-ansible-centos8s-source-upgrade
         - kolla-ansible-debian-source-upgrade

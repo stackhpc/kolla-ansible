@@ -488,6 +488,12 @@ nova_compute_startup_delay: 30
 # nova_cell_conductor_has_api_database to no.
 nova_cell_conductor_has_api_database: "yes"
 
+# Whether the failure of a nova-compute service to register itself is fatal to
+# the Kolla Ansible run.  This is evaluated on a per-cell basis. Default
+# behaviour is to only fail the host on which the compute service failed to
+# register itself.
+nova_compute_registration_fatal: false
+
 ####################
 # Notification
 ####################
@@ -530,6 +536,14 @@ migration_hostname: "{{ ansible_facts.nodename }}"
 # We can't get the id too effectively from the images so hardcoding here.
 # It does not change that often (in fact, most likely never ever).
 qemu_user_gid: 42427
+
+# Whether to enable libvirt SASL authentication.
+libvirt_enable_sasl: true
+# Username for libvirt SASL.
+libvirt_sasl_authname: "nova"
+# List of enabled libvirt SASL authentication mechanisms.
+libvirt_sasl_mech_list:
+  - "{{ 'SCRAM-SHA-256' if libvirt_tls | bool else 'DIGEST-MD5' }}"
 
 ####################
 # Kolla
