@@ -28,21 +28,17 @@ function filter_out_expected_critical {
     # job.
 
     case $1 in
-    */placement-api.log)
-        # Sometimes we see this during upgrade when keystone is down.
-        grep -v "Failed to fetch token data from identity server"
-        ;;
     */neutron-server.log)
         # Sometimes we see this during shutdown (upgrade).
         # See: https://bugs.launchpad.net/neutron/+bug/1863579
-        grep -v "WSREP has not yet prepared node for application use"
+        grep -v "WSREP has not yet prepared node for application use" |
         grep -v "Failed to fetch token data from identity server"
         ;;
     *)
-        # We have to provide some pass-through consumer to avoid:
-        #   grep: write error: Broken pipe
-        # from check_openstack_log_file_for_level
-        cat
+        # Sometimes we see this during upgrades of Keystone.
+        # Usually in Placement but also in Neutron and Nova.
+        # Especially in AIO.
+        grep -v "Failed to fetch token data from identity server"
         ;;
     esac
 }

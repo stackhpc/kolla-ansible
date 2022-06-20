@@ -55,6 +55,7 @@
       DEFAULT:
         profile: gate
         logs_dir: /tmp/logs/build
+        quiet: true
         # NOTE(yoctozepto): we cannot build and push at the same time on debian
         # buster see https://github.com/docker/for-linux/issues/711.
         push: "{{ base_distro != 'debian' }}"
@@ -152,6 +153,10 @@
         # globals.yml
         - src: "tests/templates/globals-default.j2"
           dest: /etc/kolla/globals.yml
+        # global.conf
+        - src: "tests/templates/global.conf.j2"
+          dest: /etc/kolla/config/global.conf
+          when: "{{ openstack_core_enabled }}"
         # nova-compute.conf
         - src: "tests/templates/nova-compute-overrides.j2"
           dest: /etc/kolla/config/nova/nova-compute.conf
