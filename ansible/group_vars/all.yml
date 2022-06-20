@@ -705,7 +705,7 @@ enable_searchlight: "no"
 enable_senlin: "no"
 enable_skydive: "no"
 enable_solum: "no"
-enable_storm: "{{ enable_monasca | bool }}"
+enable_storm: "{{ enable_monasca | bool and monasca_enable_alerting_pipeline | bool }}"
 enable_swift: "no"
 enable_swift_s3api: "no"
 enable_swift_recon: "no"
@@ -740,6 +740,13 @@ enable_destroy_images: "no"
 ####################
 # Monasca options
 ####################
+monasca_enable_alerting_pipeline: True
+
+# Send logs from the control plane to the Monasca API. Monasca will then persist
+# them in Elasticsearch. If this is disabled, control plane logs will be sent
+# directly to Elasticsearch.
+monasca_ingest_control_plane_logs: True
+
 monasca_api_admin_base_endpoint: "{{ admin_protocol }}://{{ kolla_internal_fqdn  | put_address_in_context('url') }}:{{ monasca_api_port }}"
 monasca_api_internal_base_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn  | put_address_in_context('url') }}:{{ monasca_api_port }}"
 monasca_api_public_base_endpoint: "{{ public_protocol }}://{{ kolla_external_fqdn  | put_address_in_context('url') }}:{{ monasca_api_port }}"
@@ -1144,6 +1151,11 @@ infuxdb_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn | p
 # Kafka options
 #################
 kafka_datadir_volume: "kafka"
+
+# The number of brokers in a Kafka cluster. This is used for automatically
+# setting quantities such as topic replicas and it is not recommended to
+# change it unless you know what you are doing.
+kafka_broker_count: "{{ groups['kafka'] | length }}"
 
 #########################
 # Internal Image options

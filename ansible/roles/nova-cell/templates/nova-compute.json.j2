@@ -61,7 +61,14 @@
             "dest": "/var/lib/nova/.config/libvirt/auth.conf",
             "owner": "nova",
             "perm": "0600"
-        }{% endif %}
+        }{% endif %},
+        {
+            "source": "{{ container_config_directory }}/provider_config.yaml",
+            "dest": "/etc/nova/provider_config/provider_config.yaml",
+            "owner": "nova",
+            "perm": "0600",
+            "optional": true
+        }
     ],
     "permissions": [
         {
