@@ -8,7 +8,7 @@
     group: "{{ config_owner_group }}"
     mode: "0770"
   when:
-    - inventory_hostname in groups[item.value.group]
+    - inventory_hostname in groups.get(item.value.group, [])
     - item.value.enabled | bool
   with_dict: "{{ prometheus_services }}"
 
@@ -23,7 +23,7 @@
     dest: "{{ node_config_directory }}/{{ item.key }}/config.json"
     mode: "0660"
   when:
-    - inventory_hostname in groups[item.value.group]
+    - inventory_hostname in groups.get(item.value.group, [])
     - item.value.enabled | bool
   with_dict: "{{ prometheus_services }}"
   notify:
@@ -112,6 +112,32 @@
     - "{{ node_custom_config }}/prometheus/{{ inventory_hostname }}/prometheus-alertmanager.yml"
     - "{{ node_custom_config }}/prometheus/prometheus-alertmanager.yml"
     - "{{ role_path }}/templates/prometheus-alertmanager.yml.j2"
+  notify:
+    - Restart prometheus-alertmanager container
+
+- name: Find custom Alertmanager alert notification templates
+  find:
+    path: "{{ node_custom_config }}/prometheus/"
+    pattern: "*.tmpl"
+  run_once: True
+  delegate_to: localhost
+  register: alertmanager_notification_templates
+  when:
+    - enable_prometheus_alertmanager | bool
+
+- name: Copying over custom Alertmanager alert notification templates
+  become: true
+  vars:
+    service: "{{ prometheus_services['prometheus-alertmanager'] }}"
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ node_config_directory }}/prometheus-alertmanager/{{ item.path | basename }}"
+    mode: 0660
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - alertmanager_notification_templates is defined and alertmanager_notification_templates.files | length > 0
+  with_items: "{{ alertmanager_notification_templates.files }}"
   notify:
     - Restart prometheus-alertmanager container
 
