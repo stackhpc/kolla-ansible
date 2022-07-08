@@ -70,3 +70,12 @@ behaviour is useful at scale, where failures are more frequent.
 
 Alternatively, to fail all hosts in a cell when any compute service fails
 to register, set ``nova_compute_registration_fatal`` to ``true``.
+
+Vendordata
+==========
+
+Nova supports passing deployer provided data to instances using a
+concept known as Vendordata. If a Vendordata file is located in the
+following path within the Kolla configuration, Kolla will
+automatically use it when the Nova service is deployed or
+reconfigured: ``/etc/kolla/config/nova/vendordata.json``.
