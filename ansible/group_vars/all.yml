@@ -543,6 +543,12 @@ public_protocol: "{{ 'https' if kolla_enable_tls_external | bool else 'http' }}"
 internal_protocol: "{{ 'https' if kolla_enable_tls_internal | bool else 'http' }}"
 admin_protocol: "{{ 'https' if kolla_enable_tls_internal | bool else 'http' }}"
 
+##################
+# Firewall options
+##################
+enable_external_api_firewalld: "false"
+external_api_firewalld_zone: "public"
+
 ####################
 # OpenStack options
 ####################
