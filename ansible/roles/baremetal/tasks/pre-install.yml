@@ -29,9 +29,12 @@
     block: |
         {% for host in groups['baremetal'] %}
         {% set api_interface = hostvars[host]['api_interface'] %}
-        {% if host not in groups['bifrost'] or api_interface in hostvars[host].ansible_facts %}
-        {% set hostnames = [hostvars[host].ansible_facts.nodename, hostvars[host].ansible_facts.hostname] %}
+        {% if host not in groups['bifrost'] or 'ansible_' + api_interface in hostvars[host] %}
+        {% set hostnames_default = [hostvars[host].ansible_facts.nodename, hostvars[host].ansible_facts.hostname] %}
+        {% set hostnames = hostvars[host].api_hostnames | default(hostnames_default) %}
+        {% if hostnames | length > 0 %}
         {{ 'api' | kolla_address(host) }} {{ hostnames | unique | join(' ') }}
+        {% endif %}
         {% endif %}
         {% endfor %}
   become: True
