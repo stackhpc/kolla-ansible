@@ -27,6 +27,8 @@
         playbook_python_version: "{{ '2' if is_upgrade and previous_release == 'train' and ansible_os_family != 'RedHat' else '3' }}"
         upper_constraints_file: "{{ ansible_env.HOME }}/src/opendev.org/openstack/requirements/upper-constraints.txt"
         docker_image_tag_suffix: "{{ '-aarch64' if ansible_architecture == 'aarch64' else '' }}"
+        pip_user_path_env:
+          PATH: "{{ ansible_env.HOME + '/.local/bin:' + ansible_env.PATH }}"
 
     - name: Install xfsprogs package for Swift filesystems
       become: true
@@ -44,20 +46,40 @@
 
 - hosts: primary
   any_errors_fatal: true
+  vars:
+    kolla_build_config:
+      DEFAULT:
+        profile: gate
+        logs_dir: /tmp/logs/build
+        quiet: true
+        # NOTE(yoctozepto): we cannot build and push at the same time on debian
+        # buster see https://github.com/docker/for-linux/issues/711.
+        push: "{{ base_distro != 'debian' }}"
+        base: "{{ base_distro }}"
+        install_type: "{{ install_type }}"
+        registry: "127.0.0.1:4000"
+        namespace: lokolla
+        tag: "{{ build_image_tag }}"
+        template_override: /etc/kolla/template_overrides.j2
+        # NOTE(yoctozepto): to avoid issues with IPv6 not enabled in the docker daemon
+        # and since we don't need isolated networks here, use host networking
+        network_mode: host
+  environment: "{{ pip_user_path_env }}"
   tasks:
     - name: detect whether need build images
       set_fact:
         need_build_image: true
       when:
-        - item.project.short_name == "kolla"
-        - item.branch == zuul.branch
+        # NOTE(yoctozepto): if there is any tested change that does not belong to kolla-ansible,
+        # then kolla images should be built
+        - item.project.short_name != "kolla-ansible"
       with_items: "{{ zuul['items'] }}"
 
     # NOTE(yoctozepto): required to template template_overrides.j2 for Zuul
     - name: Include kolla Zuul vars if building new images
       include_vars:
         file: "{{ zuul.executor.work_root }}/src/opendev.org/openstack/kolla/tests/vars/zuul.yml"
-      when: need_build_image  # only then kolla sources are available (and used)
+      when: need_build_image
 
     - block:
         # NOTE(mgoddard): This only affects the remote copy of the repo, not the
@@ -86,12 +108,16 @@
         mode: 0777
       become: true
 
+    - import_role:
+        name: kolla-build-config
+      when: need_build_image
+
     # NOTE(yoctozepto): required to customize kolla to use local mirrors
     - name: Template template_overrides.j2
       template:
         src: "{{ zuul.executor.work_root }}/src/opendev.org/openstack/kolla/tests/templates/template_overrides.j2"
         dest: /etc/kolla/template_overrides.j2
-      when: need_build_image  # only then kolla sources are available (and used)
+      when: need_build_image
 
     - name: Ensure /etc/docker exists
       file:
@@ -126,6 +152,10 @@
         # globals.yml
         - src: "tests/templates/globals-default.j2"
           dest: /etc/kolla/globals.yml
+        # global.conf
+        - src: "tests/templates/global.conf.j2"
+          dest: /etc/kolla/config/global.conf
+          when: "{{ openstack_core_enabled }}"
         # nova-compute.conf
         - src: "tests/templates/nova-compute-overrides.j2"
           dest: /etc/kolla/config/nova/nova-compute.conf
@@ -177,7 +207,7 @@
 
         - name: download Ironic Python Agent (IPA) images
           get_url:
-            url: "https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/{{ item.src }}"
+            url: "https://tarballs.opendev.org/openstack/ironic-python-agent/tinyipa/files/{{ item.src }}"
             dest: "/etc/kolla/config/ironic/{{ item.dest }}"
           with_items:
             - src: "tinyipa-{{ zuul.branch | replace('/', '-') }}.gz"
@@ -196,15 +226,12 @@
       vars:
         # Test latest ansible version on Ubuntu, minimum supported on others.
         ansible_version_constraint: "{{ '==2.9.*,!=2.9.8,!=2.9.12' if base_distro == 'ubuntu' else '==2.8.*,!=2.8.14' }}"
-      pip:
-        name:
-          - "{{ kolla_ansible_src_dir }}"
-          - "ansible{{ ansible_version_constraint }}"
-          - "ara<1.0.0"
-        # TODO(mgoddard): Always use pip3 when previous_release is ussuri.
-        executable: "pip{{ playbook_python_version }}"
-        extra_args: "-c {{ upper_constraints_file }}"
-      become: true
+      command: >-
+        python{{ playbook_python_version }} -m pip install --user
+        -c {{ upper_constraints_file }}
+        {{ kolla_ansible_src_dir }}
+        ansible{{ ansible_version_constraint }}
+        ara<1.0.0
 
     # TODO(mgoddard): Always use python3 when previous_release is ussuri.
     - name: get ARA callback plugin path
@@ -269,9 +296,7 @@
         chdir: "{{ kolla_ansible_src_dir }}"
       environment:
         BASE_DISTRO: "{{ base_distro }}"
-        INSTALL_TYPE: "{{ install_type }}"
         BUILD_IMAGE: "{{ need_build_image }}"
-        TAG: "{{ build_image_tag }}"
         KOLLA_SRC_DIR: "{{ ansible_env.HOME }}/src/opendev.org/openstack/kolla"
         SCENARIO: "{{ scenario }}"
         UPPER_CONSTRAINTS: "{{ upper_constraints_file }}"
@@ -385,6 +410,8 @@
             executable: /bin/bash
             chdir: "{{ kolla_ansible_src_dir }}"
           when: scenario == 'zun'
+          environment:
+            BASE_DISTRO: "{{ base_distro }}"
 
         - name: Run test-swift.sh script
           script:
@@ -466,6 +493,7 @@
 
 - hosts: primary
   any_errors_fatal: true
+  environment: "{{ pip_user_path_env }}"
   tasks:
     # Upgrade: update config.
     - block:
@@ -517,27 +545,15 @@
 
         # TODO(mgoddard): Remove this block when previous_release is ussuri.
         - block:
-            - name: remove ansible and ARA for python 2
-              pip:
-                name:
-                  - ansible
-                  - ara
-                executable: pip2
-                state: absent
-              become: true
-              when: playbook_python_version == '2'
-
             - name: install ansible and ARA for python 3
               vars:
                 # Test latest ansible version on Ubuntu, minimum supported on others.
                 ansible_version_constraint: "{{ '==2.9.*,!=2.9.8' if base_distro == 'ubuntu' else '==2.8.*' }}"
-              pip:
-                name:
-                  - "ansible{{ ansible_version_constraint }}"
-                  - "ara<1.0.0"
-                executable: pip3
-                extra_args: "-c {{ upper_constraints_file }}"
-              become: true
+              command: >-
+                python3 -m pip install --user
+                -c {{ upper_constraints_file }}
+                ansible{{ ansible_version_constraint }}
+                ara<1.0.0
 
             - name: get ARA callback plugin path
               command: "python3 -m ara.setup.callback_plugins"
@@ -551,11 +567,10 @@
               become: true
 
         - name: upgrade kolla-ansible
-          pip:
-            name: "{{ kolla_ansible_src_dir }}"
-            executable: pip3
-            extra_args: "-c {{ upper_constraints_file }}"
-          become: true
+          command: >-
+            python3 -m pip install --user
+            -c {{ upper_constraints_file }}
+            {{ kolla_ansible_src_dir }}
 
         # Update passwords.yml to include any new passwords added in this
         # release.
@@ -652,6 +667,7 @@
 
 - hosts: primary
   any_errors_fatal: true
+  environment: "{{ pip_user_path_env }}"
   tasks:
     - name: Run reconfigure.sh script
       script:

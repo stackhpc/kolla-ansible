@@ -1,12 +1,14 @@
 [DEFAULT]
 debug = {{ barbican_logging_debug }}
 log_dir = /var/log/kolla/barbican
+{% if service_name == "barbican-api" %}
+log_file = barbican-api.log
+{% endif %}
 
 bind_port = {{ barbican_api_listen_port }}
 bind_host = {{ api_interface_address }}
 host_href = {{ public_protocol }}://{{ barbican_external_fqdn | put_address_in_context('url') }}:{{ barbican_api_port }}
 backlog = 4096
-max_allowed_secret_in_bytes = 10000
 max_allowed_request_size_in_bytes = 1000000
 
 db_auto_create = False
@@ -60,6 +62,7 @@ password = {{ barbican_keystone_password }}
 auth_url = {{ keystone_admin_url }}
 auth_type = password
 cafile = {{ openstack_cacert }}
+region_name = {{ openstack_region_name }}
 
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = {{ memcache_secret_key }}

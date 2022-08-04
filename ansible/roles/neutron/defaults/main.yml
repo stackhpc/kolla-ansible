@@ -1,6 +1,4 @@
 ---
-project_name: "neutron"
-
 neutron_services:
   neutron-server:
     container_name: "neutron_server"
@@ -272,7 +270,7 @@ ironic_neutron_agent_dimensions: "{{ default_container_dimensions }}"
 neutron_dhcp_agent_default_volumes:
   - "{{ node_config_directory }}/neutron-dhcp-agent/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "neutron_metadata_socket:/var/lib/neutron/kolla/"
   - "/run/netns:/run/netns:shared"
   - "kolla_logs:/var/log/kolla/"
@@ -280,7 +278,7 @@ neutron_dhcp_agent_default_volumes:
 neutron_l3_agent_default_volumes:
   - "{{ node_config_directory }}/neutron-l3-agent/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "/lib/modules:/lib/modules:ro"
   - "neutron_metadata_socket:/var/lib/neutron/kolla/"
   - "/run/netns:/run/netns:shared"
@@ -289,7 +287,7 @@ neutron_l3_agent_default_volumes:
 neutron_sriov_agent_default_volumes:
   - "{{ node_config_directory }}/neutron-sriov-agent/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
   - "{{ kolla_dev_repos_directory ~ '/neutron/neutron:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/neutron' if neutron_dev_mode | bool else '' }}"
 neutron_mlnx_agent_default_volumes:
@@ -308,14 +306,14 @@ neutron_eswitchd_default_volumes:
 neutron_linuxbridge_agent_default_volumes:
   - "{{ node_config_directory }}/neutron-linuxbridge-agent/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "/lib/modules:/lib/modules:ro"
   - "kolla_logs:/var/log/kolla/"
   - "{{ kolla_dev_repos_directory ~ '/neutron/neutron:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/neutron' if neutron_dev_mode | bool else '' }}"
 neutron_metadata_agent_default_volumes:
   - "{{ node_config_directory }}/neutron-metadata-agent/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "neutron_metadata_socket:/var/lib/neutron/kolla/"
   - "kolla_logs:/var/log/kolla/"
   - "{{ kolla_dev_repos_directory ~ '/neutron/neutron:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/neutron' if neutron_dev_mode | bool else '' }}"
@@ -330,7 +328,7 @@ neutron_ovn_metadata_agent_default_volumes:
 neutron_openvswitch_agent_default_volumes:
   - "{{ node_config_directory }}/neutron-openvswitch-agent/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "/lib/modules:/lib/modules:ro"
   - "/run/openvswitch:/run/openvswitch:shared"
   - "kolla_logs:/var/log/kolla/"
@@ -338,23 +336,23 @@ neutron_openvswitch_agent_default_volumes:
 neutron_server_default_volumes:
   - "{{ node_config_directory }}/neutron-server/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
   - "{{ kolla_dev_repos_directory ~ '/neutron/neutron:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/neutron' if neutron_dev_mode | bool else '' }}"
 neutron_bgp_dragent_default_volumes:
   - "{{ node_config_directory }}/neutron-bgp-dragent/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
 neutron_infoblox_ipam_agent_default_volumes:
   - "{{ node_config_directory }}/neutron-infoblox-ipam-agent/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
 neutron_openvswitch_agent_xenapi_default_volumes:
   - "{{ node_config_directory }}/neutron-openvswitch-agent-xenapi/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "/lib/modules:/lib/modules:ro"
   - "/run/openvswitch:/run/openvswitch:shared"
   - "kolla_logs:/var/log/kolla/"
@@ -362,13 +360,13 @@ neutron_openvswitch_agent_xenapi_default_volumes:
 neutron_metering_agent_default_volumes:
   - "{{ node_config_directory }}/neutron-metering-agent/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
   - "{{ kolla_dev_repos_directory ~ '/neutron/neutron:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/neutron' if neutron_dev_mode | bool else '' }}"
 ironic_neutron_agent_default_volumes:
   - "{{ node_config_directory }}/ironic-neutron-agent/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
 
 neutron_extra_volumes: "{{ default_extra_volumes }}"
@@ -402,6 +400,9 @@ neutron_logging_debug: "{{ openstack_logging_debug }}"
 
 openstack_neutron_auth: "{{ openstack_auth }}"
 
+# Set to KOLLA_SKIP to skip setting these (even if set already - total ignore).
+# Set to KOLLA_UNSET to make Kolla unset these in the managed sysctl.conf file.
+neutron_l3_agent_host_ipv4_ip_forward: KOLLA_UNSET
 neutron_l3_agent_host_rp_filter_mode: 0
 neutron_l3_agent_host_ipv4_neigh_gc_thresh1: 128
 neutron_l3_agent_host_ipv4_neigh_gc_thresh2: 28672

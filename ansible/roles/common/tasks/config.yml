@@ -14,7 +14,6 @@
     - - service_name: "cron"
         paths:
           - "cron"
-          - "cron/logrotate"
       - service_name: "fluentd"
         paths:
           - "fluentd"
@@ -111,7 +110,7 @@
   vars:
     log_direct_to_elasticsearch: >-
       {{ ( enable_elasticsearch | bool or
-           ( elasticsearch_address != kolla_internal_vip_address )) and
+           ( elasticsearch_address != kolla_internal_fqdn )) and
          not enable_monasca | bool }}
     fluentd_version: "{{ fluentd_labels.images.0.ContainerConfig.Labels.fluentd_version | default('0.12') }}"
     # Inputs
@@ -275,7 +274,8 @@
     mode: "0600"
   become: true
   when:
-    api_address_family == "ipv6"
+    - enable_rabbitmq | bool
+    - api_address_family == "ipv6"
 
 - name: Copy rabbitmq erl_intr to kolla toolbox
   copy:
@@ -285,4 +285,5 @@
     mode: "0600"
   become: true
   when:
-    api_address_family == "ipv6"
+    - enable_rabbitmq | bool
+    - api_address_family == "ipv6"
