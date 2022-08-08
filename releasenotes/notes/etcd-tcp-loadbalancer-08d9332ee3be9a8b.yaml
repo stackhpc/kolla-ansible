@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    etcd is now exposed internally via haproxy on ``etcd_client_port``.
