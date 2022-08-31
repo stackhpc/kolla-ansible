@@ -13,6 +13,7 @@ prometheus_services:
         mode: "http"
         external: false
         port: "{{ prometheus_port }}"
+        active_passive: "{{ prometheus_active_passive | bool }}"
   prometheus-node-exporter:
     container_name: prometheus_node_exporter
     group: prometheus-node-exporter
@@ -64,6 +65,7 @@ prometheus_services:
         port: "{{ prometheus_alertmanager_port }}"
         auth_user: "{{ prometheus_alertmanager_user }}"
         auth_pass: "{{ prometheus_alertmanager_password }}"
+        active_passive: "{{ prometheus_alertmanager_active_passive | bool }}"
       prometheus_alertmanager_external:
         enabled: "{{ enable_prometheus_alertmanager_external | bool }}"
         mode: "http"
@@ -71,6 +73,7 @@ prometheus_services:
         port: "{{ prometheus_alertmanager_port }}"
         auth_user: "{{ prometheus_alertmanager_user }}"
         auth_pass: "{{ prometheus_alertmanager_password }}"
+        active_passive: "{{ prometheus_alertmanager_active_passive | bool }}"
   prometheus-openstack-exporter:
     container_name: "prometheus_openstack_exporter"
     group: "prometheus-openstack-exporter"
@@ -112,6 +115,12 @@ prometheus_services:
 # Database
 ####################
 prometheus_mysql_exporter_database_user: "{% if use_preconfigured_databases | bool and use_common_mariadb_user | bool %}{{ database_user }}{% else %}prometheus{% endif %}"
+
+####################
+# HAProxy
+####################
+prometheus_active_passive: true
+prometheus_alertmanager_active_passive: true
 
 ####################
 # Blackbox
