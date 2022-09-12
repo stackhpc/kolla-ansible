@@ -18,3 +18,6 @@ jmespath>=0.9.3 # MIT
 
 # Hashicorp Vault
 hvac>=0.10.1
+
+# as distutils is deprecated in Python 3.10+
+packaging>=21 # BSD License (2 clause)/Apache-2.0

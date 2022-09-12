@@ -14,10 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from distutils.version import StrictVersion
 import docker
 import json
 import re
+
+from packaging.version import Version
 
 from ansible.module_utils.ansible_release import __version__ as ansible_version
 from ansible.module_utils.basic import AnsibleModule
@@ -111,7 +112,7 @@ def gen_commandline(params):
     if params.get('module_name'):
         command.extend(['-m', params.get('module_name')])
     if params.get('module_args'):
-        if StrictVersion(ansible_version) < StrictVersion('2.11.0'):
+        if Version(ansible_version) < Version('2.11.0'):
             module_args = params.get('module_args')
         else:
             module_args = literal_eval(params.get('module_args'))
@@ -132,8 +133,8 @@ def get_docker_client():
 
 
 def docker_supports_environment_in_exec(client):
-    docker_version = StrictVersion(client.api_version)
-    return docker_version >= StrictVersion('1.25')
+    docker_version = Version(client.api_version)
+    return docker_version >= Version('1.25')
 
 
 def main():

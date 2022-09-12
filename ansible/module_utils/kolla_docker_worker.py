@@ -21,7 +21,7 @@ import json
 import os
 import shlex
 
-from distutils.version import StrictVersion
+from packaging.version import Version
 
 COMPARE_CONFIG_CMD = ['/usr/local/bin/kolla_set_configs', '--check']
 
@@ -50,9 +50,9 @@ class DockerWorker(object):
         self.dc = get_docker_client()(**options)
 
         self._cgroupns_mode_supported = (
-            StrictVersion(self.dc._version) >= StrictVersion('1.41'))
+            Version(self.dc._version) >= Version('1.41'))
         self._dimensions_kernel_memory_removed = (
-            StrictVersion(self.dc._version) >= StrictVersion('1.42'))
+            Version(self.dc._version) >= Version('1.42'))
 
     def generate_tls(self):
         tls = {'verify': self.params.get('tls_verify')}
