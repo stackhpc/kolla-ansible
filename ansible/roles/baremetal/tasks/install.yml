@@ -93,6 +93,22 @@
   when: ansible_facts.os_family == 'RedHat'
   register: rpm_install_result
 
+- name: Unmask the docker systemd unit on Debian/Ubuntu
+  file:
+    path: /etc/systemd/system/docker.service
+    state: absent
+  become: true
+  when:
+    - ansible_facts.os_family == 'Debian'
+    # Two cases we care about:
+    # 1. The unit file didn't exist before this run, and was created above.
+    # 2. The unit file existed before this run, and was created by a previous
+    #    run before the mask was removed.
+    - >-
+      not docker_unit_file.stat.exists or
+      (docker_unit_file.stat.islink and
+       docker_unit_file.stat.lnk_target == '/dev/null')
+
 # If any packages were updated, and any containers were running, wait for the
 # daemon to come up and start all previously running containers.
 

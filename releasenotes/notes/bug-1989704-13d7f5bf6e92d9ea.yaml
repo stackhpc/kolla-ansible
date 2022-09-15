@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fixes an issue with Docker service being masked on Debian and Ubuntu hosts.
+    `LP#1989704
+    <https://bugs.launchpad.net/ansible-collection-kolla/+bug/1989704>`_
