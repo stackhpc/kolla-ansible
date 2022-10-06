@@ -14,7 +14,6 @@
     - - service_name: "cron"
         paths:
           - "cron"
-          - "cron/logrotate"
       - service_name: "fluentd"
         paths:
           - "fluentd"
@@ -111,8 +110,8 @@
   vars:
     log_direct_to_elasticsearch: >-
       {{ ( enable_elasticsearch | bool or
-           ( elasticsearch_address != kolla_internal_vip_address )) and
-           ( not enable_monasca | bool or not monasca_ingest_control_plane_logs | bool ) }}
+           ( elasticsearch_address != kolla_internal_fqdn )) and
+         not enable_monasca | bool }}
     fluentd_version: "{{ fluentd_labels.images.0.ContainerConfig.Labels.fluentd_version | default('0.12') }}"
     # Inputs
     fluentd_input_files: "{{ default_input_files | customise_fluentd(customised_input_files) }}"
@@ -150,7 +149,7 @@
       - name: "conf/output/01-es.conf.j2"
         enabled: "{{ log_direct_to_elasticsearch }}"
       - name: "conf/output/02-monasca.conf.j2"
-        enabled: "{{ enable_monasca | bool and monasca_ingest_control_plane_logs | bool }}"
+        enabled: "{{ enable_monasca | bool }}"
     customised_output_files: "{{ find_custom_fluentd_outputs.files | map(attribute='path') | list }}"
   template:
     src: "td-agent.conf.j2"
@@ -214,9 +213,13 @@
       - { name: "neutron-tls-proxy", enabled: "{{ neutron_enable_tls_backend |
       bool }}" }
       - { name: "nova", enabled: "{{ enable_nova | bool }}" }
+      - { name: "nova-libvirt", enabled: "{{ enable_nova | bool and nova_compute_virt_type in ['kvm', 'qemu'] }}" }
       - { name: "octavia", enabled: "{{ enable_octavia | bool }}" }
+      - { name: "openvswitch", enabled: "{{ enable_openvswitch | bool }}" }
       - { name: "outward-rabbitmq", enabled: "{{ enable_outward_rabbitmq | bool }}" }
       - { name: "panko", enabled: "{{ enable_panko | bool }}" }
+      - { name: "placement", enabled: "{{ enable_placement | bool }}" }
+      - { name: "prometheus", enabled: "{{ enable_prometheus | bool }}" }
       - { name: "qinling", enabled: "{{ enable_qinling | bool }}" }
       - { name: "rabbitmq", enabled: "{{ enable_rabbitmq | bool }}" }
       - { name: "rally", enabled: "{{ enable_rally | bool }}" }
@@ -279,6 +282,7 @@
   become: true
   when:
     - common_services['kolla-toolbox'] | service_enabled_and_mapped_to_host
+    - enable_rabbitmq | bool
     - api_address_family == "ipv6"
 
 - name: Copy rabbitmq erl_intr to kolla toolbox
@@ -290,4 +294,5 @@
   become: true
   when:
     - common_services['kolla-toolbox'] | service_enabled_and_mapped_to_host
+    - enable_rabbitmq | bool
     - api_address_family == "ipv6"

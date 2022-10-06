@@ -92,11 +92,13 @@ enable_mistral: "yes"
 enable_redis: "yes"
 enable_barbican: "yes"
 enable_heat: "yes"
+# NOTE(yoctozepto): see https://bugs.launchpad.net/kolla-ansible/+bug/1906299
+enable_aodh: "yes"
 {% endif %}
 
 {% if scenario == "ironic" %}
 enable_ironic: "yes"
-ironic_dnsmasq_dhcp_range: "10.42.0.2,10.42.0.254"
+ironic_dnsmasq_dhcp_range: "10.42.0.2,10.42.0.254,255.255.255.0"
 {% endif %}
 
 {% if scenario == "masakari" %}
@@ -122,7 +124,6 @@ enable_cinder: "yes"
 glance_backend_ceph: "yes"
 cinder_backend_ceph: "yes"
 nova_backend_ceph: "yes"
-ceph_nova_user: "cinder"
 enable_ceph_rgw: {{ not is_upgrade or previous_release != 'victoria' }}
 ceph_rgw_hosts:
 {% for host in hostvars %}

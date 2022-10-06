@@ -119,8 +119,8 @@ Customize Amphora flavor
 ------------------------
 
 The default amphora flavor is named ``amphora`` with 1 VCPUs, 1GB RAM and 5GB
-disk. you can customize this flavor by changing ``octavia_amphora_flavor``  in
-``globals.yml``
+disk. you can customize this flavor by changing ``octavia_amp_flavor`` in
+``globals.yml``.
 
 See the ``os_nova_flavor`` Ansible module for details. Supported parameters
 are:
@@ -149,9 +149,9 @@ The following defaults are used:
 Customise network and subnet
 ----------------------------
 
-Configure octavia management network and subnet in ``globals.yml``. This must
-be a network that is :ref:`accessible from the controllers
-<octavia-network>`. Typically a VLAN provider network is used.
+Configure Octavia management network and subnet with ``octavia_amp_network`` in
+``globals.yml``. This must be a network that is :ref:`accessible from the
+controllers <octavia-network>`. Typically a VLAN provider network is used.
 
 See the ``os_network`` and ``os_subnet`` Ansible modules for details. Supported
 parameters:
@@ -176,6 +176,9 @@ The subnet parameter has the following supported parameters:
 - ``gateway_ip`` (optional)
 - ``name``
 - ``no_gateway_ip`` (optional)
+- ``ip_version`` (optional)
+- ``ipv6_address_mode`` (optional)
+- ``ipv6_ra_mode`` (optional)
 
 For example:
 

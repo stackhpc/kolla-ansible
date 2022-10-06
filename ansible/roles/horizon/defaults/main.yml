@@ -1,6 +1,4 @@
 ---
-project_name: "horizon"
-
 horizon_services:
   horizon:
     container_name: horizon
@@ -116,7 +114,7 @@ horizon_default_volumes:
   - "{{ kolla_dev_repos_directory ~ '/horizon/openstack_dashboard:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/openstack_dashboard' if horizon_dev_mode | bool else '' }}"
   - "{{ kolla_dev_repos_directory ~ '/murano-dashboard/muranodashboard:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/muranodashboard' if horizon_murano_dev_mode | bool else '' }}"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
   - "/tmp:/tmp"
 
@@ -147,11 +145,6 @@ horizon_dev_mode: "{{ kolla_dev_mode }}"
 horizon_murano_dev_mode: "{{ kolla_dev_mode }}"
 horizon_source_version: "{{ kolla_source_version }}"
 horizon_murano_source_version: "{{ kolla_source_version }}"
-
-####################
-# TLS
-####################
-horizon_enable_tls_backend: "{{ kolla_enable_tls_backend }}"
 
 # This variable was created for administrators to define which one of the Keystone's URLs should be configured in Horizon.
 # In some cases, such as when using OIDC, horizon will need to be configured with Keystone's public URL.

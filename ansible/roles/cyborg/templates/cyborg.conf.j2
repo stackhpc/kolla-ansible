@@ -2,13 +2,12 @@
 auth_strategy = keystone
 log_dir = /var/log/kolla/cyborg
 debug = {{ cyborg_logging_debug }}
-notification_topics = notifications
 
 transport_url = {{ rpc_transport_url }}
 
 [api]
 port = {{ cyborg_api_port }}
-host = {{ api_interface_address }}
+host_ip = {{ api_interface_address }}
 
 [database]
 connection = mysql+pymysql://{{ cyborg_database_user }}:{{ cyborg_database_password }}@{{ cyborg_database_address }}/{{ cyborg_database_name }}
@@ -19,7 +18,7 @@ max_pool_size = {{ database_max_pool_size }}
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = {{ memcache_secret_key }}
 memcache_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_address(host) | put_address_in_context('memcache') }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}
-auth_uri = {{ keystone_internal_url }}
+www_authenticate_uri = {{ keystone_internal_url }}
 project_domain_name = {{ default_project_domain_name }}
 project_name = service
 user_domain_name = {{ default_user_domain_name }}
@@ -28,6 +27,7 @@ password = {{ cyborg_keystone_password }}
 auth_url = {{ keystone_admin_url }}
 auth_type = password
 cafile = {{ openstack_cacert }}
+region_name = {{ openstack_region_name }}
 
 [placement]
 auth_type = password

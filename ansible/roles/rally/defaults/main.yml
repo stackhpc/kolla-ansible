@@ -1,6 +1,4 @@
 ---
-project_name: "rally"
-
 rally_services:
   rally:
     container_name: "rally"
@@ -23,7 +21,7 @@ rally_dimensions: "{{ default_container_dimensions }}"
 rally_default_volumes:
   - "{{ node_config_directory }}/rally/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
-  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
 
 rally_extra_volumes: "{{ default_extra_volumes }}"

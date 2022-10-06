@@ -2,9 +2,12 @@
 [DEFAULT]
 debug = {{ nova_logging_debug }}
 
-log_dir = /var/log/kolla/nova
 {% if service_name == "nova-super-conductor" %}
 log_file = /var/log/kolla/nova/nova-super-conductor.log
+{% elif service_name == "nova-api"  %}
+log_file = /var/log/kolla/nova/nova-api.log
+{% else %}
+log_dir = /var/log/kolla/nova
 {% endif %}
 
 state_path = /var/lib/nova
@@ -115,6 +118,7 @@ project_name = service
 username = {{ nova_keystone_user }}
 password = {{ nova_keystone_password }}
 cafile = {{ openstack_cacert }}
+region_name = {{ openstack_region_name }}
 
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = {{ memcache_secret_key }}
