@@ -125,7 +125,8 @@ function usage {
 Usage: $0 COMMAND [options]
 
 Options:
-    --inventory, -i <inventory_path>   Specify path to ansible inventory file
+    --inventory, -i <inventory_path>   Specify path to ansible inventory file. \
+Can be specified multiple times to pass multiple inventories.
     --playbook, -p <playbook_path>     Specify path to ansible playbook file
     --configdir <config_path>          Specify path to directory with globals.yml
     --key -k <key_path>                Specify path to ansible vault keyfile
@@ -173,6 +174,7 @@ Commands:
     genconfig            Generate configuration files for enabled OpenStack services
     prune-images         Prune orphaned Kolla images
     chrony-cleanup       Clean up disabled chrony containers
+    nova-libvirt-cleanup Clean up disabled nova_libvirt containers
 EOF
 }
 
@@ -216,6 +218,7 @@ upgrade
 upgrade-bifrost
 genconfig
 prune-images
+nova-libvirt-cleanup
 EOF
 }
 
@@ -243,12 +246,13 @@ BACKUP_TYPE="full"
 # Serial is not recommended and disabled by default. Users can enable it by
 # configuring ANSIBLE_SERIAL variable.
 ANSIBLE_SERIAL=${ANSIBLE_SERIAL:-0}
+INVENTORIES=()
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
 
     (--inventory|-i)
-            INVENTORY="$2"
+            INVENTORIES+=("$2")
             shift 2
             ;;
 
@@ -503,6 +507,10 @@ EOF
         ACTION="Cleanup disabled chrony containers"
         PLAYBOOK="${BASEDIR}/ansible/chrony-cleanup.yml"
         ;;
+(nova-libvirt-cleanup)
+        ACTION="Cleanup disabled nova_libvirt containers"
+        PLAYBOOK="${BASEDIR}/ansible/nova-libvirt-cleanup.yml"
+        ;;
 (bash-completion)
         bash_completion
         exit 0
@@ -516,5 +524,8 @@ GLOBALS_DIR="${CONFIG_DIR}/globals.d"
 EXTRA_GLOBALS=$(find ${GLOBALS_DIR} -maxdepth 1 -type f -name '*.yml' -printf ' -e @%p' 2>/dev/null)
 PASSWORDS_FILE="${PASSWORDS_FILE:-${CONFIG_DIR}/passwords.yml}"
 CONFIG_OPTS="-e @${CONFIG_DIR}/globals.yml ${EXTRA_GLOBALS} -e @${PASSWORDS_FILE} -e CONFIG_DIR=${CONFIG_DIR}"
-CMD="ansible-playbook -i $INVENTORY $CONFIG_OPTS $EXTRA_OPTS $PLAYBOOK $VERBOSITY"
+CMD="ansible-playbook $CONFIG_OPTS $EXTRA_OPTS $PLAYBOOK $VERBOSITY"
+for INVENTORY in ${INVENTORIES[@]}; do
+    CMD="${CMD} --inventory $INVENTORY"
+done
 process_cmd

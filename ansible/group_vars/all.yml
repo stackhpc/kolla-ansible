@@ -284,6 +284,12 @@ barbican_api_listen_port: "{{ barbican_api_port }}"
 
 blazar_api_port: "1234"
 
+caso_tcp_output_port: "24224"
+
+ceph_rgw_internal_fqdn: "{{ kolla_internal_fqdn }}"
+ceph_rgw_external_fqdn: "{{ kolla_external_fqdn }}"
+ceph_rgw_port: "6780"
+
 cinder_internal_fqdn: "{{ kolla_internal_fqdn }}"
 cinder_external_fqdn: "{{ kolla_external_fqdn }}"
 cinder_api_port: "8776"
@@ -458,10 +464,15 @@ prometheus_memcached_exporter_port: "9150"
 prometheus_rabbitmq_exporter_port: "{{ rabbitmq_prometheus_port }}"
 # Default cadvisor port of 8080 already in use
 prometheus_cadvisor_port: "18080"
+prometheus_fluentd_integration_port: "24231"
+prometheus_libvirt_exporter_port: "9177"
 
 # Prometheus alertmanager ports
 prometheus_alertmanager_port: "9093"
 prometheus_alertmanager_cluster_port: "9094"
+
+# Prometheus MSTeams port
+prometheus_msteams_port: "9095"
 
 # Prometheus openstack-exporter ports
 prometheus_openstack_exporter_port: "9198"
@@ -535,6 +546,12 @@ public_protocol: "{{ 'https' if kolla_enable_tls_external | bool else 'http' }}"
 internal_protocol: "{{ 'https' if kolla_enable_tls_internal | bool else 'http' }}"
 admin_protocol: "{{ 'https' if kolla_enable_tls_internal | bool else 'http' }}"
 
+##################
+# Firewall options
+##################
+enable_external_api_firewalld: "false"
+external_api_firewalld_zone: "public"
+
 ####################
 # OpenStack options
 ####################
@@ -602,10 +619,13 @@ enable_haproxy_memcached: "no"
 enable_aodh: "no"
 enable_barbican: "no"
 enable_blazar: "no"
+enable_caso: "no"
 enable_ceilometer: "no"
 enable_ceilometer_ipmi: "no"
 enable_cells: "no"
 enable_central_logging: "no"
+enable_ceph_rgw: "no"
+enable_ceph_rgw_loadbalancer: "{{ enable_ceph_rgw | bool }}"
 enable_chrony: "no"
 enable_cinder: "no"
 enable_cinder_backup: "yes"
@@ -687,6 +707,7 @@ enable_neutron_trunk: "no"
 enable_neutron_metering: "no"
 enable_neutron_infoblox_ipam_agent: "no"
 enable_neutron_port_forwarding: "no"
+enable_nova_libvirt_container: "{{ nova_compute_virt_type in ['kvm', 'qemu'] }}"
 enable_nova_serialconsole_proxy: "no"
 enable_nova_ssh: "yes"
 enable_octavia: "no"
@@ -983,6 +1004,9 @@ designate_admin_endpoint: "{{ admin_protocol }}://{{ designate_internal_fqdn | p
 designate_internal_endpoint: "{{ internal_protocol }}://{{ designate_internal_fqdn | put_address_in_context('url') }}:{{ designate_api_port }}"
 designate_public_endpoint: "{{ public_protocol }}://{{ designate_external_fqdn | put_address_in_context('url') }}:{{ designate_api_port }}"
 
+designate_enable_notifications_sink: "yes"
+designate_notifications_topic_name: "notifications_designate"
+
 #######################
 # Neutron options
 #######################
@@ -1024,7 +1048,7 @@ nova_backend_ceph: "no"
 nova_backend: "{{ 'rbd' if nova_backend_ceph | bool else 'default' }}"
 # Valid options are [ kvm, qemu, vmware ]
 nova_compute_virt_type: "kvm"
-nova_instance_datadir_volume: "nova_compute"
+nova_instance_datadir_volume: "{{ 'nova_compute' if enable_nova_libvirt_container | bool else '/var/lib/nova' }}"
 nova_safety_upgrade: "no"
 # Valid options are [ none, novnc, spice ]
 nova_console: "novnc"
@@ -1116,6 +1140,7 @@ enable_prometheus_mysqld_exporter: "{{ enable_mariadb | bool }}"
 enable_prometheus_node_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_memcached_exporter: "{{ enable_memcached | bool }}"
 enable_prometheus_cadvisor: "{{ enable_prometheus | bool }}"
+enable_prometheus_fluentd_integration: "{{ enable_prometheus | bool and enable_fluentd | bool }}"
 enable_prometheus_alertmanager: "{{ enable_prometheus | bool }}"
 enable_prometheus_alertmanager_external: "{{ enable_prometheus_alertmanager | bool }}"
 enable_prometheus_ceph_mgr_exporter: "no"
@@ -1123,6 +1148,8 @@ enable_prometheus_openstack_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_elasticsearch_exporter: "{{ enable_prometheus | bool and enable_elasticsearch | bool }}"
 enable_prometheus_blackbox_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_rabbitmq_exporter: "{{ enable_prometheus | bool and enable_rabbitmq | bool }}"
+enable_prometheus_libvirt_exporter: "no"
+enable_prometheus_msteams: "no"
 
 prometheus_alertmanager_user: "admin"
 prometheus_openstack_exporter_interval: "60s"
@@ -1132,6 +1159,8 @@ prometheus_cmdline_extras:
 prometheus_ceph_mgr_exporter_endpoints: []
 prometheus_openstack_exporter_endpoint_type: "internal"
 prometheus_openstack_exporter_compute_api_version: "2.1"
+prometheus_libvirt_exporter_interval: "60s"
+prometheus_msteams_webhook_url:
 
 ############
 # Vitrage
