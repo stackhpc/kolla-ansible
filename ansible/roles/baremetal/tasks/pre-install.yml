@@ -6,6 +6,7 @@
     line: "127.0.0.1 localhost"
     state: present
   become: True
+  tags: etc-hosts
   when: customize_etc_hosts | bool
 
 # NOTE(mgoddard): Ubuntu may include a line in /etc/hosts that makes the local
@@ -20,6 +21,7 @@
     regexp: "^127.0.1.1\\b.*\\s{{ ansible_hostname }}\\b"
     state: absent
   become: True
+  tags: etc-hosts
   when: customize_etc_hosts | bool
 
 - name: Generate /etc/hosts for all of the nodes
@@ -38,6 +40,7 @@
         {% endif %}
         {% endfor %}
   become: True
+  tags: etc-hosts
   when:
     - customize_etc_hosts | bool
     # Skip hosts in the bifrost group that do not have a valid api_interface.
@@ -62,6 +65,7 @@
         mode: "0660"
       when: cloud_init.stat.exists
   become: True
+  tags: etc-hosts
   when: customize_etc_hosts | bool
 
 - name: Ensure sudo group is present
