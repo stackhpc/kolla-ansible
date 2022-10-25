@@ -323,6 +323,7 @@
 #enable_gnocchi: "no"
 #enable_gnocchi_statsd: "no"
 #enable_grafana: "{{ enable_monasca | bool }}"
+#enable_grafana_external: "{{ enable_grafana | bool }}"
 #enable_heat: "{{ enable_openstack_core | bool }}"
 #enable_horizon: "{{ enable_openstack_core | bool }}"
 #enable_horizon_blazar: "{{ enable_blazar | bool }}"
@@ -355,6 +356,7 @@
 #enable_iscsid: "{{ (enable_cinder | bool and enable_cinder_backend_iscsi | bool) or enable_ironic | bool }}"
 #enable_kafka: "{{ enable_monasca | bool }}"
 #enable_kibana: "{{ 'yes' if enable_central_logging | bool or enable_monasca | bool else 'no' }}"
+#enable_kibana_external: "{{ enable_kibana | bool }}"
 #enable_kuryr: "no"
 #enable_magnum: "no"
 #enable_manila: "no"
@@ -725,11 +727,13 @@
 #enable_prometheus_fluentd_integration: "{{ enable_prometheus | bool and enable fluentd | bool }}"
 #enable_prometheus_memcached: "{{ enable_prometheus | bool }}"
 #enable_prometheus_alertmanager: "{{ enable_prometheus | bool }}"
+#enable_prometheus_alertmanager_external: "{{ enable_prometheus_alertmanager | bool }}"
 #enable_prometheus_ceph_mgr_exporter: "no"
 #enable_prometheus_openstack_exporter: "{{ enable_prometheus | bool }}"
 #enable_prometheus_elasticsearch_exporter: "{{ enable_prometheus | bool and enable_elasticsearch | bool }}"
 #enable_prometheus_blackbox_exporter: "{{ enable_prometheus | bool }}"
 #enable_prometheus_libvirt_exporter: "no"
+#enable_prometheus_msteams: "no"
 
 # List of extra parameters passed to prometheus. You can add as many to the list.
 #prometheus_cmdline_extras:

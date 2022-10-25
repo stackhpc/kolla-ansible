@@ -471,6 +471,9 @@ prometheus_libvirt_exporter_port: "9177"
 prometheus_alertmanager_port: "9093"
 prometheus_alertmanager_cluster_port: "9094"
 
+# Prometheus MSTeams port
+prometheus_msteams_port: "9095"
+
 # Prometheus openstack-exporter ports
 prometheus_openstack_exporter_port: "9198"
 prometheus_elasticsearch_exporter_port: "9108"
@@ -641,6 +644,7 @@ enable_freezer: "no"
 enable_gnocchi: "no"
 enable_gnocchi_statsd: "no"
 enable_grafana: "{{ enable_monasca | bool }}"
+enable_grafana_external: "{{ enable_grafana | bool }}"
 enable_hacluster: "no"
 enable_heat: "{{ enable_openstack_core | bool }}"
 enable_horizon: "{{ enable_openstack_core | bool }}"
@@ -802,6 +806,7 @@ enable_elasticsearch: "{{ 'yes' if enable_central_logging | bool or enable_ospro
 enable_elasticsearch_curator: "no"
 
 enable_kibana: "{{ 'yes' if enable_central_logging | bool or enable_monasca | bool else 'no' }}"
+enable_kibana_external: "{{ enable_kibana | bool }}"
 
 ####################
 # Redis options
@@ -999,6 +1004,9 @@ designate_admin_endpoint: "{{ admin_protocol }}://{{ designate_internal_fqdn | p
 designate_internal_endpoint: "{{ internal_protocol }}://{{ designate_internal_fqdn | put_address_in_context('url') }}:{{ designate_api_port }}"
 designate_public_endpoint: "{{ public_protocol }}://{{ designate_external_fqdn | put_address_in_context('url') }}:{{ designate_api_port }}"
 
+designate_enable_notifications_sink: "{{ enable_designate | bool }}"
+designate_notifications_topic_name: "notifications_designate"
+
 #######################
 # Neutron options
 #######################
@@ -1134,12 +1142,14 @@ enable_prometheus_memcached_exporter: "{{ enable_memcached | bool }}"
 enable_prometheus_cadvisor: "{{ enable_prometheus | bool }}"
 enable_prometheus_fluentd_integration: "{{ enable_prometheus | bool and enable_fluentd | bool }}"
 enable_prometheus_alertmanager: "{{ enable_prometheus | bool }}"
+enable_prometheus_alertmanager_external: "{{ enable_prometheus_alertmanager | bool }}"
 enable_prometheus_ceph_mgr_exporter: "no"
 enable_prometheus_openstack_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_elasticsearch_exporter: "{{ enable_prometheus | bool and enable_elasticsearch | bool }}"
 enable_prometheus_blackbox_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_rabbitmq_exporter: "{{ enable_prometheus | bool and enable_rabbitmq | bool }}"
 enable_prometheus_libvirt_exporter: "no"
+enable_prometheus_msteams: "no"
 
 prometheus_alertmanager_user: "admin"
 prometheus_openstack_exporter_interval: "60s"
@@ -1150,6 +1160,7 @@ prometheus_ceph_mgr_exporter_endpoints: []
 prometheus_openstack_exporter_endpoint_type: "internal"
 prometheus_openstack_exporter_compute_api_version: "2.1"
 prometheus_libvirt_exporter_interval: "60s"
+prometheus_msteams_webhook_url:
 
 ############
 # Vitrage
