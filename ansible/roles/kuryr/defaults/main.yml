@@ -20,6 +20,12 @@ kuryr_services:
     volumes: "{{ kuryr_default_volumes + kuryr_extra_volumes }}"
     dimensions: "{{ kuryr_dimensions }}"
 
+####################
+# Config Validate
+####################
+kuryr_config_validation:
+  - generator: "/kuryr/etc/kuryr-config-generator.conf"
+    config: "/etc/kuryr/kuryr.conf"
 
 ####################
 # Docker

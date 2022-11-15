@@ -57,6 +57,13 @@ nova_services:
     dimensions: "{{ nova_super_conductor_dimensions }}"
 
 ####################
+# Config Validate
+####################
+nova_config_validation:
+  - generator: "/nova/etc/nova/nova-config-generator.conf"
+    config: "/etc/nova/nova.conf"
+
+####################
 # Database
 ####################
 # These are kept for backwards compatibility, as cell0 references them.

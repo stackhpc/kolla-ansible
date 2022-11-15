@@ -51,6 +51,13 @@ heat_services:
     dimensions: "{{ heat_engine_dimensions }}"
 
 ####################
+# Config Validate
+####################
+heat_config_validation:
+  - generator: "/heat/config-generator.conf"
+    config: "/etc/heat/heat.conf"
+
+####################
 # Database
 ####################
 heat_database_name: "heat"

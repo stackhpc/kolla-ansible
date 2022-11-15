@@ -66,6 +66,13 @@ nova_cell_services:
     dimensions: "{{ nova_compute_ironic_dimensions }}"
 
 ####################
+# Config Validate
+####################
+nova_cell_config_validation:
+  - generator: "/nova/etc/nova/nova-config-generator.conf"
+    config: "/etc/nova/nova.conf"
+
+####################
 # Ceph
 ####################
 ceph_nova_pool_type: "{{ ceph_pool_type }}"

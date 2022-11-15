@@ -48,6 +48,13 @@ zun_services:
     dimensions: "{{ zun_compute_dimensions }}"
 
 ####################
+# Config Validate
+####################
+zun_config_validation:
+  - generator: "/zun/etc/zun/zun-config-generator.conf"
+    config: "/etc/zun/zun.conf"
+
+####################
 ## Database
 ####################
 zun_database_name: "zun"

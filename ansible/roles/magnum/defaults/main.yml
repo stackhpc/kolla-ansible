@@ -31,6 +31,12 @@ magnum_services:
     volumes: "{{ magnum_conductor_default_volumes + magnum_conductor_extra_volumes }}"
     dimensions: "{{ magnum_conductor_dimensions }}"
 
+####################
+# Config Validate
+####################
+magnum_config_validation:
+  - generator: "/magnum/etc/magnum/magnum-config-generator.conf"
+    config: "/etc/magnum/magnum.conf"
 
 ####################
 # Database

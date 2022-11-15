@@ -55,6 +55,13 @@ keystone_services:
 
 
 ####################
+# Config Validate
+####################
+keystone_config_validation:
+  - generator: "/keystone/config-generator/keystone.conf"
+    config: "/etc/keystone/keystone.conf"
+
+####################
 # Database
 ####################
 keystone_database_name: "keystone"

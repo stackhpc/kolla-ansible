@@ -29,6 +29,12 @@ sahara_services:
     volumes: "{{ sahara_engine_default_volumes + sahara_engine_extra_volumes }}"
     dimensions: "{{ sahara_engine_dimensions }}"
 
+####################
+# Config Validate
+####################
+sahara_config_validation:
+  - generator: "/sahara/tools/config/config-generator.sahara.conf"
+    config: "/etc/sahara/sahara.conf"
 
 ####################
 # Database

@@ -42,6 +42,12 @@ mistral_services:
     volumes: "{{ mistral_executor_default_volumes + mistral_executor_extra_volumes }}"
     dimensions: "{{ mistral_executor_dimensions }}"
 
+####################
+# Config Validate
+####################
+mistral_config_validation:
+  - generator: "/mistral/tools/config/config-generator.mistral.conf"
+    config: "/etc/mistral/mistral.conf"
 
 ####################
 # Database

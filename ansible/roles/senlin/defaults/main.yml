@@ -31,6 +31,13 @@ senlin_services:
     dimensions: "{{ senlin_engine_dimensions }}"
 
 ####################
+# Config Validate
+####################
+senlin_config_validation:
+  - generator: "/senlin/tools/config-generator.conf"
+    config: "/etc/senlin/senlin.conf"
+
+####################
 # Database
 ####################
 senlin_database_name: "senlin"

@@ -65,6 +65,12 @@ designate_services:
     volumes: "{{ designate_sink_default_volumes + designate_sink_extra_volumes }}"
     dimensions: "{{ designate_sink_dimensions }}"
 
+####################
+# Config Validate
+####################
+designate_config_validation:
+  - generator: "/designate/etc/designate/designate-config-generator.conf"
+    config: "/etc/designate/designate.conf"
 
 ####################
 # Database

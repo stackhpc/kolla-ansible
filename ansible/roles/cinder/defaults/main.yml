@@ -87,6 +87,13 @@ ceph_client_cinder_backup_keyring_caps:
 
 
 ####################
+# Config Validate
+####################
+cinder_config_validation:
+  - generator: "/cinder/tools/config/cinder-config-generator.conf"
+    config: "/etc/cinder/cinder.conf"
+
+####################
 # Database
 ####################
 cinder_database_name: "cinder"

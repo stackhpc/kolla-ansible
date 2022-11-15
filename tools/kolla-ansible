@@ -165,6 +165,7 @@ Commands:
     upgrade             Upgrades existing OpenStack Environment
     upgrade-bifrost     Upgrades an existing bifrost container
     genconfig           Generate configuration files for enabled OpenStack services
+    validate-config      Validate configuration files for enabled OpenStack services
 EOF
 }
 
@@ -204,6 +205,7 @@ certificates
 upgrade
 upgrade-bifrost
 genconfig
+validate-config
 EOF
 }
 
@@ -459,6 +461,10 @@ EOF
 (genconfig)
         ACTION="Generate configuration files for enabled OpenStack services"
         EXTRA_OPTS="$EXTRA_OPTS -e kolla_action=config"
+        ;;
+(validate-config)
+        ACTION="Validate configuration files for enabled OpenStack services"
+        EXTRA_OPTS="$EXTRA_OPTS -e kolla_action=config_validate"
         ;;
 (bash-completion)
         bash_completion

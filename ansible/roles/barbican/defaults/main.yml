@@ -37,6 +37,12 @@ barbican_services:
     volumes: "{{ barbican_worker_default_volumes + barbican_worker_extra_volumes }}"
     dimensions: "{{ barbican_worker_dimensions }}"
 
+####################
+# Config Validate
+####################
+barbican_config_validation:
+  - generator: "/barbican/etc/oslo-config-generator/barbican.conf"
+    config: "/etc/barbican/barbican.conf"
 
 ####################
 # Database

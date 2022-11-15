@@ -33,6 +33,13 @@ tacker_services:
     dimensions: "{{ tacker_conductor_dimensions }}"
 
 ####################
+# Config Validate
+####################
+tacker_config_validation:
+  - generator: "/tacker/etc/config-generator.conf"
+    config: "/etc/tacker/tacker.conf"
+
+####################
 # Database
 ####################
 tacker_database_name: "tacker"

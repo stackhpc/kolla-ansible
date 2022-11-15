@@ -43,6 +43,13 @@ vitrage_services:
     dimensions: "{{ vitrage_ml_dimensions }}"
 
 ####################
+# Config Validate
+####################
+vitrage_config_validation:
+  - generator: "/vitrage/etc/vitrage/vitrage-config-generator.conf"
+    config: "/etc/vitrage/vitrage.conf"
+
+####################
 ## Database
 #####################
 vitrage_database_name: "vitrage"

@@ -35,6 +35,12 @@ trove_services:
     volumes: "{{ trove_taskmanager_default_volumes + trove_taskmanager_extra_volumes }}"
     dimensions: "{{ trove_taskmanager_dimensions }}"
 
+####################
+# Config Validate
+####################
+trove_config_validation:
+  - generator: "/trove/tools/trove-config-generator.conf"
+    config: "/etc/trove/trove.conf"
 
 ####################
 # Database

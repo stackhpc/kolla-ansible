@@ -24,6 +24,13 @@ placement_services:
         listen_port: "{{ placement_api_listen_port }}"
 
 ####################
+# Config Validate
+####################
+placement_config_validation:
+  - generator: "/placement/etc/placement/config-generator.conf"
+    config: "/etc/placement/placement.conf"
+
+####################
 # Database
 ####################
 placement_database_name: "placement"

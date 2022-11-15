@@ -36,6 +36,12 @@ masakari_services:
     privileged: True
     dimensions: "{{ masakari_monitors_dimensions }}"
 
+####################
+# Config Validate
+####################
+masakari_config_validation:
+  - generator: "/masakari/etc/masakari/masakari-config-generator.conf"
+    config: "/etc/masakari/masakari.conf"
 
 ####################
 # Database

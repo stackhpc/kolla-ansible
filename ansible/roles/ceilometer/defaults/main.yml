@@ -32,6 +32,12 @@ ceilometer_services:
     volumes: "{{ ceilometer_ipmi_default_volumes + ceilometer_ipmi_extra_volumes }}"
     dimensions: "{{ ceilometer_ipmi_dimensions }}"
 
+####################
+# Config Validate
+####################
+ceilometer_config_validation:
+  - generator: "/ceilometer/etc/ceilometer/ceilometer-config-generator.conf"
+    config: "/etc/ceilometer/ceilometer.conf"
 
 ####################
 # Docker

@@ -35,6 +35,12 @@ watcher_services:
     volumes: "{{ watcher_engine_default_volumes + watcher_engine_extra_volumes }}"
     dimensions: "{{ watcher_engine_dimensions }}"
 
+####################
+# Config Validate
+####################
+watcher_config_validation:
+  - generator: "/watcher/etc/watcher/oslo-config-generator/watcher.conf"
+    config: "/etc/watcher/watcher.conf"
 
 ####################
 # Database
