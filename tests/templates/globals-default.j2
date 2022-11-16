@@ -59,6 +59,8 @@ mariadb_wsrep_extra_provider_options:
 
 nova_compute_virt_type: "{{ virt_type }}"
 
+neutron_agents_wrappers: "yes"
+
 enable_openstack_core: "{{ openstack_core_enabled }}"
 enable_horizon: "{{ dashboard_enabled }}"
 enable_heat: "{{ openstack_core_tested }}"
@@ -154,6 +156,7 @@ enable_rabbitmq: "no"
 {% if scenario == "cephadm" %}
 # kolla-ansible vars
 enable_cinder: "yes"
+enable_neutron_agent_ha: "yes"
 # External Ceph
 glance_backend_ceph: "yes"
 cinder_backend_ceph: "yes"
