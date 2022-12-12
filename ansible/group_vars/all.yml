@@ -279,6 +279,8 @@ barbican_api_listen_port: "{{ barbican_api_port }}"
 
 blazar_api_port: "1234"
 
+caso_tcp_output_port: "24224"
+
 ceph_rgw_internal_fqdn: "{{ kolla_internal_fqdn }}"
 ceph_rgw_external_fqdn: "{{ kolla_external_fqdn }}"
 ceph_rgw_port: "6780"
@@ -534,6 +536,12 @@ public_protocol: "{{ 'https' if kolla_enable_tls_external | bool else 'http' }}"
 internal_protocol: "{{ 'https' if kolla_enable_tls_internal | bool else 'http' }}"
 admin_protocol: "{{ 'https' if kolla_enable_tls_internal | bool else 'http' }}"
 
+##################
+# Firewall options
+##################
+enable_external_api_firewalld: "false"
+external_api_firewalld_zone: "public"
+
 ####################
 # OpenStack options
 ####################
@@ -602,6 +610,7 @@ enable_haproxy_memcached: "no"
 enable_aodh: "no"
 enable_barbican: "no"
 enable_blazar: "no"
+enable_caso: "no"
 enable_ceilometer: "no"
 enable_ceilometer_ipmi: "no"
 enable_cells: "no"
@@ -689,6 +698,7 @@ enable_neutron_trunk: "no"
 enable_neutron_metering: "no"
 enable_neutron_infoblox_ipam_agent: "no"
 enable_neutron_port_forwarding: "no"
+enable_nova_libvirt_container: "{{ nova_compute_virt_type in ['kvm', 'qemu'] }}"
 enable_nova_serialconsole_proxy: "no"
 enable_nova_ssh: "yes"
 enable_octavia: "no"
@@ -981,6 +991,9 @@ designate_admin_endpoint: "{{ admin_protocol }}://{{ designate_internal_fqdn | p
 designate_internal_endpoint: "{{ internal_protocol }}://{{ designate_internal_fqdn | put_address_in_context('url') }}:{{ designate_api_port }}"
 designate_public_endpoint: "{{ public_protocol }}://{{ designate_external_fqdn | put_address_in_context('url') }}:{{ designate_api_port }}"
 
+designate_enable_notifications_sink: "{{ enable_designate | bool }}"
+designate_notifications_topic_name: "notifications_designate"
+
 #######################
 # Neutron options
 #######################
@@ -1022,7 +1035,7 @@ nova_backend_ceph: "no"
 nova_backend: "{{ 'rbd' if nova_backend_ceph | bool else 'default' }}"
 # Valid options are [ kvm, qemu, vmware ]
 nova_compute_virt_type: "kvm"
-nova_instance_datadir_volume: "nova_compute"
+nova_instance_datadir_volume: "{{ 'nova_compute' if enable_nova_libvirt_container | bool else '/var/lib/nova' }}"
 nova_safety_upgrade: "no"
 # Valid options are [ none, novnc, spice ]
 nova_console: "novnc"

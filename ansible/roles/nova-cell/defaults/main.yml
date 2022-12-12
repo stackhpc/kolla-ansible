@@ -3,7 +3,7 @@ nova_cell_services:
   nova-libvirt:
     container_name: nova_libvirt
     group: "{{ nova_cell_compute_group }}"
-    enabled: "{{ nova_compute_virt_type in ['kvm', 'qemu'] }}"
+    enabled: "{{ enable_nova_libvirt_container }}"
     image: "{{ nova_libvirt_image_full }}"
     pid_mode: "host"
     cgroupns_mode: "host"
@@ -399,7 +399,7 @@ nova_compute_default_volumes:
   - "/dev:/dev"
   - "kolla_logs:/var/log/kolla/"
   - "{% if enable_iscsid | bool %}iscsi_info:/etc/iscsi{% endif %}"
-  - "libvirtd:/var/lib/libvirt"
+  - "{{ nova_libvirt_volume }}:/var/lib/libvirt"
   - "{{ nova_instance_datadir_volume }}:/var/lib/nova/"
   - "{% if enable_shared_var_lib_nova_mnt | bool %}/var/lib/nova/mnt:/var/lib/nova/mnt:shared{% endif %}"
   - "{{ kolla_dev_repos_directory ~ '/nova/nova:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/nova' if nova_dev_mode | bool else '' }}"
@@ -428,6 +428,8 @@ nova_compute_extra_volumes: "{{ nova_extra_volumes }}"
 nova_compute_ironic_extra_volumes: "{{ nova_extra_volumes }}"
 # Used by bootstrapping containers.
 nova_cell_bootstrap_extra_volumes: "{{ nova_extra_volumes }}"
+
+nova_libvirt_volume: "{{ 'libvirtd' if enable_nova_libvirt_container | bool else '/var/lib/libvirt' }}"
 
 ####################
 # HAProxy
@@ -500,8 +502,8 @@ nova_compute_registration_fatal: false
 nova_notification_topics:
   - name: notifications
     enabled: "{{ enable_ceilometer | bool or enable_neutron_infoblox_ipam_agent | bool }}"
-  - name: notifications_designate
-    enabled: "{{ enable_designate | bool }}"
+  - name: "{{ designate_notifications_topic_name }}"
+    enabled: "{{ designate_enable_notifications_sink | bool }}"
   - name: vitrage_notifications
     enabled: "{{ enable_vitrage | bool }}"
 
@@ -564,3 +566,14 @@ enable_shared_var_lib_nova_mnt: "{{ enable_cinder_backend_nfs | bool or enable_c
 ###################################
 
 nova_pci_passthrough_whitelist: "{{ enable_neutron_sriov | bool | ternary(neutron_sriov_physnet_mappings | dict2items(key_name='physical_network', value_name='devname'), []) }}"
+
+##################
+# Libvirt cleanup
+##################
+
+# The following options pertain to the kolla-ansible nova-libvirt-cleanup command.
+
+# Whether to fail when there are running VMs.
+nova_libvirt_cleanup_running_vms_fatal: true
+# Whether to remove Docker volumes.
+nova_libvirt_cleanup_remove_volumes: false
