@@ -49,10 +49,14 @@ topics = notifications
 driver = noop
 {% endif %}
 
-{% if om_enable_rabbitmq_tls | bool %}
 [oslo_messaging_rabbit]
+heartbeat_in_pthread = {{ service_name == 'masakari-api' }}
+{% if om_enable_rabbitmq_tls | bool %}
 ssl = true
 ssl_ca_file = {{ om_rabbitmq_cacert }}
+{% endif %}
+{% if om_enable_rabbitmq_high_availability | bool %}
+amqp_durable_queues = true
 {% endif %}
 
 [oslo_middleware]
