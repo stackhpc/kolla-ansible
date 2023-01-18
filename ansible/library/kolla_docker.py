@@ -23,6 +23,7 @@
 import json
 import os
 import shlex
+import time
 import traceback
 
 import docker
@@ -230,6 +231,12 @@ options:
     required: False
     default: dict()
     type: dict
+  post_start_delay:
+    description:
+      - Wait for this period of time, in seconds, after starting container.
+    required: False
+    default: 0
+    type: int
 author: Sam Yaple
 '''
 
@@ -279,6 +286,7 @@ class DockerWorker(object):
         self.changed = False
         # Use this to store arguments to pass to exit_json().
         self.result = {}
+        self.post_start_delay = self.params.get('post_start_delay')
 
         # TLS not fully implemented
         # tls_config = self.generate_tls()
@@ -951,6 +959,7 @@ class DockerWorker(object):
                     msg="Container exited with non-zero return code %s" % rc,
                     **self.result
                 )
+        time.sleep(self.post_start_delay)
 
     def get_container_env(self):
         name = self.params.get('name')
@@ -1076,6 +1085,8 @@ class DockerWorker(object):
             self.dc.stop(name, timeout=graceful_timeout)
             self.dc.start(name)
 
+        time.sleep(self.post_start_delay)
+
     def create_volume(self):
         if not self.check_volume():
             self.changed = True
@@ -1186,6 +1197,7 @@ def generate_module():
         dimensions=dict(required=False, type='dict', default=dict()),
         tty=dict(required=False, type='bool', default=False),
         client_timeout=dict(required=False, type='int', default=120),
+        post_start_delay=dict(required=False, type='int', default=0),
         ignore_missing=dict(required=False, type='bool', default=False),
     )
     required_if = [

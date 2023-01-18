@@ -4,6 +4,7 @@
     service_name: "openvswitch-db-server"
     service: "{{ openvswitch_services[service_name] }}"
   become: true
+  throttle: "{{ openvswitch_restart_throttle }}"
   kolla_docker:
     action: "recreate_or_restart_container"
     common_options: "{{ docker_common_options }}"
@@ -11,7 +12,7 @@
     image: "{{ service.image }}"
     volumes: "{{ service.volumes }}"
     dimensions: "{{ service.dimensions }}"
-    healthcheck: "{{ service.healthcheck }}"
+    post_start_delay: "{{ openvswitch_restart_delay }}"
   when:
     - kolla_action != "config"
   notify:
@@ -31,6 +32,7 @@
     service_name: "openvswitch-vswitchd"
     service: "{{ openvswitch_services[service_name] }}"
   become: true
+  throttle: "{{ openvswitch_restart_throttle }}"
   kolla_docker:
     action: "recreate_or_restart_container"
     common_options: "{{ docker_common_options }}"
@@ -39,6 +41,6 @@
     volumes: "{{ service.volumes }}"
     privileged: "{{ service.privileged | default(False) }}"
     dimensions: "{{ service.dimensions }}"
-    healthcheck: "{{ service.healthcheck }}"
+    post_start_delay: "{{ openvswitch_restart_delay }}"
   when:
     - kolla_action != "config"
