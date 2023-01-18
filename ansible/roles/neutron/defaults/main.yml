@@ -767,6 +767,13 @@ neutron_dev_repos_pull: "{{ kolla_dev_repos_pull }}"
 neutron_dev_mode: "{{ kolla_dev_mode }}"
 neutron_source_version: "{{ kolla_source_version }}"
 neutron_service_limit: "all"
+# Limit container restarts to this many hosts at a time. This can be used to
+# spread the load on the system over a longer period of time whilst still using
+# a higher degree of parallism to generate the config, thefore hopefully
+# minimising the impact to the overall runtime.
+neutron_agent_restart_throttle: 10
+# Delay after restarting containers before moving onto the next.
+neutron_agent_restart_delay: 1
 
 ####################
 # Keystone

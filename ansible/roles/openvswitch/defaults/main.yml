@@ -102,3 +102,14 @@ openvswitch_vswitchd_extra_volumes: "{{ openvswitch_extra_volumes }}"
 #############
 
 openvswitch_system_id: "{{ ansible_facts.hostname }}"
+
+#############
+# Kolla
+#############
+# Limit container restarts to this many hosts at a time. This can be used to
+# spread the load on the system over a longer period of time whilst still using
+# a higher degree of parallism to generate the config, thefore hopefully
+# minimising the impact to the overall runtime.
+openvswitch_restart_throttle: 10
+# Delay after restarting containers before moving onto the next.
+openvswitch_restart_delay: 1
