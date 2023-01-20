@@ -12,7 +12,7 @@
     image: "{{ service.image }}"
     volumes: "{{ service.volumes }}"
     dimensions: "{{ service.dimensions }}"
-    post_start_delay: 10
+    post_start_delay: 1
   when:
     - kolla_action != "config"
   notify:
@@ -41,6 +41,6 @@
     volumes: "{{ service.volumes }}"
     privileged: "{{ service.privileged | default(False) }}"
     dimensions: "{{ service.dimensions }}"
-    post_start_delay: 10
+    post_start_delay: 1
   when:
     - kolla_action != "config"

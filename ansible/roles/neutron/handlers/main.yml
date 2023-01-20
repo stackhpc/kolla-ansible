@@ -32,7 +32,7 @@
     dimensions: "{{ service.dimensions }}"
     privileged: "{{ service.privileged | default(False) }}"
     healthcheck: "{{ service.healthcheck | default(omit) }}"
-    post_start_delay: 10
+    post_start_delay: 1
   when:
     - kolla_action != "config"
 
