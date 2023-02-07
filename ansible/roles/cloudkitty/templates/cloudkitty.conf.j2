@@ -45,6 +45,7 @@ policy_file = {{ cloudkitty_policy_file }}
 {% endif %}
 
 [oslo_messaging_rabbit]
+kombu_reconnect_delay = 0.1
 heartbeat_in_pthread = {{ service_name == 'cloudkitty-api' }}
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true
