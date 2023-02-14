@@ -218,7 +218,7 @@
   when:
     - enable_ceph_rgw | bool
     - enable_ceph_rgw_loadbalancer | bool
-    - inventory_hostname in groups['loadbalancer']
+    - inventory_hostname in groups['haproxy']
     - haproxy_stat.find('radosgw') == -1
     - haproxy_vip_prechecks
 
