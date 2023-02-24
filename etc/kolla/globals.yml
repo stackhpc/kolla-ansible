@@ -743,6 +743,9 @@
 #prometheus_node_exporter_cmdline_extras:
 #prometheus_openstack_exporter_cmdline_extras:
 
+# CA certificate file for Blackbox exporter
+#prometheus_blackbox_exporter_cafile:
+
 # Example of setting endpoints for prometheus ceph mgr exporter.
 # You should add all ceph mgr's in your external ceph deployment.
 #prometheus_ceph_mgr_exporter_endpoints:

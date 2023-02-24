@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Adds a new variable ``prometheus_blackbox_exporter_cafile`` to configure
+    the CA certificate file used to verify ``os_endpoint`` HTTPS queries from
+    Prometheus blackbox exporter. The CA file needs to be present inside the
+    ``prometheus_blackbox_exporter`` container, which can be done with
+    ``prometheus_blackbox_exporter_extra_volumes``.

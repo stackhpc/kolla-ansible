@@ -9,6 +9,10 @@ modules:
         Content-Type: application/json
       fail_if_body_not_matches_regexp:
         - "versions"
+{% if prometheus_blackbox_exporter_cafile %}
+      tls_config:
+        ca_file: "{{ prometheus_blackbox_exporter_cafile }}"
+{% endif %}
   http_post_2xx:
     prober: http
     http:
