@@ -21,7 +21,7 @@
     service_name: "neutron-openvswitch-agent"
     service: "{{ neutron_services[service_name] }}"
   become: true
-  throttle: 1
+  throttle: 10
   kolla_docker:
     action: "recreate_or_restart_container"
     common_options: "{{ docker_common_options }}"
