@@ -1,2 +1,5 @@
 ---
 project_name: "neutron"
+
+# Support ansible style limit strings
+_neutron_service_limit: "{{ neutron_service_limit | split(',') | reject(neutron_service_limit) or neutron_service_limit | split(':') }}"
