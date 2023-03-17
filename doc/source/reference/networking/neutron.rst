@@ -335,3 +335,38 @@ In this example:
 - `neutron_modules_extra`: Allows users to specify additional modules and
   their associated parameters. The given configuration adjusts the
   `hashsize` parameter for the `nf_conntrack_tftp` module.
+
+Reconfiguring/upgrading individual Neutron services
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``neutron_service_limit`` can be used to target a subset of the Neutron
+services during a ``deploy``, ``reconfigure`` or ``upgrade`` action. This can
+help to minimise the blast radius when applying a configuration change or to
+perform a two-step upgrade of Neutron, where neutron-server is upgraded first,
+followed by the agents e.g:
+
+Upgrade neutron-server across all controller nodes:
+
+.. code:: sh
+
+   kolla-ansible upgrade --tags neutron -e neutron_service_limit=neutron-server
+
+For each network node, drain the network agents running on that node of all
+routers and DHCP instances. Then upgrade the agents:
+
+.. code:: sh
+
+   kolla-ansible upgrade --limit network[0] --tags neutron,openvswitch -e neutron_service_limit='neutron-openvswitch-agent,neutron-dhcp-agent,neutron-l3-agent,neutron-metadata-agent,ironic-neutron-agent'
+
+Restore router and DHCP instances onto the target and repeat the process for
+the next network node.
+
+The compute nodes can then be upgraded in a staged fashion:
+
+.. code:: sh
+
+   kolla-ansible upgrade --limit compute[0] --tags neutron,openvswitch
+
+This can reduce load on neutron for large deployments. See the
+:neutron-doc:`neutron documentation on rolling upgrades
+<contributor/internals/upgrade.html#rolling-upgrade>` for further details.

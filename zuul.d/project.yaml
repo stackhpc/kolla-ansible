@@ -39,9 +39,8 @@
         - kolla-ansible-debian-ironic
         - kolla-ansible-ubuntu-ironic
         - kolla-ansible-rocky9-upgrade
-        - kolla-ansible-rocky9-slurp-upgrade
+        - kolla-ansible-rocky9-split-neutron-upgrade
         - kolla-ansible-debian-upgrade
-        - kolla-ansible-debian-slurp-upgrade
         - kolla-ansible-ubuntu-upgrade
         - kolla-ansible-ubuntu-slurp-upgrade
         - kolla-ansible-ubuntu-cells

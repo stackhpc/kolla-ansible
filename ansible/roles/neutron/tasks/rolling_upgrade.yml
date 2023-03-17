@@ -41,7 +41,9 @@
   register: neutron_check_contract_db_stdout
   ignore_errors: yes
   with_items: "{{ neutron_rolling_upgrade_services }}"
-  when: inventory_hostname == groups['neutron-server'][0]
+  when:
+    - neutron_server.enabled
+    - inventory_hostname == groups['neutron-server'][0]
 
 - name: Stopping all neutron-server for contract db
   vars:
@@ -58,6 +60,7 @@
     name: "{{ service.container_name }}"
   when:
     - service.host_in_groups | bool
+    - service.enabled
     - is_stop_neutron_server | length > 0
   notify:
     - "Restart neutron-server container"

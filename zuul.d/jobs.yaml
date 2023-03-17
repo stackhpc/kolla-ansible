@@ -164,9 +164,20 @@
       tls_enabled: true
 
 - job:
+    name: kolla-ansible-rocky9-split-neutron-upgrade
+    parent: kolla-ansible-base
+    nodeset: kolla-ansible-rocky9
+    timeout: 9000
+    vars:
+      base_distro: rocky
+      is_upgrade: yes
+      tls_enabled: true
+      scenario: ovs_split_upgrade
+
+- job:
     name: kolla-ansible-debian-upgrade
     parent: kolla-ansible-base
-    nodeset: kolla-ansible-debian-bullseye
+    nodeset: kolla-ansible-debian-bookworm
     timeout: 10800
     vars:
       base_distro: debian
@@ -176,7 +187,7 @@
 - job:
     name: kolla-ansible-debian-slurp-upgrade
     parent: kolla-ansible-base
-    nodeset: kolla-ansible-debian-bullseye
+    nodeset: kolla-ansible-debian-bookworm
     timeout: 9000
     branches: master
     vars:
@@ -189,8 +200,7 @@
 - job:
     name: kolla-ansible-debian-upgrade-aarch64
     parent: kolla-ansible-debian-upgrade
-    nodeset: kolla-ansible-debian-bullseye-aarch64
-    voting: false
+    nodeset: kolla-ansible-debian-bookworm-aarch64
 
 - job:
     name: kolla-ansible-ubuntu-upgrade
