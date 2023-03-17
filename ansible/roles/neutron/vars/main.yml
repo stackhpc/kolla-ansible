@@ -1,2 +1,5 @@
 ---
 project_name: "neutron"
+
+# Comma separated list of services e.g neutron-server,neutron-openvswitch-agent
+neutron_service_limits: "{{ neutron_service_limit.split(',') | select }}"
