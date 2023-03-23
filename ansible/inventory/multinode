@@ -262,6 +262,13 @@ common
 [elasticsearch-curator:children]
 elasticsearch
 
+[opensearch:children]
+control
+
+# Opensearch dashboards
+[opensearch-dashboards:children]
+opensearch
+
 # Glance
 [glance-api:children]
 glance
@@ -715,6 +722,7 @@ monitoring
 
 [prometheus-elasticsearch-exporter:children]
 elasticsearch
+opensearch
 
 [prometheus-blackbox-exporter:children]
 monitoring
