@@ -6,7 +6,13 @@
             "dest": "/etc/magnum/magnum.conf",
             "owner": "magnum",
             "perm": "0600"
-        }{% if magnum_policy_file is defined %},
+        }{% if magnum_cluster_api_driver_enabled is defined %},
+        {
+            "source": "{{ container_config_directory }}/kubeconfig",
+            "dest": "/etc/magnum/kubeconfig",
+            "owner": "magnum",
+            "perm": "0600"
+        }{% endif % }{% if magnum_policy_file is defined %},
         {
             "source": "{{ container_config_directory }}/{{ magnum_policy_file }}",
             "dest": "/etc/magnum/{{ magnum_policy_file }}",
