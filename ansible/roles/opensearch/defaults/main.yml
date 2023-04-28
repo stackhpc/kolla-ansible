@@ -40,6 +40,7 @@ opensearch_services:
         enabled: "{{ enable_opensearch_dashboards_external | bool }}"
         mode: "http"
         external: true
+        external_fqdn: "{{ opensearch_external_fqdn }}"
         port: "{{ opensearch_dashboards_port_external }}"
         auth_user: "{{ opensearch_dashboards_user }}"
         auth_pass: "{{ opensearch_dashboards_password }}"
@@ -79,13 +80,12 @@ opensearch_dashboards_opensearch_ssl_verify: true
 ####################
 # Docker
 ####################
-opensearch_install_type: "{{ kolla_install_type }}"
-opensearch_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ opensearch_install_type }}-opensearch"
+opensearch_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/opensearch"
 opensearch_tag: "{{ openstack_tag }}"
 opensearch_image_full: "{{ opensearch_image }}:{{ opensearch_tag }}"
 
-opensearch_dashboards_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ opensearch_install_type }}-opensearch-dashboards"
-opensearch_dashboards_tag: "{{ opensearch_tag }}"
+opensearch_dashboards_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/opensearch-dashboards"
+opensearch_dashboards_tag: "{{ openstack_tag }}"
 opensearch_dashboards_image_full: "{{ opensearch_dashboards_image }}:{{ opensearch_dashboards_tag }}"
 
 opensearch_dimensions: "{{ default_container_dimensions }}"
