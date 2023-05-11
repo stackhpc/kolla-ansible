@@ -57,24 +57,6 @@
   notify:
     - Restart haproxy container
 
-- name: Copying over proxysql config
-  vars:
-    service: "{{ loadbalancer_services['proxysql'] }}"
-  template:
-    src: "{{ item }}"
-    dest: "{{ node_config_directory }}/proxysql/proxysql.yaml"
-    mode: "0660"
-  become: true
-  when:
-    - inventory_hostname in groups[service.group]
-    - service.enabled | bool
-  with_first_found:
-    - "{{ node_custom_config }}/proxysql/{{ inventory_hostname }}/proxysql.yaml"
-    - "{{ node_custom_config }}/proxysql/proxysql.yaml"
-    - "proxysql/proxysql.yaml.j2"
-  notify:
-    - Restart proxysql container
-
 - name: Copying over haproxy single external frontend config
   vars:
     service: "{{ loadbalancer_services['haproxy'] }}"
