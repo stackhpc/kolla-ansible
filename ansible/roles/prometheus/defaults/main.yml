@@ -72,6 +72,7 @@ prometheus_services:
         external: true
         external_fqdn: "{{ prometheus_alertmanager_external_fqdn }}"
         port: "{{ prometheus_alertmanager_public_port }}"
+        listen_port: "{{ prometheus_alertmanager_listen_port }}"
         auth_user: "{{ prometheus_alertmanager_user }}"
         auth_pass: "{{ prometheus_alertmanager_password }}"
         active_passive: "{{ prometheus_alertmanager_active_passive | bool }}"
