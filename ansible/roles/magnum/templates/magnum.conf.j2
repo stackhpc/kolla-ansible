@@ -146,6 +146,6 @@ connection_string = {{ osprofiler_backend_connection_string }}
 {% endif %}
 
 {% if magnum_cluster_api_driver_enabled is defined %}
-[drivers]
-kubeconfig_file= /etc/magnum/kubeconfig
+[capi_driver]
+kubeconfig_file = /etc/magnum/kubeconfig
 {% endif %}
