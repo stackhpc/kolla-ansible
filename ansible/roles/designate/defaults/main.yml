@@ -42,6 +42,8 @@ designate_services:
     container_name: designate_mdns
     group: designate-mdns
     enabled: true
+    cap_add:
+      - NET_BIND_SERVICE
     image: "{{ designate_mdns_image_full }}"
     volumes: "{{ designate_mdns_default_volumes + designate_mdns_extra_volumes }}"
     dimensions: "{{ designate_mdns_dimensions }}"
