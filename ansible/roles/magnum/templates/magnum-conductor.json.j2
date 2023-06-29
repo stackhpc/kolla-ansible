@@ -12,7 +12,7 @@
             "dest": "/etc/magnum/kubeconfig",
             "owner": "magnum",
             "perm": "0600"
-        }{% endif % }{% if magnum_policy_file is defined %},
+        }{% endif %}{% if magnum_policy_file is defined %},
         {
             "source": "{{ container_config_directory }}/{{ magnum_policy_file }}",
             "dest": "/etc/magnum/{{ magnum_policy_file }}",
