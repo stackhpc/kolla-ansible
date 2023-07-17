@@ -72,7 +72,8 @@
   stat:
     path: "{{ node_custom_config }}/magnum/kubeconfig"
   register: kubeconfig
-
+  delegate_to: localhost
+  run_once: true
 - name: Optionally configure magnum for cluster-api driver
   set_fact:
     magnum_cluster_api_driver_enabled: true
