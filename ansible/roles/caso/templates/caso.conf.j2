@@ -10,7 +10,7 @@ spooldir = /var/lib/caso
 
 [keystone_auth]
 auth_type = password
-auth_url = {{ admin_protocol }}://{{ kolla_internal_fqdn }}:{{ keystone_admin_port }}
+auth_url = {{ keystone_internal_url }}
 project_domain_id = {{ default_project_domain_id }}
 username = {{ caso_keystone_user }}
 user_domain_id = {{ default_user_domain_id }}
