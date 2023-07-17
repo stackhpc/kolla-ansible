@@ -41,8 +41,7 @@ caso_ks_users: "{{ caso_ks_users_tmpl | from_yaml if caso_projects else [] }}"
 ####################
 # Docker
 ####################
-caso_install_type: "{{ kolla_install_type }}"
-caso_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ caso_install_type }}-caso"
+caso_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/caso"
 caso_tag: "{{ openstack_tag }}"
 caso_image_full: "{{ caso_image }}:{{ caso_tag }}"
 caso_dimensions: "{{ default_container_dimensions }}"
