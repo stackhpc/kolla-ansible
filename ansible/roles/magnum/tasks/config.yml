@@ -35,6 +35,32 @@
   when:
     - kolla_copy_ca_into_containers | bool
 
+- name: Check if management cluster kubeconfig is provided
+  stat:
+    path: "{{ node_custom_config }}/magnum/kubeconfig"
+  register: kubeconfig
+  delegate_to: localhost
+
+- name: Optionally configure magnum for cluster-api driver
+  set_fact:
+    magnum_cluster_api_driver_enabled: true
+  when: kubeconfig.stat.exists
+
+- name: Copying over kubeconfig for management cluster 
+  vars:
+    service: "{{ magnum_services['magnum-conductor'] }}"
+  copy:
+    src: "{{ node_custom_config }}/magnum/kubeconfig"
+    dest: "{{ node_config_directory }}/magnum-conductor/kubeconfig"
+    mode: "0660"
+  become: true
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - magnum_cluster_api_driver_enabled is defined
+  notify:
+    - Restart magnum-conductor container
+
 - name: Copying over config.json files for services
   template:
     src: "{{ item.key }}.json.j2"
@@ -67,32 +93,6 @@
   with_dict: "{{ magnum_services }}"
   notify:
     - Restart {{ item.key }} container
-    
-- name: Check if management cluster kubeconfig is provided
-  stat:
-    path: "{{ node_custom_config }}/magnum/kubeconfig"
-  register: kubeconfig
-  delegate_to: localhost
-
-- name: Optionally configure magnum for cluster-api driver
-  set_fact:
-    magnum_cluster_api_driver_enabled: true
-  when: kubeconfig.stat.exists
-
-- name: Copying over kubeconfig for management cluster 
-  vars:
-    service: "{{ magnum_services['magnum-conductor'] }}"
-  copy:
-    src: "{{ node_custom_config }}/magnum/kubeconfig"
-    dest: "{{ node_config_directory }}/magnum-conductor/kubeconfig"
-    mode: "0660"
-  become: true
-  when:
-    - inventory_hostname in groups[service.group]
-    - service.enabled | bool
-    - magnum_cluster_api_driver_enabled is defined
-  notify:
-    - Restart magnum-conductor container
 
 - name: Copying over existing policy file
   template:
