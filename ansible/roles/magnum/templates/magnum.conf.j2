@@ -61,7 +61,11 @@ ca_file = {{ openstack_cacert }}
 
 [nova_client]
 region_name = {{ openstack_region_name }}
+{% if magnum_cluster_api_driver_enabled is defined %}
+endpoint_type = publicURL
+{% else %}
 endpoint_type = internalURL
+{% endif %}
 ca_file = {{ openstack_cacert }}
 
 [keystone_auth]
