@@ -96,3 +96,15 @@ haproxy_host_ipv4_tcp_retries2: "KOLLA_UNSET"
 haproxy_socket_level_admin: "no"
 
 kolla_externally_managed_cert: False
+
+# Default backend for single external frontend (for missing mappings)
+haproxy_external_single_frontend_default_backend: "horizon_external_back"
+
+haproxy_external_single_frontend_public_port: "443"
+
+haproxy_external_single_frontend_options:
+  - option httplog
+  - option forwardfor
+  - "timeout client {{ haproxy_glance_api_client_timeout }}"
+
+haproxy_glance_api_client_timeout: "6h"
