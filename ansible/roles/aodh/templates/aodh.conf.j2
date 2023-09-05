@@ -61,7 +61,6 @@ driver = noop
 {% endif %}
 
 [oslo_messaging_rabbit]
-kombu_reconnect_delay = 0.1
 heartbeat_in_pthread = {{ service_name == 'aodh-api' }}
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true

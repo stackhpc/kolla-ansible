@@ -68,7 +68,6 @@ memcached_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_addres
 transport_url = {{ notify_transport_url }}
 
 [oslo_messaging_rabbit]
-kombu_reconnect_delay = 0.1
 heartbeat_in_pthread = false
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true
