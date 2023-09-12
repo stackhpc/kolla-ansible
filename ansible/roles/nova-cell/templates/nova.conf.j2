@@ -184,10 +184,14 @@ topics = {{ nova_enabled_notification_topics | map(attribute='name') | join(',')
 driver = noop
 {% endif %}
 
-{% if om_enable_rabbitmq_tls | bool %}
 [oslo_messaging_rabbit]
+heartbeat_in_pthread = false
+{% if om_enable_rabbitmq_tls | bool %}
 ssl = true
 ssl_ca_file = {{ om_rabbitmq_cacert }}
+{% endif %}
+{% if om_enable_rabbitmq_high_availability | bool %}
+amqp_durable_queues = true
 {% endif %}
 
 {% if service_name in nova_cell_services_require_policy_json and nova_policy_file is defined %}
@@ -200,6 +204,11 @@ helper_command=sudo nova-rootwrap /etc/nova/rootwrap.conf privsep-helper --confi
 
 [guestfs]
 debug = {{ nova_logging_debug }}
+
+{% if service_name == 'nova-conductor' %}
+[scheduler]
+max_attempts = 10
+{% endif %}
 
 [placement]
 auth_type = password
@@ -249,3 +258,16 @@ track_instance_changes = false
 [pci]
 passthrough_whitelist = {{ nova_pci_passthrough_whitelist | to_json }}
 {% endif %}
+
+[service_user]
+send_service_user_token = true
+auth_url = {{ keystone_internal_url }}
+auth_type = password
+project_domain_id = {{ default_project_domain_id }}
+user_domain_id = {{ default_user_domain_id }}
+project_name = service
+username = {{ nova_keystone_user }}
+password = {{ nova_keystone_password }}
+cafile = {{ openstack_cacert }}
+region_name = {{ openstack_region_name }}
+valid_interfaces = internal

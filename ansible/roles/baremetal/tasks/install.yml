@@ -68,6 +68,25 @@
     - ansible_facts.os_family == 'Debian'
     - not docker_unit_file.stat.exists
 
+- name: Ensure /etc/apt/preferences.d exists
+  file:
+    path: /etc/apt/preferences.d
+    state: directory
+    mode: 0755
+  when: ansible_facts.os_family == 'Debian'
+
+- name: Install docker apt pin
+  copy:
+    dest: "/etc/apt/preferences.d/docker"
+    content: |
+        Package: {{ docker_apt_package }}
+        Pin: version {{ docker_apt_package_pin }}
+        Pin-Priority: 1000
+  become: True
+  when:
+    - docker_apt_package_pin | length > 0
+    - ansible_facts.os_family == 'Debian'
+
 - name: Install apt packages
   package:
     name: "{{ (debian_pkg_install | join(' ')).split() }}"
@@ -156,7 +175,11 @@
   pip:
     # NOTE(hrw) docker 2.4.2 is in kolla-ansible requirements
     # NOTE(mnasiadka): docker 5.0.0 lacks six in deps but requires it
-    name: docker>=2.4.2,<5.0.0
+    # NOTE(mnasiadka): requests and urllib3 as a workaround for https://github.com/docker/docker-py/issues/3113
+    name:
+      - "docker>=2.4.2,<5.0.0"
+      - "requests<2.29.0"
+      - "urllib3<2"
     executable: "{{ virtualenv is none | ternary('pip3', omit) }}"
     virtualenv: "{{ virtualenv is none | ternary(omit, virtualenv) }}"
     virtualenv_site_packages: "{{ virtualenv is none | ternary(omit, virtualenv_site_packages) }}"
