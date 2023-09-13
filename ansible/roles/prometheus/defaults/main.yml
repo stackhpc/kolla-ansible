@@ -13,6 +13,7 @@ prometheus_services:
         mode: "http"
         external: false
         port: "{{ prometheus_port }}"
+        active_passive: "{{ prometheus_active_passive | bool }}"
   prometheus-node-exporter:
     container_name: prometheus_node_exporter
     group: prometheus-node-exporter
@@ -64,13 +65,17 @@ prometheus_services:
         port: "{{ prometheus_alertmanager_port }}"
         auth_user: "{{ prometheus_alertmanager_user }}"
         auth_pass: "{{ prometheus_alertmanager_password }}"
+        active_passive: "{{ prometheus_alertmanager_active_passive | bool }}"
       prometheus_alertmanager_external:
         enabled: "{{ enable_prometheus_alertmanager_external | bool }}"
         mode: "http"
         external: true
-        port: "{{ prometheus_alertmanager_port }}"
+        external_fqdn: "{{ prometheus_alertmanager_external_fqdn }}"
+        port: "{{ prometheus_alertmanager_public_port }}"
+        listen_port: "{{ prometheus_alertmanager_listen_port }}"
         auth_user: "{{ prometheus_alertmanager_user }}"
         auth_pass: "{{ prometheus_alertmanager_password }}"
+        active_passive: "{{ prometheus_alertmanager_active_passive | bool }}"
   prometheus-openstack-exporter:
     container_name: "prometheus_openstack_exporter"
     group: "prometheus-openstack-exporter"
@@ -122,6 +127,12 @@ prometheus_services:
 prometheus_mysql_exporter_database_user: "{% if use_preconfigured_databases | bool and use_common_mariadb_user | bool %}{{ database_user }}{% else %}prometheus{% endif %}"
 
 ####################
+# HAProxy
+####################
+prometheus_active_passive: true
+prometheus_alertmanager_active_passive: true
+
+####################
 # Blackbox
 ####################
 
@@ -129,7 +140,7 @@ prometheus_mysql_exporter_database_user: "{% if use_preconfigured_databases | bo
 # 'service_name:blackbox_exporter_module:endpoint' for example:
 #
 # prometheus_blackbox_exporter_targets:
-#   - 'glance:os_endpoint:{{ external_protocol }}://{{ kolla_external_fqdn | put_address_in_context('url') }}:{{ glance_api_port}}'
+#   - 'glance:os_endpoint:{{ external_protocol }}://{{ glance_external_fqdn | put_address_in_context('url') }}:{{ glance_api_port}}'
 #
 # For a list of modules see the alertmanager config.
 prometheus_blackbox_exporter_endpoints: []
