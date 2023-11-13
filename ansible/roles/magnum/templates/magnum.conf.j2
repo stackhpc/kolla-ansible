@@ -76,6 +76,7 @@ cafile = {{ openstack_cacert }}
 region_name = {{ openstack_region_name }}
 
 [keystone_authtoken]
+service_type = container-infra
 auth_version = v3
 www_authenticate_uri = {{ keystone_internal_url }}/v3
 auth_url = {{ keystone_admin_url }}
@@ -122,10 +123,14 @@ topics = {{ magnum_enabled_notification_topics | map(attribute='name') | join(',
 driver = noop
 {% endif %}
 
-{% if om_enable_rabbitmq_tls | bool %}
 [oslo_messaging_rabbit]
+heartbeat_in_pthread = false
+{% if om_enable_rabbitmq_tls | bool %}
 ssl = true
 ssl_ca_file = {{ om_rabbitmq_cacert }}
+{% endif %}
+{% if om_enable_rabbitmq_high_availability | bool %}
+amqp_durable_queues = true
 {% endif %}
 
 {% if magnum_policy_file is defined %}

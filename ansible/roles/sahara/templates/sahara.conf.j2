@@ -16,6 +16,7 @@ connection_recycle_time = {{ database_connection_recycle_time }}
 max_pool_size = {{ database_max_pool_size }}
 
 [keystone_authtoken]
+service_type = data-processing
 auth_url = {{ keystone_admin_url }}
 auth_type = password
 user_domain_name = {{ default_project_domain_name }}
@@ -39,10 +40,14 @@ topics = {{ sahara_enabled_notification_topics | map(attribute='name') | join(',
 driver = noop
 {% endif %}
 
-{% if om_enable_rabbitmq_tls | bool %}
 [oslo_messaging_rabbit]
+heartbeat_in_pthread = false
+{% if om_enable_rabbitmq_tls | bool %}
 ssl = true
 ssl_ca_file = {{ om_rabbitmq_cacert }}
+{% endif %}
+{% if om_enable_rabbitmq_high_availability | bool %}
+amqp_durable_queues = true
 {% endif %}
 
 {% if sahara_policy_file is defined %}

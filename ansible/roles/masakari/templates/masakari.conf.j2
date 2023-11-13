@@ -22,6 +22,7 @@ max_pool_size = {{ database_max_pool_size }}
 max_retries = -1
 
 [keystone_authtoken]
+service_type = instance-ha
 www_authenticate_uri = {{ keystone_internal_url }}/v3
 auth_url = {{ keystone_admin_url }}
 auth_type = password
@@ -49,10 +50,14 @@ topics = notifications
 driver = noop
 {% endif %}
 
-{% if om_enable_rabbitmq_tls | bool %}
 [oslo_messaging_rabbit]
+heartbeat_in_pthread = {{ service_name == 'masakari-api' }}
+{% if om_enable_rabbitmq_tls | bool %}
 ssl = true
 ssl_ca_file = {{ om_rabbitmq_cacert }}
+{% endif %}
+{% if om_enable_rabbitmq_high_availability | bool %}
+amqp_durable_queues = true
 {% endif %}
 
 [oslo_middleware]

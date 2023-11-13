@@ -19,6 +19,7 @@ enable_host_header = True
 enabled_extensions_admin = quotas, reports
 
 [keystone_authtoken]
+service_type = dns
 www_authenticate_uri = {{ keystone_internal_url }}
 auth_url = {{ keystone_admin_url }}
 auth_type = password
@@ -92,10 +93,14 @@ topics = {{ designate_enabled_notification_topics | map(attribute='name') | join
 driver = noop
 {% endif %}
 
-{% if om_enable_rabbitmq_tls | bool %}
 [oslo_messaging_rabbit]
+heartbeat_in_pthread = false
+{% if om_enable_rabbitmq_tls | bool %}
 ssl = true
 ssl_ca_file = {{ om_rabbitmq_cacert }}
+{% endif %}
+{% if om_enable_rabbitmq_high_availability | bool %}
+amqp_durable_queues = true
 {% endif %}
 
 [oslo_concurrency]
