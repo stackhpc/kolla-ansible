@@ -1017,4 +1017,5 @@
   serial: '{{ kolla_serial|default("0") }}'
   roles:
     - { role: caso,
-        tags: caso}
+        tags: caso,
+        when: enable_caso | bool }
