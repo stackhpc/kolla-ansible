@@ -18,7 +18,8 @@ vitrage_services:
         enabled: "{{ enable_vitrage }}"
         mode: "http"
         external: true
-        port: "{{ vitrage_api_port }}"
+        external_fqdn: "{{ vitrage_external_fqdn }}"
+        port: "{{ vitrage_api_public_port }}"
   vitrage-notifier:
     container_name: vitrage_notifier
     group: vitrage-notifier
