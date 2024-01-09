@@ -374,6 +374,7 @@ grafana_server_listen_port: "{{ grafana_server_port }}"
 
 haproxy_stats_port: "1984"
 haproxy_monitor_port: "61313"
+haproxy_ssh_port: "2985"
 
 heat_internal_fqdn: "{{ kolla_internal_fqdn }}"
 heat_external_fqdn: "{{ kolla_external_fqdn }}"
@@ -419,6 +420,8 @@ keystone_internal_listen_port: "{{ keystone_internal_port }}"
 keystone_ssh_port: "8023"
 
 kuryr_port: "23750"
+
+letsencrypt_webserver_port: "8081"
 
 magnum_internal_fqdn: "{{ kolla_internal_fqdn }}"
 magnum_external_fqdn: "{{ kolla_external_fqdn }}"
@@ -818,6 +821,7 @@ enable_ironic_neutron_agent: "{{ enable_neutron | bool and enable_ironic | bool 
 enable_ironic_pxe_uefi: "no"
 enable_iscsid: "{{ enable_cinder | bool and enable_cinder_backend_iscsi | bool }}"
 enable_kuryr: "no"
+enable_letsencrypt: "no"
 enable_magnum: "no"
 enable_manila: "no"
 enable_manila_backend_generic: "no"
@@ -945,6 +949,8 @@ rabbitmq_cacert: "/etc/ssl/certs/{{ 'ca-certificates.crt' if kolla_base_distro i
 ####################
 haproxy_user: "openstack"
 haproxy_enable_external_vip: "{{ 'no' if kolla_same_external_internal_vip | bool else 'yes' }}"
+haproxy_enable_http2: "yes"
+haproxy_http2_protocol: "alpn h2,http/1.1"
 kolla_enable_tls_internal: "no"
 kolla_enable_tls_external: "{{ kolla_enable_tls_internal if kolla_same_external_internal_vip | bool else 'no' }}"
 kolla_certificates_dir: "{{ node_config }}/certificates"
@@ -974,7 +980,8 @@ kolla_tls_backend_key: "{{ kolla_certificates_dir }}/backend-key.pem"
 #####################
 # ACME client options
 #####################
-acme_client_servers: []
+acme_client_lego: "server lego {{ api_interface_address }}:{{ letsencrypt_webserver_port }}"
+acme_client_servers: "{% set arr = [] %}{% if enable_letsencrypt | bool %}{{ arr.append(acme_client_lego) }}{% endif %}{{ arr }}"
 
 ####################
 # Keystone options
