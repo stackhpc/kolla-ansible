@@ -1,5 +1,5 @@
 ---
 collections:
-  - name: https://opendev.org/openstack/ansible-collection-kolla
+  - name: https://github.com/stackhpc/ansible-collection-kolla
     type: git
-    version: stable/yoga
+    version: yoga-continue-on-error
