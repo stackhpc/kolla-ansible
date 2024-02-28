@@ -9,7 +9,7 @@
   tasks:
     - name: Group hosts to determine when using --limit
       group_by:
-        key: "all_using_limit_{{ (ansible_play_batch | length) != (groups['all'] | length) }}"
+        key: "all_using_limit_{{ (ansible_play_hosts | length) != (groups['all'] | length) }}"
       changed_when: false
 
     - name: Gather facts
@@ -47,4 +47,7 @@
       # We gathered facts for all hosts in the batch during the first play.
       when:
         - not hostvars[item].ansible_facts
+        # Don't retry hosts that failed to gather facts in the first play.
+        # FIXME(mgoddard): Does this include hosts that failed before this play?
+        - item not in ansible_play_hosts_all
   tags: always
