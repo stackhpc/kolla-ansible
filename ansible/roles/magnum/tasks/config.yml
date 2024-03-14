@@ -58,9 +58,9 @@
   when:
     - magnum_kubeconfig_file.stat.exists
 
-- name: Optionally configure magnum for cluster-api driver
+- name: Optionally configure magnum for cluster-api helm driver
   set_fact:
-    magnum_cluster_api_driver_enabled: true
+    magnum_cluster_api_helm_driver_enabled: true
   when: magnum_kubeconfig_file.stat.exists
 
 - include_tasks: copy-certs.yml
