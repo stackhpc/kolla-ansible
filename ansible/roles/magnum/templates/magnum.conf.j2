@@ -158,6 +158,6 @@ disabled_drivers = k8s_cluster_api_flatcar,k8s_cluster_api_ubuntu,k8s_cluster_ap
 {% endif %}
 
 {% if magnum_cluster_api_helm_driver_enabled is defined %}
-[capi_driver]
+[capi_helm]
 kubeconfig_file = /etc/magnum/kubeconfig
 {% endif %}
