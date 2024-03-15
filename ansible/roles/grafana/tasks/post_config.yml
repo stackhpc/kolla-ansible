@@ -15,7 +15,7 @@
 
 - name: Remove old grafana docker volume
   become: true
-  kolla_container:
+  kolla_docker:
     action: "remove_volume"
     name: grafana
   when: grafana_remove_old_volume | bool
