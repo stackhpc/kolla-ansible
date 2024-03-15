@@ -60,7 +60,7 @@
 
 - name: Enable magnum cluster-api helm driver if kubeconfig exists
   set_fact:
-    magnum_cluster_api_helm_driver_enabled: "{{ magnum_kubeconfig_file.stat.exists | bool }}"
+    magnum_capi_helm_driver_enabled: "{{ magnum_kubeconfig_file.stat.exists | bool }}"
 
 - include_tasks: copy-certs.yml
   when:
