@@ -192,3 +192,18 @@
     tag infra.mariadb.mysqld
   </rule>
 </match>
+
+# Retag log messages from HAProxy according to log format
+<match syslog.{{ syslog_haproxy_facility }}.**>
+  @type rewrite_tag_filter
+  <rule>
+    key Payload
+    pattern /^.*haproxy.*\]: [^ ]+:[^ ]+ [^ ]+ [^ ]+ [^ ]+\/[^ ]+ [^\/]+\/[^\/]+\/[^ ]+ [^ ]+ [^ ]+ \S{2}[^\/]+.*$/
+    tag infra.haproxy.tcp
+  </rule>
+  <rule>
+    key Payload
+    pattern /^.*haproxy.*\]: [^ ]+:[^ ]+ [^ ]+ [^ ]+ [^ ]+\/[^ ]+ [^\/]+\/[^\/]+\/[^ ]+ [^ ]+ [^ ]+ \S \S \S{4}[^\/]+.*$/
+    tag infra.haproxy.http
+  </rule>
+</match>
