@@ -58,6 +58,10 @@
   when:
     - magnum_kubeconfig_file.stat.exists
 
+- name: Enable magnum cluster-api helm driver if kubeconfig exists
+  set_fact:
+    magnum_capi_helm_driver_enabled: "{{ magnum_kubeconfig_file.stat.exists | bool }}"
+
 - include_tasks: copy-certs.yml
   when:
     - kolla_copy_ca_into_containers | bool
@@ -94,32 +98,6 @@
   with_dict: "{{ magnum_services }}"
   notify:
     - Restart {{ item.key }} container
-    
-- name: Check if management cluster kubeconfig is provided
-  stat:
-    path: "{{ node_custom_config }}/magnum/kubeconfig"
-  register: kubeconfig
-  delegate_to: localhost
-  run_once: true
-- name: Optionally configure magnum for cluster-api driver
-  set_fact:
-    magnum_cluster_api_driver_enabled: true
-  when: kubeconfig.stat.exists
-
-- name: Copying over kubeconfig for management cluster 
-  vars:
-    service: "{{ magnum_services['magnum-conductor'] }}"
-  copy:
-    src: "{{ node_custom_config }}/magnum/kubeconfig"
-    dest: "{{ node_config_directory }}/magnum-conductor/kubeconfig"
-    mode: "0660"
-  become: true
-  when:
-    - inventory_hostname in groups[service.group]
-    - service.enabled | bool
-    - magnum_cluster_api_driver_enabled is defined
-  notify:
-    - Restart magnum-conductor container
 
 - name: Copying over existing policy file
   template:
