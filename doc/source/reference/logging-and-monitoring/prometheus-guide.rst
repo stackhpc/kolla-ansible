@@ -156,3 +156,29 @@ files:
         - 192.168.1.1
       labels:
           job: ipmi_exporter
+
+Exporter configuration
+~~~~~~~~~~~~~~~~~~~~~~
+
+Node Exporter
+-------------
+
+Sometimes it can be useful to monitor hosts outside of the Kolla deployment.
+One method of doing this is to configure a list of additional targets using the
+``prometheus_node_exporter_targets_extra`` variable.  The format of which
+should be a list of dictionaries with the following keys:
+
+* target: URL of node exporter to scrape
+* labels: (Optional) A list of labels to set on the metrics scaped from this
+  exporter.
+
+For example:
+
+.. code-block:: yaml
+  :caption: ``/etc/kolla/globals.yml``
+
+  prometheus_node_exporter_targets_extra:
+    - target: http://10.0.0.1:1234
+      labels:
+        instance: host1
+
