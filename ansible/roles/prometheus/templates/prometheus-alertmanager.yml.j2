@@ -27,4 +27,5 @@ receivers:
     - send_resolved: true
       url: 'http://localhost:{{ prometheus_msteams_port }}/alertmanager'
 {% endif %}
-templates: []
+templates:
+  - '/etc/prometheus/*.tmpl'

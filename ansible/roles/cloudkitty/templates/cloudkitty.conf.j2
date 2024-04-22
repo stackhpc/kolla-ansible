@@ -45,6 +45,7 @@ policy_file = {{ cloudkitty_policy_file }}
 {% endif %}
 
 [oslo_messaging_rabbit]
+kombu_reconnect_delay = 0.1
 heartbeat_in_pthread = {{ service_name == 'cloudkitty-api' }}
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true
@@ -60,11 +61,6 @@ collector = {{ cloudkitty_collector_backend }}
 metrics_conf = /etc/cloudkitty/{{ cloudkitty_custom_metrics_yaml_file }}
 {% endif %}
 
-[fetcher_keystone]
-keystone_version = 3
-auth_section = keystone_authtoken
-region_name = {{ openstack_region_name }}
-
 {% if cloudkitty_collector_backend == "gnocchi" %}
 [collector_gnocchi]
 auth_section = keystone_authtoken
@@ -79,6 +75,29 @@ interface = {{ cloudkitty_monasca_interface }}
 
 {% if cloudkitty_collector_backend == "prometheus" %}
 [collector_prometheus]
+prometheus_url = {{ cloudkitty_prometheus_url }}
+
+{% if cloudkitty_prometheus_cafile is defined %}
+cafile = {{ cloudkitty_prometheus_cafile }}
+{% endif %}
+
+insecure = {{ cloudkitty_prometheus_insecure_connections }}
+{% endif %}
+
+[fetcher]
+backend = {{ cloudkitty_fetcher_backend }}
+
+{% if cloudkitty_fetcher_backend == "keystone" %}
+[fetcher_keystone]
+keystone_version = 3
+auth_section = keystone_authtoken
+region_name = {{ openstack_region_name }}
+{% endif %}
+
+{% if cloudkitty_fetcher_backend == "prometheus" %}
+[fetcher_prometheus]
+metric = openstack_identity_project_info
+scope_attribute = id
 prometheus_url = {{ cloudkitty_prometheus_url }}
 
 {% if cloudkitty_prometheus_cafile is defined %}

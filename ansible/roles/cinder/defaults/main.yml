@@ -20,7 +20,8 @@ cinder_services:
         enabled: "{{ enable_cinder }}"
         mode: "http"
         external: true
-        port: "{{ cinder_api_port }}"
+        external_fqdn: "{{ cinder_external_fqdn }}"
+        port: "{{ cinder_api_public_port }}"
         listen_port: "{{ cinder_api_listen_port }}"
         tls_backend: "{{ cinder_enable_tls_backend }}"
   cinder-scheduler:
@@ -189,8 +190,8 @@ cinder_enable_conversion_tmpfs: false
 ####################
 # OpenStack
 ####################
-cinder_internal_base_endpoint: "{{ internal_protocol }}://{{ cinder_internal_fqdn | put_address_in_context('url') }}:{{ cinder_api_port }}"
-cinder_public_base_endpoint: "{{ public_protocol }}://{{ cinder_external_fqdn | put_address_in_context('url') }}:{{ cinder_api_port }}"
+cinder_internal_base_endpoint: "{{ cinder_internal_fqdn | kolla_url(internal_protocol, cinder_api_port) }}"
+cinder_public_base_endpoint: "{{ cinder_external_fqdn | kolla_url(public_protocol, cinder_api_public_port) }}"
 
 cinder_v3_internal_endpoint: "{{ cinder_internal_base_endpoint }}/v3/%(tenant_id)s"
 cinder_v3_public_endpoint: "{{ cinder_public_base_endpoint }}/v3/%(tenant_id)s"
@@ -213,20 +214,30 @@ cinder_rpc_version_startup_delay: 30
 # Cinder
 ####################
 cinder_backends:
-  - name: "rbd-1"
+  - name: "{{ cinder_backend_ceph_name }}"
     enabled: "{{ cinder_backend_ceph | bool }}"
-  - name: "lvm-1"
+  - name: "{{ cinder_backend_lvm_name }}"
     enabled: "{{ enable_cinder_backend_lvm | bool }}"
-  - name: "nfs-1"
+  - name: "{{ cinder_backend_nfs_name }}"
     enabled: "{{ enable_cinder_backend_nfs | bool }}"
-  - name: "hnas-nfs"
+  - name: "{{ cinder_backend_hnas_nfs_name }}"
     enabled: "{{ enable_cinder_backend_hnas_nfs | bool }}"
-  - name: "vmwarevc-vmdk"
+  - name: "{{ cinder_backend_vmwarevc_vmdk_name }}"
     enabled: "{{ cinder_backend_vmwarevc_vmdk | bool }}"
-  - name: "vmware-vstorage-object"
+  - name: "{{ cinder_backend_vmware_vstorage_object_name }}"
     enabled: "{{ cinder_backend_vmware_vstorage_object | bool }}"
-  - name: "QuobyteHD"
+  - name: "{{ cinder_backend_quobyte_name }}"
     enabled: "{{ enable_cinder_backend_quobyte | bool }}"
+
+cinder_backend_ceph_name: "rbd-1"
+cinder_backend_lvm_name: "lvm-1"
+cinder_backend_nfs_name: "nfs-1"
+cinder_backend_hnas_nfs_name: "hnas-nfs"
+cinder_backend_vmwarevc_vmdk_name: "vmwarevc-vmdk"
+cinder_backend_vmware_vstorage_object_name: "vmware-vstorage-object"
+cinder_backend_quobyte_name: "QuobyteHD"
+cinder_backend_pure_iscsi_name: "Pure-FlashArray-iscsi"
+cinder_backend_pure_fc_name: "Pure-FlashArray-fc"
 
 skip_cinder_backend_check: False
 

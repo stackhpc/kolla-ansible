@@ -61,7 +61,11 @@ ca_file = {{ openstack_cacert }}
 
 [nova_client]
 region_name = {{ openstack_region_name }}
+{% if magnum_cluster_api_driver_enabled is defined %}
+endpoint_type = publicURL
+{% else %}
 endpoint_type = internalURL
+{% endif %}
 ca_file = {{ openstack_cacert }}
 
 [keystone_auth]
@@ -123,6 +127,7 @@ driver = noop
 {% endif %}
 
 [oslo_messaging_rabbit]
+kombu_reconnect_delay = 0.1
 heartbeat_in_pthread = false
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true
@@ -143,4 +148,9 @@ enabled = true
 trace_sqlalchemy = true
 hmac_keys = {{ osprofiler_secret }}
 connection_string = {{ osprofiler_backend_connection_string }}
+{% endif %}
+
+{% if magnum_cluster_api_driver_enabled is defined %}
+[capi_helm]
+kubeconfig_file = /etc/magnum/kubeconfig
 {% endif %}
