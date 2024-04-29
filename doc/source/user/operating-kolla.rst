@@ -56,6 +56,16 @@ deployment.
 Limitations and Recommendations
 -------------------------------
 
+.. warning::
+
+   Please notice that using the ansible ``--limit`` option is not recommended.
+   The reason is, that there are known bugs with it, e.g. when `upgrading parts of nova.
+   <https://bugs.launchpad.net/kolla-ansible/+bug/2054348>`__
+   We accept bug reports for this and try to fix issues when they are known.
+   The core problem is how the ``register:`` keyword works and how it
+   interacts with the ``--limit`` option. You can find more information in the above
+   bug report.
+
 .. note::
 
    Please note that when the ``use_preconfigured_databases`` flag is set to
@@ -75,6 +85,15 @@ The Victoria release adds support for Ubuntu Focal 20.04 as a host operating
 system. Ubuntu users upgrading from Ussuri should first upgrade OpenStack
 containers to Victoria, which uses the Ubuntu Focal 20.04 base container image.
 Hosts should then be upgraded to Ubuntu Focal 20.04.
+
+Ubuntu Jammy 22.04
+------------------
+
+The Zed release adds support for Ubuntu Jammy 22.04 as a host operating
+system. Ubuntu Jammy 22.04 support was also added to the Yoga stable
+release. Ubuntu Focal 20.04 users upgrading from Yoga can thus directly
+upgrade to Ubuntu Jammy 22.04 on the host and then upgrade to the Zed release.
+
 
 CentOS Stream 8
 ---------------
