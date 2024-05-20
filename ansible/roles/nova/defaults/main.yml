@@ -252,6 +252,9 @@ nova_ks_user_roles:
     user: "{{ nova_keystone_user }}"
     role: "service"
 
+nova_ks_roles:
+  - service
+
 ####################
 # Notification
 ####################
