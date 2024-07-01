@@ -58,6 +58,10 @@
   when:
     - magnum_kubeconfig_file.stat.exists
 
+- name: Enable magnum cluster-api helm driver if kubeconfig exists
+  set_fact:
+    magnum_capi_helm_driver_enabled: "{{ magnum_kubeconfig_file.stat.exists | bool }}"
+
 - include_tasks: copy-certs.yml
   when:
     - kolla_copy_ca_into_containers | bool
