@@ -128,3 +128,5 @@ rabbitmq_feature_flags:
   - "user_limits"
 
 kolla_externally_managed_cert: False
+
+rabbitmq_version_suffix: ""
