@@ -68,6 +68,17 @@
   register: rabbitmq_hostnames
   with_items: "{{ groups['rabbitmq'] }}"
 
+- name: Print rabbitmq_hostnames
+  debug:
+    var: rabbitmq_hostnames
+
+- name: Print resolution
+  debug:
+    msg: "{{ 'api' | kolla_address(item.0.item) }}"
+  with_subelements:
+    - "{{ rabbitmq_hostnames.results }}"
+    - stdout_lines
+
 - name: Check if each rabbit hostname resolves uniquely to the proper IP address
   fail:
     msg: Hostname has to resolve uniquely to the IP address of api_interface
