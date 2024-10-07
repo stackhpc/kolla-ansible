@@ -86,6 +86,8 @@
     default_input_files:
       - name: "conf/input/00-global.conf.j2"
         enabled: true
+      - name: "conf/input/99-caso.conf.j2"
+        enabled: true
       - name: "conf/input/01-syslog.conf.j2"
         enabled: true
       - name: "conf/input/02-mariadb.conf.j2"
@@ -100,6 +102,8 @@
         enabled: "{{ enable_prometheus_fluentd_integration | bool }}"
       - name: "conf/input/10-openvswitch.conf.j2"
         enabled: true
+      - name: "conf/input/11-letsencrypt.conf.j2"
+        enabled: "{{ enable_letsencrypt | bool }}"
     customised_input_files: "{{ find_custom_fluentd_inputs.files | map(attribute='path') | list }}"
     # Filters
     fluentd_filter_files: "{{ default_filter_files | customise_fluentd(customised_filter_files) }}"
@@ -148,6 +152,7 @@
       - { name: "barbican", enabled: "{{ enable_barbican | bool }}" }
       - { name: "blazar", enabled: "{{ enable_blazar | bool }}" }
       - { name: "ceilometer", enabled: "{{ enable_ceilometer | bool }}" }
+      - { name: "caso", enabled: "{{ enable_caso | bool }}" }
       - { name: "cinder", enabled: "{{ enable_cinder | bool }}" }
       - { name: "cloudkitty", enabled: "{{ enable_cloudkitty | bool }}" }
       - { name: "collectd", enabled: "{{ enable_collectd | bool }}" }
