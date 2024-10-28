@@ -27,6 +27,14 @@
       failed_when: false
       check_mode: false
 
+    - name: Debug current
+      debug:
+        msg: "{{ rabbitmq_version_current }}"
+
+    - name: Debug new
+      debug:
+          msg: "{{ rabbitmq_version_new }}"
+
     # As an example, when the new RabbitMQ version is 3.13.6:
     # new_major_version = 3
     # new_minor_version = 13
