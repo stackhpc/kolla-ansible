@@ -332,7 +332,7 @@ cinder_source_version: "{{ kolla_source_version }}"
 ####################
 cinder_ks_services:
   - name: "cinderv3"
-    type: "volumev3"
+    type: "block-storage"
     description: "Openstack Block Storage"
     endpoints:
       - {'interface': 'internal', 'url': '{{ cinder_v3_internal_endpoint }}'}
