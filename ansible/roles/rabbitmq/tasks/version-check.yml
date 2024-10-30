@@ -16,6 +16,7 @@
       kolla_container:
         action: "start_container"
         command: "rabbitmqctl --version"
+        common_options: "{{ docker_common_options }}"
         detach: false
         environment:
           KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
