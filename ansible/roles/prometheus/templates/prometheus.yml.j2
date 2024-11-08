@@ -31,25 +31,10 @@ scrape_configs:
 {% endif %}
 {% endfor %}
 
-{% if enable_prometheus_node_exporter | bool %}
   - job_name: node
-    static_configs:
-{% for host in groups['prometheus-node-exporter'] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_node_exporter_port'] }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
-{% for target in prometheus_node_exporter_targets_extra %}
-      - targets:
-        - '{{ target.target }}'
-{% if target.labels | default({}, true) %}
-        labels: {{ target.labels | to_json }}
-{% endif %}
-{% endfor %}
-{% endif %}
+    file_sd_configs:
+    - files:
+      - 'file_sd_configs/node-exporter-targets.yaml'
 
 {% if enable_prometheus_mysqld_exporter | bool %}
   - job_name: mysqld

@@ -150,3 +150,7 @@
     dimensions: "{{ service.dimensions }}"
   when:
     - kolla_action != "config"
+
+- name: Reload prometheus-server file SD config
+  debug:
+    msg: Reload called (placeholder)
