@@ -18,7 +18,7 @@
             "dest": "/etc/haproxy/services.d",
             "owner": "root",
             "perm": "0700"
-        }{% if kolla_enable_tls_external | bool and not enable_letsencrypt | bool %},
+        }{% if kolla_enable_tls_external | bool %},
         {
             "source": "{{ container_config_directory }}/external-frontend-map",
             "dest": "/etc/haproxy/external-frontend-map",
@@ -31,7 +31,7 @@
             "dest": "/etc/haproxy/certificates/haproxy.pem",
             "owner": "haproxy",
             "perm": "0600",
-            "optional": {{ (not kolla_enable_tls_external | bool) | string | lower }}
+            "optional": {{ (enable_letsencrypt | bool) | string | lower }}
         }{% endif %}
         {% if kolla_enable_tls_internal | bool %},
         {
