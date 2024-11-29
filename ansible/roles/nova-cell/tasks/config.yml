@@ -225,3 +225,52 @@
   with_items:
     - nova-compute
     - nova-compute-ironic
+
+- name: Check if compute_id file exists
+  stat:
+    path: "{{ container_engine_volumes_path }}/nova_compute/_data/compute_id"
+  become: True
+  register: compute_id_file
+
+- name: Retrieve the compute node's UUID from OpenStack
+  command: >
+    {{ kolla_container_engine }} exec kolla_toolbox openstack
+    --os-interface {{ openstack_interface }}
+    --os-auth-url {{ openstack_auth.auth_url }}
+    --os-project-domain-name {{ openstack_auth.domain_name }}
+    --os-project-name {{ openstack_auth.project_name }}
+    --os-username {{ openstack_auth.username }}
+    --os-password {{ openstack_auth.password }}
+    --os-identity-api-version 3
+    --os-user-domain-name {{ openstack_auth.user_domain_name }}
+    --os-region-name {{ openstack_region_name }}
+    {% if openstack_cacert != '' %}--os-cacert {{ openstack_cacert }}{% endif %}
+    hypervisor show {{ hostvars[inventory_hostname].ansible_facts.nodename }} -c id -f value
+  register: compute_id
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  delegate_to: "{{ groups[nova_cell_conductor_group][0] }}"
+  when: not compute_id_file.stat.exists
+
+- name: Ensure the Nova data directory exists
+  file:
+    path: "{{ container_engine_volumes_path }}/nova_compute/_data/"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: True
+  when: not compute_id_file.stat.exists
+
+- name: Create compute_id file when missing
+  copy:
+    content: "{{ compute_id.stdout }}"
+    dest: /var/lib/docker/volumes/nova_compute/_data/compute_id
+    owner: root
+    group: root
+    mode: '0644'
+  become: True
+  when:
+    - not compute_id_file.stat.exists
+    - compute_id.rc == 0
