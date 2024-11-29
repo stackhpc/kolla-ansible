@@ -562,6 +562,13 @@ network
 [prometheus-valkey-exporter:children]
 valkey
 
+[prometheus-docker-metrics:children]
+monitoring
+control
+compute
+network
+storage
+
 [masakari-api:children]
 control
 

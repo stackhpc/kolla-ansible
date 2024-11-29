@@ -35,6 +35,7 @@ docker_registry_insecure: false
 docker_runtime_directory: ""
 # Docker client timeout in seconds.
 docker_client_timeout: 120
+docker_metrics_addr: "{{ (api_interface_address + ':' + prometheus_docker_metrics_port) if enable_prometheus_docker_metrics | bool else '' }}"
 
 # Docker networking options
 docker_disable_default_iptables_rules: true
