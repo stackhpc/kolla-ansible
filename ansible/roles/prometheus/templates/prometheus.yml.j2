@@ -167,6 +167,19 @@ scrape_configs:
 {% endfor %}
 {% endif %}
 
+{% if enable_prometheus_docker_metrics | bool %}
+  - job_name: docker_metrics
+    static_configs:
+{% for host in groups["prometheus-docker-metrics"] %}
+      - targets:
+        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_docker_metrics_port'] }}'
+{% if hostvars[host].prometheus_instance_label | default(false, true) %}
+        labels:
+          instance: "{{ hostvars[host].prometheus_instance_label }}"
+{% endif %}
+{% endfor %}
+{% endif %}
+
 {% if enable_prometheus_blackbox_exporter | bool and prometheus_blackbox_exporter_endpoints | length > 0 | bool %}
   - job_name: blackbox_exporter
     metrics_path: /probe

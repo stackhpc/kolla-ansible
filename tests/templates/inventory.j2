@@ -625,6 +625,13 @@ monitoring
 [prometheus-libvirt-exporter:children]
 compute
 
+[prometheus-docker-metrics:children]
+monitoring
+control
+compute
+network
+storage
+
 {% if is_upgrade | bool %}
 {# TODO: Remove me in 2025.2 #}
 [prometheus-msteams:children]

@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Added configuration options for enabling the builtin Docker Prometheus
+    exporter. It is disabled by default because the available metrics and the
+    names of those metrics are in active development and may change at any
+    time.
+
+

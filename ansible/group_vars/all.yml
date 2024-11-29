@@ -106,6 +106,7 @@ docker_registry_insecure: "no"
 docker_runtime_directory: ""
 # Docker client timeout in seconds.
 docker_client_timeout: 120
+docker_metrics_addr: "{{ (api_interface_address + ':' + prometheus_docker_metrics_port) if enable_prometheus_docker_metrics | bool else ''}}"
 
 # Docker networking options
 docker_disable_default_iptables_rules: "yes"
@@ -669,6 +670,7 @@ prometheus_fluentd_integration_port: "24231"
 prometheus_libvirt_exporter_port: "9177"
 prometheus_etcd_integration_port: "{{ etcd_client_port }}"
 proxysql_prometheus_exporter_port: "6070"
+prometheus_docker_metrics_port: "9323"
 
 # Prometheus alertmanager ports
 prometheus_alertmanager_internal_fqdn: "{{ kolla_internal_fqdn }}"
@@ -1320,6 +1322,8 @@ enable_prometheus_rabbitmq_exporter: "{{ enable_prometheus | bool and enable_rab
 enable_prometheus_libvirt_exporter: "{{ enable_prometheus | bool and enable_nova | bool and nova_compute_virt_type in ['kvm', 'qemu'] }}"
 enable_prometheus_etcd_integration: "{{ enable_prometheus | bool and enable_etcd | bool }}"
 enable_prometheus_proxysql_exporter: "{{ enable_prometheus | bool and enable_proxysql | bool }}"
+# NOTE(Alex-Welsh): the Docker Prometheus endpoint is currently in developement and subject to change
+enable_prometheus_docker_metrics: "no"
 
 prometheus_alertmanager_user: "admin"
 prometheus_ceph_exporter_interval: "{{ prometheus_scrape_interval }}"

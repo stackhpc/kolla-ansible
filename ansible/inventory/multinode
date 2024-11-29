@@ -574,6 +574,13 @@ monitoring
 [prometheus-libvirt-exporter:children]
 compute
 
+[prometheus-docker-metrics:children]
+monitoring
+control
+compute
+network
+storage
+
 [masakari-api:children]
 control
 
