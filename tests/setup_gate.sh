@@ -80,7 +80,15 @@ function prepare_images {
     sudo tee -a /etc/kolla/kolla-build.conf <<EOF
 [DEFAULT]
 engine = ${CONTAINER_ENGINE}
+EOF
 
+    if [[ $BASE_DISTRO == "debian" || $BASE_DISTRO == "ubuntu" ]]; then
+        sudo tee -a /etc/kolla/kolla-build.conf <<EOF
+base_image = quay.io/openstack.kolla/${BASE_DISTRO}
+EOF
+    fi
+
+    sudo tee -a /etc/kolla/kolla-build.conf <<EOF
 [profiles]
 gate = ${GATE_IMAGES}
 EOF
@@ -88,7 +96,7 @@ EOF
     sudo mkdir -p /tmp/logs/build
     sudo mkdir -p /opt/kolla_registry
 
-    sudo $CONTAINER_ENGINE run -d --net=host -e REGISTRY_HTTP_ADDR=0.0.0.0:4000 --restart=always -v /opt/kolla_registry/:/var/lib/registry --name registry registry:2
+    sudo $CONTAINER_ENGINE run -d --net=host -e REGISTRY_HTTP_ADDR=0.0.0.0:4000 --restart=always -v /opt/kolla_registry/:/var/lib/registry --name registry quay.io/libpod/registry:2.8.2
 
 
     python3 -m venv ~/kolla-venv
