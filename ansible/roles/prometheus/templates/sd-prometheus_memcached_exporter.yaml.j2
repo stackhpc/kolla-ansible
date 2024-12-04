@@ -1,0 +1,10 @@
+---
+{% for host in groups['prometheus-memcached-exporter'] %}
+- targets:
+  - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_memcached_exporter_port'] }}'
+{% if hostvars[host].prometheus_instance_label | default(false, true) %}
+  labels:
+    instance: "{{ hostvars[host].prometheus_instance_label }}"
+{% endif %}
+{% endfor %}
+

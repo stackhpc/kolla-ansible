@@ -21,123 +21,74 @@ scrape_configs:
     basic_auth:
       username: admin
       password: "{{ prometheus_password }}"
-    static_configs:
-{% for host in groups['prometheus'] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ prometheus_port }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_exporter.yaml'
 
 {% if enable_prometheus_node_exporter | bool %}
   - job_name: node
-    static_configs:
-{% for host in groups['prometheus-node-exporter'] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_node_exporter_port'] }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
-{% for target in prometheus_node_exporter_targets_extra %}
-      - targets:
-        - '{{ target.target }}'
-{% if target.labels | default({}, true) %}
-        labels: {{ target.labels | to_json }}
-{% endif %}
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_node_exporter.yaml'
 {% endif %}
 
 {% if enable_prometheus_mysqld_exporter | bool %}
   - job_name: mysqld
-    static_configs:
-{% for host in groups['prometheus-mysqld-exporter'] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_mysqld_exporter_port'] }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_mysqld_exporter.yaml'
 {% endif %}
 
 {% if enable_prometheus_haproxy_exporter | bool %}
   - job_name: haproxy
-    static_configs:
-{% for host in groups['loadbalancer'] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ prometheus_haproxy_exporter_port }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_haproxy_exporter.yaml'
 {% endif %}
 
 {% if enable_prometheus_rabbitmq_exporter | bool %}
   - job_name: rabbitmq
-    static_configs:
-{% for host in groups['rabbitmq'] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_rabbitmq_exporter_port'] }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_rabbitmq_exporter.yaml'
 {% endif %}
 
 {% if enable_prometheus_memcached_exporter | bool %}
   - job_name: memcached
-    static_configs:
-{% for host in groups['prometheus-memcached-exporter'] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_memcached_exporter_port'] }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_memcached_exporter.yaml'
 {% endif %}
 
 {% if enable_prometheus_cadvisor | bool %}
   - job_name: cadvisor
-    static_configs:
-{% for host in groups["prometheus-cadvisor"] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_cadvisor_port'] }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_cadvisor.yaml'
 {% endif %}
 
 {% if enable_prometheus_fluentd_integration | bool %}
   - job_name: fluentd
-    static_configs:
-{% for host in groups['fluentd'] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_fluentd_integration_port'] }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_fluentd_integration.yaml'
 {% endif %}
 
 {% if enable_prometheus_ceph_mgr_exporter | bool %}
   - job_name: ceph_mgr_exporter
     honor_labels: true
-    scrape_interval: {{ prometheus_ceph_exporter_interval }}
-    static_configs:
-      - targets:
-{% for exporter in prometheus_ceph_mgr_exporter_endpoints %}
-        - '{{ exporter }}'
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_ceph_mgr_exporter.yaml'
 {% endif %}
 
 {% if enable_prometheus_openstack_exporter | bool %}
@@ -148,34 +99,29 @@ scrape_configs:
     scheme: https
 {% endif %}
     honor_labels: true
-    static_configs:
-      - targets:
-        - '{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ prometheus_openstack_exporter_port }}'
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_openstack_exporter.yaml'
 {% endif %}
 
 {% if enable_prometheus_elasticsearch_exporter | bool %}
   - job_name: elasticsearch_exporter
     scrape_interval: {{ prometheus_elasticsearch_exporter_interval }}
-    static_configs:
-{% for host in groups["prometheus-elasticsearch-exporter"] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_elasticsearch_exporter_port'] }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_elasticsearch_exporter.yaml'
 {% endif %}
 
-{% if enable_prometheus_blackbox_exporter | bool and prometheus_blackbox_exporter_endpoints | length > 0 | bool %}
+{% if enable_prometheus_blackbox_exporter | bool %}
   - job_name: blackbox_exporter
     metrics_path: /probe
     honor_labels: true
-    static_configs:
-      - targets:
-{% for target in prometheus_blackbox_exporter_endpoints %}
-        - '{{ target }}'
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_blackbox_exporter.yaml'
     relabel_configs:
       - source_labels: [__address__]
         regex: (\w+):(\w+):(.+)
@@ -201,15 +147,10 @@ scrape_configs:
   - job_name: libvirt_exporter
     scrape_interval: {{ prometheus_libvirt_exporter_interval }}
     honor_labels: true
-    static_configs:
-{% for host in groups["prometheus-libvirt-exporter"] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_libvirt_exporter_port'] }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_libvirt_exporter.yaml'
 {% endif %}
 
 {% if enable_prometheus_etcd_integration | bool %}
@@ -217,53 +158,34 @@ scrape_configs:
 {% if etcd_enable_tls | bool %}
     scheme: https
 {% endif %}
-    static_configs:
-{% for host in groups["etcd"] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_etcd_integration_port'] }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_etcd_integration.yaml'
 {% endif %}
 
 {% if enable_ironic_prometheus_exporter | bool %}
   - job_name: ironic_prometheus_exporter
-    static_configs:
-{% for host in groups['ironic-conductor'] %}
-      - targets: ["{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['ironic_prometheus_exporter_port'] }}"]
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-ironic_prometheus_exporter.yaml'
 {% endif %}
-{% endfor %}
+
+{% if enable_prometheus_proxysql_exporter | bool %}
+  - job_name: proxysql
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_proxysql_exporter.yaml'
 {% endif %}
 
 {% if enable_prometheus_alertmanager | bool %}
   - job_name: alertmanager
-    static_configs:
-{% for host in groups['prometheus-alertmanager'] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_alertmanager_port'] }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
-
-{% if enable_prometheus_proxysql_exporter | bool %}
-  - job_name: proxysql
-    static_configs:
-{% for host in groups["loadbalancer"] %}
-      - targets:
-        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['proxysql_prometheus_exporter_port'] }}'
-{% if hostvars[host].prometheus_instance_label | default(false, true) %}
-        labels:
-          instance: "{{ hostvars[host].prometheus_instance_label }}"
-{% endif %}
-{% endfor %}
-{% endif %}
+    file_sd_configs:
+    - refresh_interval: 30s
+      files:
+      - 'file_sd_configs/sd-prometheus_alertmanager.yaml'
 
 alerting:
   alertmanagers:

@@ -1,0 +1,5 @@
+---
+- targets:
+{% for exporter in prometheus_ceph_mgr_exporter_endpoints %}
+  - '{{ exporter }}'
+{% endfor %}

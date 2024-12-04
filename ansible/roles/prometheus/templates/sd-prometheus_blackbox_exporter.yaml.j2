@@ -1,0 +1,5 @@
+---
+- targets:
+{% for target in prometheus_blackbox_exporter_endpoints | sort %}
+  - '{{ target }}'
+{% endfor %}

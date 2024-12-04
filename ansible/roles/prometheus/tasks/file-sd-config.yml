@@ -1,0 +1,17 @@
+---
+
+- name: "Copying over {{ scrape_job }} targets file"
+  become: true
+  vars:
+    service: "{{ prometheus_services['prometheus-server'] }}"
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/prometheus-server/file_sd_configs_staging/sd-{{ scrape_job }}.yaml"
+    owner: "42472"
+    group: "42472"
+    mode: "0600"
+  when: service | service_enabled_and_mapped_to_host
+  with_first_found:
+    - "{{ node_custom_config }}/prometheus/{{ inventory_hostname }}/sd-{{ scrape_job }}.yaml"
+    - "{{ node_custom_config }}/prometheus/sd-{{ scrape_job }}.yaml"
+    - "{{ role_path }}/templates/sd-{{ scrape_job }}.yaml.j2"
