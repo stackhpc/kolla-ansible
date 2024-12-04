@@ -13,7 +13,7 @@ function prepare_images {
     fi
 
     if [[ $SCENARIO != "bifrost" ]]; then
-        GATE_IMAGES="^cron,^fluentd,^glance,^haproxy,^keepalived,^keystone,^kolla-toolbox,^mariadb,^memcached,^neutron,^nova-,^openvswitch,^rabbitmq,^horizon,^heat,^placement"
+        GATE_IMAGES="^cron,^fluentd,^glance,^haproxy,^proxysql,^keepalived,^keystone,^kolla-toolbox,^mariadb,^memcached,^neutron,^nova-,^openvswitch,^rabbitmq,^horizon,^heat,^placement"
     else
         GATE_IMAGES="bifrost"
     fi
@@ -58,7 +58,7 @@ function prepare_images {
     fi
 
     if [[ $SCENARIO == "mariadb" ]]; then
-        GATE_IMAGES="^cron,^fluentd,^haproxy,^keepalived,^kolla-toolbox,^mariadb"
+        GATE_IMAGES="^cron,^fluentd,^haproxy,^proxysql,^keepalived,^kolla-toolbox,^mariadb"
     fi
 
     if [[ $SCENARIO == "lets-encrypt" ]]; then
@@ -66,11 +66,11 @@ function prepare_images {
     fi
 
     if [[ $SCENARIO == "prometheus-opensearch" ]]; then
-        GATE_IMAGES="^cron,^fluentd,^grafana,^haproxy,^keepalived,^kolla-toolbox,^mariadb,^memcached,^opensearch,^prometheus,^rabbitmq"
+        GATE_IMAGES="^cron,^fluentd,^grafana,^haproxy,^proxysql,^keepalived,^kolla-toolbox,^mariadb,^memcached,^opensearch,^prometheus,^rabbitmq"
     fi
 
     if [[ $SCENARIO == "venus" ]]; then
-        GATE_IMAGES="^cron,^opensearch,^fluentd,^haproxy,^keepalived,^keystone,^kolla-toolbox,^mariadb,^memcached,^rabbitmq,^venus"
+        GATE_IMAGES="^cron,^opensearch,^fluentd,^haproxy,^proxysql,^keepalived,^keystone,^kolla-toolbox,^mariadb,^memcached,^rabbitmq,^venus"
     fi
 
     if [[ $SCENARIO == "skyline" || $SCENARIO == "skyline-sso" ]]; then
@@ -80,7 +80,15 @@ function prepare_images {
     sudo tee -a /etc/kolla/kolla-build.conf <<EOF
 [DEFAULT]
 engine = ${CONTAINER_ENGINE}
+EOF
 
+    if [[ $BASE_DISTRO == "debian" || $BASE_DISTRO == "ubuntu" ]]; then
+        sudo tee -a /etc/kolla/kolla-build.conf <<EOF
+base_image = quay.io/openstack.kolla/${BASE_DISTRO}
+EOF
+    fi
+
+    sudo tee -a /etc/kolla/kolla-build.conf <<EOF
 [profiles]
 gate = ${GATE_IMAGES}
 EOF
@@ -88,7 +96,7 @@ EOF
     sudo mkdir -p /tmp/logs/build
     sudo mkdir -p /opt/kolla_registry
 
-    sudo $CONTAINER_ENGINE run -d --net=host -e REGISTRY_HTTP_ADDR=0.0.0.0:4000 --restart=always -v /opt/kolla_registry/:/var/lib/registry --name registry registry:2
+    sudo $CONTAINER_ENGINE run -d --net=host -e REGISTRY_HTTP_ADDR=0.0.0.0:4000 --restart=always -v /opt/kolla_registry/:/var/lib/registry --name registry quay.io/libpod/registry:2.8.2
 
 
     python3 -m venv ~/kolla-venv
@@ -116,7 +124,7 @@ EOF
 RAW_INVENTORY=/etc/kolla/inventory
 
 source $KOLLA_ANSIBLE_VENV_PATH/bin/activate
-kolla-ansible -i ${RAW_INVENTORY} -vvv bootstrap-servers &> /tmp/logs/ansible/bootstrap-servers
+kolla-ansible bootstrap-servers -i ${RAW_INVENTORY} -vvv  &> /tmp/logs/ansible/bootstrap-servers
 deactivate
 
 prepare_images

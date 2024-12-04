@@ -15,6 +15,9 @@
 
 - name: Install cephadm
   apt:
-    name: cephadm
+    name:
+      - cephadm
+      - python3-jinja2
+      - python3-yaml
     install_recommends: False
   become: True

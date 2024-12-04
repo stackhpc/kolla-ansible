@@ -245,7 +245,7 @@ workaround_ansible_issue_8743: yes
 #kolla_copy_ca_into_containers: "no"
 #haproxy_backend_cacert: "{{ 'ca-certificates.crt' if kolla_base_distro in ['debian', 'ubuntu'] else 'ca-bundle.trust.crt' }}"
 #haproxy_backend_cacert_dir: "/etc/ssl/certs"
-
+#database_enable_tls_backend: "{{ 'yes' if kolla_enable_tls_backend | bool and enable_proxysql | bool else 'no' }}"
 ##################
 # Backend options
 ##################
@@ -327,7 +327,6 @@ workaround_ansible_issue_8743: yes
 #enable_ceph_rgw_loadbalancer: "{{ enable_ceph_rgw | bool }}"
 #enable_cinder: "no"
 #enable_cinder_backup: "yes"
-#enable_cinder_backend_hnas_nfs: "no"
 #enable_cinder_backend_iscsi: "{{ enable_cinder_backend_lvm | bool }}"
 #enable_cinder_backend_lvm: "no"
 #enable_cinder_backend_nfs: "no"
@@ -411,7 +410,7 @@ workaround_ansible_issue_8743: yes
 #enable_osprofiler: "no"
 #enable_placement: "{{ enable_nova | bool or enable_zun | bool }}"
 #enable_prometheus: "no"
-#enable_proxysql: "no"
+#enable_proxysql: "yes"
 #enable_redis: "no"
 #enable_skyline: "no"
 #enable_swift: "no"
@@ -466,26 +465,20 @@ workaround_ansible_issue_8743: yes
 
 # Glance
 #ceph_glance_user: "glance"
-#ceph_glance_keyring: "client.{{ ceph_glance_user }}.keyring"
 #ceph_glance_pool_name: "images"
 # Cinder
 #ceph_cinder_user: "cinder"
-#ceph_cinder_keyring: "client.{{ ceph_cinder_user }}.keyring"
 #ceph_cinder_pool_name: "volumes"
 #ceph_cinder_backup_user: "cinder-backup"
-#ceph_cinder_backup_keyring: "client.{{ ceph_cinder_backup_user }}.keyring"
 #ceph_cinder_backup_pool_name: "backups"
 # Nova
-#ceph_nova_keyring: "{{ ceph_cinder_keyring }}"
 #ceph_nova_user: "{{ ceph_cinder_user }}"
 #ceph_nova_pool_name: "vms"
 # Gnocchi
 #ceph_gnocchi_user: "gnocchi"
-#ceph_gnocchi_keyring: "client.{{ ceph_gnocchi_user }}.keyring"
 #ceph_gnocchi_pool_name: "gnocchi"
 # Manila
 #ceph_manila_user: "manila"
-#ceph_manila_keyring: "client.{{ ceph_manila_user }}.keyring"
 
 #############################
 # Keystone - Identity Options

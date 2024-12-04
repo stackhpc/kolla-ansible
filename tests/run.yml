@@ -323,7 +323,7 @@
     - name: Create TLS certificates for octavia
       shell: |
         source {{ kolla_ansible_venv_path }}/bin/activate
-        kolla-ansible octavia-certificates
+        kolla-ansible octavia-certificates -i {{ kolla_inventory_path }} -vvvv
       when: scenario in ['octavia']
       args:
         executable: /bin/bash
@@ -555,6 +555,16 @@
             KOLLA_ANSIBLE_VENV_PATH: "{{ kolla_ansible_venv_path }}"
             CONTAINER_ENGINE: "{{ container_engine }}"
 
+        - name: Run test-proxysql.sh script
+          script:
+            cmd: test-proxysql.sh
+            executable: /bin/bash
+            chdir: "{{ kolla_ansible_src_dir }}"
+          when: scenario == "cells"
+          environment:
+            VIP: "{{ kolla_internal_vip_address }}"
+            TLS_ENABLED: "{{ tls_enabled }}"
+
         - name: Run test-prometheus-opensearch.sh script
           script:
             cmd: test-prometheus-opensearch.sh
@@ -752,7 +762,7 @@
         # NOTE(yoctozepto): this is nice as the first step after the upgrade
         # because it waits for the services to stabilize well enough so that
         # the dashboard is able to show the login prompt
-        - name: Run test-dashboard.sh script
+        - name: Run test-dashboard.sh script (post upgrade)
           shell:
             cmd: tests/test-dashboard.sh
             executable: /bin/bash
@@ -767,7 +777,7 @@
         # than script.
         # [1] https://opendev.org/openstack/python-openstackclient/src/commit/6810414e45a32dd44263dff47fec161989508ef0/openstackclient/image/v2/image.py#L114-L120
         # [2] https://opendev.org/openstack/python-openstackclient/src/commit/6810414e45a32dd44263dff47fec161989508ef0/openstackclient/image/v2/image.py#L414
-        - name: Run test-core-openstack.sh script
+        - name: Run test-core-openstack.sh script (post upgrade)
           script:
             cmd: test-core-openstack.sh
             executable: /bin/bash
@@ -779,13 +789,13 @@
             IP_VERSION: "{{ 6 if address_family == 'ipv6' else 4 }}"
           when: openstack_core_tested
 
-        - name: Run test-swift.sh script
+        - name: Run test-swift.sh script (post-upgrade)
           command:
             cmd: tests/test-swift.sh
             chdir: "{{ kolla_ansible_src_dir }}"
           when: scenario == 'swift'
 
-        - name: Run test-prometheus-opensearch.sh script
+        - name: Run test-prometheus-opensearch.sh script (post-upgrade)
           script:
             cmd: test-prometheus-opensearch.sh
             executable: /bin/bash
