@@ -1,0 +1,3 @@
+---
+- targets:
+  - '{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ prometheus_openstack_exporter_port }}'

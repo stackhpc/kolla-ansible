@@ -1,0 +1,9 @@
+---
+{% for host in groups['fluentd'] %}
+- targets:
+  - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_fluentd_integration_port'] }}'
+{% if hostvars[host].prometheus_instance_label | default(false, true) %}
+  labels:
+    instance: "{{ hostvars[host].prometheus_instance_label }}"
+{% endif %}
+{% endfor %}

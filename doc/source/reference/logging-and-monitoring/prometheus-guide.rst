@@ -87,11 +87,14 @@ Extending prometheus.cfg
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to add extra targets to scrape, you can extend the default
-``prometheus.yml`` config file by placing additional configs in
-``{{ node_custom_config }}/prometheus/prometheus.yml.d``. These should have the
-same format as ``prometheus.yml``. These additional configs are merged so
-that any list items are extended. For example, if using the default value for
-``node_custom_config``, you could add additional targets to scrape by defining
+``prometheus.yml`` config file by placing additional configs in ``{{
+node_custom_config }}/prometheus/prometheus.yml.d``. These additional configs
+are merged so that any list items are extended. The existing configuration uses
+file service discovery, to use the same format, you will need to add extra
+configuration files. See `Extra files`_ for more information.
+For simple additions, it may be easier to add static configs.
+For example, if using the default value for ``node_custom_config``, you could
+add additional targets to scrape by defining
 ``/etc/kolla/config/prometheus/prometheus.yml.d/10-custom.yml`` containing the
 following:
 

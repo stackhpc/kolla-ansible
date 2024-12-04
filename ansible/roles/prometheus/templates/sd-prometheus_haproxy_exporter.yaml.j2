@@ -1,0 +1,8 @@
+{% for host in groups['loadbalancer'] %}
+- targets:
+  - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ prometheus_haproxy_exporter_port }}'
+{% if hostvars[host].prometheus_instance_label | default(false, true) %}
+  labels:
+    instance: "{{ hostvars[host].prometheus_instance_label }}"
+{% endif %}
+{% endfor %}

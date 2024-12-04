@@ -1,0 +1,9 @@
+---
+{% for host in groups["prometheus-elasticsearch-exporter"] %}
+- targets:
+  - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_elasticsearch_exporter_port'] }}'
+{% if hostvars[host].prometheus_instance_label | default(false, true) %}
+  labels:
+    instance: "{{ hostvars[host].prometheus_instance_label }}"
+{% endif %}
+{% endfor %}
