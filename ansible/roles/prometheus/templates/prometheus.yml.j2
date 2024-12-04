@@ -159,7 +159,7 @@ scrape_configs:
     honor_labels: true
     static_configs:
       - targets:
-{% for target in prometheus_blackbox_exporter_endpoints %}
+{% for target in prometheus_blackbox_exporter_endpoints | sort %}
         - '{{ target }}'
 {% endfor %}
     relabel_configs:

@@ -18,12 +18,6 @@
             "dest": "/etc/prometheus/extras/",
             "preserve_properties": true,
             "optional": true
-        },
-        {
-            "source": "{{ container_config_directory }}/file_sd_configs/*",
-            "dest": "/etc/prometheus/file_sd_configs/",
-            "preserve_properties": true,
-            "optional": true
         }
 {% if enable_prometheus_alertmanager | bool %}
         ,{
@@ -48,11 +42,6 @@
         },
         {
             "path": "/etc/prometheus/extras/",
-            "owner": "prometheus:kolla",
-            "recurse": true
-        },
-        {
-            "path": "/etc/prometheus/file_sd_configs/",
             "owner": "prometheus:kolla",
             "recurse": true
         }

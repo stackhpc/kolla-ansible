@@ -16,8 +16,8 @@
   file:
     path: "{{ node_config_directory }}/prometheus-server/file_sd_configs"
     state: "directory"
-    owner: "{{ config_owner_user }}"
-    group: "{{ config_owner_group }}"
+    owner: "42472"
+    group: "42472"
     mode: "0770"
   become: true
   when: service | service_enabled_and_mapped_to_host
@@ -125,6 +125,8 @@
   template:
     src: "{{ item }}"
     dest: "{{ node_config_directory }}/prometheus-server/file_sd_configs/node-exporter-targets.yaml"
+    owner: "42472"
+    group: "42472"
     mode: "0600"
   when: service | service_enabled_and_mapped_to_host
   with_first_found:
