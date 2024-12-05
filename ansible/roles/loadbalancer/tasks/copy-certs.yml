@@ -8,7 +8,7 @@
     mode: "0660"
   become: true
   when:
-    - letsencrypt_managed_certs == 'internal' or letsencrypt_managed_certs == ''
+    - kolla_copy_external_cert_file | bool
     - kolla_enable_tls_external | bool
     - not kolla_externally_managed_cert | bool
     - service | service_enabled_and_mapped_to_host
@@ -24,7 +24,7 @@
     mode: "0660"
   become: true
   when:
-    - letsencrypt_managed_certs == 'external' or letsencrypt_managed_certs == ''
+    - kolla_copy_internal_cert_file | bool
     - kolla_enable_tls_internal | bool
     - not kolla_externally_managed_cert | bool
     - service | service_enabled_and_mapped_to_host

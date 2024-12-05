@@ -71,9 +71,27 @@
         fail_msg: "External haproxy certificate file is not found. It is configured via 'kolla_external_fqdn_cert'"
   when:
     - not kolla_externally_managed_cert | bool
-    - letsencrypt_managed_certs == 'internal' or letsencrypt_managed_certs == ''
+    - kolla_copy_external_cert_file | bool
     - kolla_enable_tls_external | bool
 
+- block:
+    - name: Checking if internal haproxy certificate exists
+      run_once: true
+      stat:
+        path: "{{ kolla_internal_fqdn_cert }}"
+      delegate_to: localhost
+      register: haproxy_cert_file
+      changed_when: false
+
+    - name: Assert that internal haproxy certificate exists
+      run_once: true
+      assert:
+        that: haproxy_cert_file.stat.exists
+        fail_msg: "Internal haproxy certificate file is not found. It is configured via 'kolla_internal_fqdn_cert'"
+  when:
+    - not kolla_externally_managed_cert | bool
+    - kolla_copy_internal_cert_file | bool
+    - kolla_enable_tls_internal | bool
 - block:
     - name: Checking if internal haproxy certificate exists
       run_once: true
@@ -90,7 +108,7 @@
         fail_msg: "Internal haproxy certificate file is not found. It is configured via 'kolla_internal_fqdn_cert'"
   when:
     - not kolla_externally_managed_cert | bool
-    - letsencrypt_managed_certs == 'external' or letsencrypt_managed_certs == ''
+    - kolla_copy_internal_cert_file | bool
     - kolla_enable_tls_internal | bool
 
 - name: Checking the kolla_external_vip_interface is present

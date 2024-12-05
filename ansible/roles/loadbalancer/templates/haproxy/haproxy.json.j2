@@ -18,27 +18,25 @@
             "dest": "/etc/haproxy/services.d",
             "owner": "root",
             "perm": "0700"
-        },
+        }{% if kolla_enable_tls_external | bool %},
         {
             "source": "{{ container_config_directory }}/external-frontend-map",
             "dest": "/etc/haproxy/external-frontend-map",
             "owner": "root",
             "perm": "0600",
             "optional": {{ (not haproxy_single_external_frontend | bool) | string | lower }}
-        }{% if kolla_enable_tls_external and letsencrypt_managed_certs == 'internal' or letsencrypt_managed_certs == '' %},
+        }{% endif %}{% if kolla_enable_tls_external | bool and kolla_copy_external_cert_file | bool %},
         {
             "source": "{{ container_config_directory }}/haproxy.pem",
             "dest": "/etc/haproxy/certificates/haproxy.pem",
             "owner": "haproxy",
-            "perm": "0600",
-            "optional": {{ (not kolla_enable_tls_external | bool) | string | lower }}
-        }{% endif %}{% if kolla_enable_tls_internal | bool and letsencrypt_managed_certs == 'external' or letsencrypt_managed_certs == '' %},
+            "perm": "0600"
+        }{% endif %}{% if kolla_enable_tls_internal | bool and kolla_copy_internal_cert_file | bool %},
         {
             "source": "{{ container_config_directory }}/haproxy-internal.pem",
             "dest": "/etc/haproxy/certificates/haproxy-internal.pem",
             "owner": "haproxy",
-            "perm": "0600",
-            "optional": {{ (not kolla_enable_tls_internal | bool) | string | lower }}
+            "perm": "0600"
         }
         {% endif %}{% if kolla_copy_ca_into_containers | bool %},
         {
