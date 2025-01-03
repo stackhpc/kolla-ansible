@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Use ``zed-eol`` tag for ``ansible-collection-kolla`` as the
+    ``unmaintained/zed`` branch has been deleted.
+
