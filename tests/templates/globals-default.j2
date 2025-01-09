@@ -5,10 +5,6 @@
 ansible_python_interpreter: /usr/bin/python3
 {% endif %}
 
-# NOTE(yoctozepto): In CI it makes sense to always try to fail
-# as early as possible.
-kolla_ansible_setup_any_errors_fatal: true
-
 kolla_base_distro: "{{ base_distro }}"
 network_interface: "{{ api_interface_name }}"
 network_address_family: "{{ address_family }}"
@@ -158,7 +154,7 @@ enable_redis: "yes"
 
 enable_ceph_rgw: "yes"
 ceph_rgw_hosts:
-{% for host in hostvars %}
+{% for host in hostvars | reject('equalto', 'localhost') %}
   - host: {{ host }}
     ip: {{ hostvars[host]['ansible_host'] }}
     port: 6780
@@ -189,6 +185,7 @@ enable_octavia: "yes"
 octavia_provider_drivers: "ovn:OVN provider"
 octavia_provider_agents: "ovn"
 enable_redis: "yes"
+neutron_dns_domain: "example.org."
 {% endif %}
 
 {% if scenario == "prometheus-opensearch" %}
