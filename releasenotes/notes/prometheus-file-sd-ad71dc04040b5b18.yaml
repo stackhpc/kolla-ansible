@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Switched Prometheus target discovery from static configuration to file
+    based service discovery. This allows you to dynamically discover targets
+    from a file on disk, meaning the ``prometheus_server`` container does not
+    have to be restarted for all configuration changes. See the `prometheus
+    documentation
+    <https://prometheus.io/docs/prometheus/latest/configuration/configuration/#file_sd_config>`__
+    for more information.

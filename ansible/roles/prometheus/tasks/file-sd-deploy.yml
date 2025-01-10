@@ -1,0 +1,8 @@
+---
+- name: Deploy staged SD files
+  become: true
+  synchronize:
+    src: "{{ node_config_directory }}/prometheus-server/file_sd_configs_staging/"
+    dest: "{{ node_config_directory }}/prometheus-server/file_sd_configs/"
+    delete: true
+  delegate_to: "{{ inventory_hostname }}"
