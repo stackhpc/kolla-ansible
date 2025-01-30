@@ -9,9 +9,7 @@
     group: "{{ config_owner_group }}"
     mode: "0770"
   become: true
-  when:
-    - inventory_hostname in groups[service.group]
-    - service.enabled | bool
+  when: service | service_enabled_and_mapped_to_host
 
 - name: Copy over multiple ceph configs for Glance
   merge_configs:
@@ -23,8 +21,6 @@
   become: true
   when: inventory_hostname in groups['glance-api']
   with_items: "{{ glance_ceph_backends }}"
-  notify:
-    - Restart glance-api container
 
 - name: Copy over ceph Glance keyrings
   template:
@@ -34,8 +30,6 @@
   become: true
   with_items: "{{ glance_ceph_backends }}"
   when: inventory_hostname in groups['glance-api']
-  notify:
-    - Restart glance-api container
 
 - name: Ensuring config directory has correct owner and permission
   file:
