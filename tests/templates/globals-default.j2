@@ -11,6 +11,9 @@ network_address_family: "{{ address_family }}"
 kolla_container_engine: "{{ container_engine }}"
 docker_restart_policy: "no"
 
+docker_apt_url: "http://{{ zuul_site_mirror_fqdn }}:8080/docker/{{ ansible_facts.distribution | lower }}"
+docker_yum_url: "http://{{ zuul_site_mirror_fqdn }}:8080/docker/centos"
+
 {% if container_engine == 'podman' %}
 podman_debug: true
 podman_registry_mirrors:
@@ -244,7 +247,7 @@ horizon_external_fqdn: "horizon.external"
 keystone_external_fqdn: "keystone.external"
 neutron_external_fqdn: "neutron.external"
 nova_external_fqdn: "nova.external"
-nova_novncproxy_external_fqdn: "novncproxy.external"
+nova_novncproxy_fqdn: "novncproxy.external"
 placement_external_fqdn: "placement.external"
 {% endif %}
 
