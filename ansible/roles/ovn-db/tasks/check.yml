@@ -1,0 +1,4 @@
+---
+- name: Checking OVN-DB containers
+  import_role:
+    role: service-check

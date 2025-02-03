@@ -1,0 +1,4 @@
+---
+- name: Checking Keystone containers
+  import_role:
+    role: service-check
