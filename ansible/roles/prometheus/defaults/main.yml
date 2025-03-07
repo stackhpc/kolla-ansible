@@ -14,6 +14,14 @@ prometheus_services:
         external: false
         port: "{{ prometheus_port }}"
         active_passive: "{{ prometheus_active_passive | bool }}"
+      prometheus_server_external:
+        enabled: "{{ enable_prometheus_server_external | bool }}"
+        mode: "http"
+        external: true
+        port: "{{ prometheus_port }}"
+        auth_user: "{{ prometheus_user }}"
+        auth_pass: "{{ prometheus_password }}"
+        active_passive: "{{ prometheus_active_passive | bool }}"
   prometheus-node-exporter:
     container_name: prometheus_node_exporter
     group: prometheus-node-exporter
@@ -122,6 +130,11 @@ prometheus_services:
     image: "{{ prometheus_msteams_image_full }}"
     volumes: "{{ prometheus_msteams_default_volumes + prometheus_msteams_extra_volumes }}"
     dimensions: "{{ prometheus_msteams_dimensions }}"
+
+####################
+# Server
+####################
+enable_prometheus_server_external: false
 
 ####################
 # Database
