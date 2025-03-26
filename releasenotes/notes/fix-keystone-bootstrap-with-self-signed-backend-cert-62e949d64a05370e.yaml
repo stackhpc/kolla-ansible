@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixes a bug where ``bootstrap_keystone`` container hangs because
+    it fails to verify response from MariaDB when self-signed backend
+    API TLS certificates are being used.
+    `LP#2104286 <https://bugs.launchpad.net/kolla-ansible/+bug/2104286>`__
