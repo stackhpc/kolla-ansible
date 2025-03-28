@@ -49,10 +49,6 @@ function prepare_images {
         GATE_IMAGES+=",^masakari-,^hacluster-"
     fi
 
-    if [[ $SCENARIO == "swift" ]]; then
-        GATE_IMAGES+=",^swift"
-    fi
-
     if [[ $SCENARIO == "ovn" ]]; then
         GATE_IMAGES+=",^redis,^octavia,^ovn"
     fi
@@ -67,6 +63,10 @@ function prepare_images {
 
     if [[ $SCENARIO == "prometheus-opensearch" ]]; then
         GATE_IMAGES="^cron,^fluentd,^grafana,^haproxy,^proxysql,^keepalived,^kolla-toolbox,^mariadb,^memcached,^opensearch,^prometheus,^rabbitmq"
+    fi
+
+    if [[ $SCENARIO == "ipv6" ]]; then
+        GATE_IMAGES+=",^prometheus"
     fi
 
     if [[ $SCENARIO == "venus" ]]; then
