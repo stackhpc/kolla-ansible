@@ -87,6 +87,9 @@ amqp_durable_queues = true
 {% endif %}
 {% if om_enable_rabbitmq_quorum_queues | bool %}
 rabbit_quorum_queue = true
+{% if om_enable_rabbitmq_transient_quorum_queue | bool %}
+rabbit_transient_quorum_queue = true
+{% endif %}
 {% endif %}
 
 [oslo_middleware]
@@ -237,6 +240,17 @@ volume_backend_name = {{ pure_roce_backend }}
 volume_driver = cinder.volume.drivers.pure.PureNVMEDriver
 san_ip = {{ pure_san_ip }}
 pure_api_token = {{ pure_api_token }}
+{% endif %}
+
+{% if enable_cinder_backend_lightbits | bool %}
+[{{ cinder_backend_lightbits_name }}]
+volume_driver = cinder.volume.drivers.lightos.LightOSVolumeDriver
+volume_backend_name = {{ lightbits_nvme_tcp_backend_name }}
+lightos_api_address = {{ lightbits_target_ips }}
+lightos_api_port = {{ lightbits_api_port }}
+lightos_default_num_replicas = {{ lightbits_default_num_replicas }}
+lightos_skip_ssl_verify = {{ lightbits_skip_ssl_verify }}
+lightos_jwt = {{ lightbits_JWT }}
 {% endif %}
 
 [privsep_entrypoint]

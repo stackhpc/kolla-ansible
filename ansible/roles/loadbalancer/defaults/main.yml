@@ -9,6 +9,7 @@ loadbalancer_services:
     volumes: "{{ haproxy_default_volumes + haproxy_extra_volumes }}"
     dimensions: "{{ haproxy_dimensions }}"
     healthcheck: "{{ haproxy_healthcheck }}"
+    copy_tls_backend: "{{ kolla_enable_tls_backend | bool }}"
   proxysql:
     container_name: proxysql
     group: loadbalancer
@@ -18,6 +19,7 @@ loadbalancer_services:
     volumes: "{{ proxysql_default_volumes + proxysql_extra_volumes }}"
     dimensions: "{{ proxysql_dimensions }}"
     healthcheck: "{{ proxysql_healthcheck }}"
+    copy_tls_backend: "{{ kolla_enable_tls_backend | bool }}"
   keepalived:
     container_name: keepalived
     group: loadbalancer
@@ -26,6 +28,7 @@ loadbalancer_services:
     privileged: True
     volumes: "{{ keepalived_default_volumes + keepalived_extra_volumes }}"
     dimensions: "{{ keepalived_dimensions }}"
+    copy_tls_backend: "{{ kolla_enable_tls_backend | bool }}"
   haproxy-ssh:
     container_name: "haproxy_ssh"
     group: loadbalancer
