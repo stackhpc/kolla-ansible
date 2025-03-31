@@ -46,7 +46,7 @@ options:
       - The action to perform
     required: True
     type: str
-author: Jeffrey Zhang, Michal Nasiadka
+author: Jeffrey Zhang, Michal Nasiadka, Ivan Halomi
 '''
 
 EXAMPLES = '''
@@ -89,6 +89,11 @@ EXAMPLES = '''
       kolla_container_facts:
         container_engine: docker
         action: get_volumes
+
+    - name: Get container names
+      kolla_container_facts:
+        container_engine: docker
+        action: get_containers_names
 '''
 
 
@@ -122,6 +127,12 @@ class ContainerFactsWorker():
             envs[key] = value
         return envs
 
+    def get_containers_names(self):
+        """Handles when module is called with action get_containers_names"""
+        containers = self.client.containers.list()
+        names = [cont.name for cont in containers]
+        self.result['container_names'] = names
+
     def get_containers(self):
         """Handle when module is called with action get_containers"""
         names = self.params.get('name')
@@ -140,8 +151,8 @@ class ContainerFactsWorker():
 
     def get_containers_state(self):
         """Handle when module is called with action get_containers_state"""
-        # NOTE(r-krcek): This function can be removed when bifrost and swift
-        # roles switch to modern format
+        # NOTE(r-krcek): This function can be removed when bifrost
+        # role switches to modern format
         names = self.params.get('name')
         self.result['states'] = dict()
 
@@ -152,8 +163,8 @@ class ContainerFactsWorker():
 
     def get_containers_env(self):
         """Handle when module is called with action get_containers_state"""
-        # NOTE(r-krcek): This function can be removed when bifrost and swift
-        # roles switch to modern format
+        # NOTE(r-krcek): This function can be removed when bifrost
+        # role switches to modern format
         names = self.params.get('name')
         self.result['envs'] = dict()
 
@@ -216,6 +227,7 @@ def main():
                     choices=['get_containers',
                              'get_containers_env',
                              'get_containers_state',
+                             'get_containers_names',
                              'get_volumes']),
     )
 

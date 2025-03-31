@@ -74,18 +74,6 @@ rbd_store_ceph_conf = /etc/ceph/{{ backend.cluster }}.conf
 {% endfor %}
 {% endif %}
 
-{% if glance_backend_swift | bool %}
-[swift]
-swift_store_container = glance
-swift_store_multiple_containers_seed = 0
-swift_store_multi_tenant = false
-swift_store_create_container_on_put = true
-swift_store_region = {{ openstack_region_name }}
-default_swift_reference = swift
-swift_store_config_file = /etc/glance/glance-swift.conf
-swift_store_auth_insecure = true
-{% endif %}
-
 {% if glance_backend_s3 | bool %}
 [s3]
 s3_store_host = {{ glance_backend_s3_url }}
@@ -125,6 +113,9 @@ driver = noop
 {% endif %}
 
 [oslo_messaging_rabbit]
+{% if om_enable_queue_manager | bool %}
+use_queue_manager = true
+{% endif %}
 heartbeat_in_pthread = false
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true
@@ -135,6 +126,9 @@ amqp_durable_queues = true
 {% endif %}
 {% if om_enable_rabbitmq_quorum_queues | bool %}
 rabbit_quorum_queue = true
+{% if om_enable_rabbitmq_transient_quorum_queue | bool %}
+rabbit_transient_quorum_queue = true
+{% endif %}
 {% endif %}
 
 {% if glance_policy_file is defined %}

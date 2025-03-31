@@ -46,14 +46,6 @@ backup_mount_options = {{ cinder_backup_mount_options_nfs }}
 backup_mount_point_base = /var/lib/cinder/backup
 backup_share = {{ cinder_backup_share }}
 backup_file_size = 327680000
-{% elif enable_swift | bool and cinder_backup_driver == "swift" %}
-backup_driver = cinder.backup.drivers.swift.SwiftBackupDriver
-backup_swift_url = {{ swift_internal_base_endpoint }}/v1/AUTH_
-backup_swift_ca_cert_file = {{ openstack_cacert }}
-backup_swift_auth = per_user
-backup_swift_auth_version = 1
-backup_swift_user =
-backup_swift_key =
 {% elif cinder_backup_driver == "s3" %}
 backup_driver = cinder.backup.drivers.s3.S3BackupDriver
 backup_s3_endpoint_url = {{ cinder_backup_s3_url }}
@@ -79,6 +71,12 @@ driver = noop
 {% endif %}
 
 [oslo_messaging_rabbit]
+{% if om_enable_queue_manager | bool %}
+use_queue_manager = true
+{% if service_name == 'cinder-api' %}
+processname = {{ service_name }}
+{% endif %}
+{% endif %}
 heartbeat_in_pthread = {{ service_name == 'cinder-api' }}
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true
@@ -89,6 +87,9 @@ amqp_durable_queues = true
 {% endif %}
 {% if om_enable_rabbitmq_quorum_queues | bool %}
 rabbit_quorum_queue = true
+{% if om_enable_rabbitmq_transient_quorum_queue | bool %}
+rabbit_transient_quorum_queue = true
+{% endif %}
 {% endif %}
 
 [oslo_middleware]
@@ -239,6 +240,17 @@ volume_backend_name = {{ pure_roce_backend }}
 volume_driver = cinder.volume.drivers.pure.PureNVMEDriver
 san_ip = {{ pure_san_ip }}
 pure_api_token = {{ pure_api_token }}
+{% endif %}
+
+{% if enable_cinder_backend_lightbits | bool %}
+[{{ cinder_backend_lightbits_name }}]
+volume_driver = cinder.volume.drivers.lightos.LightOSVolumeDriver
+volume_backend_name = {{ lightbits_nvme_tcp_backend_name }}
+lightos_api_address = {{ lightbits_target_ips }}
+lightos_api_port = {{ lightbits_api_port }}
+lightos_default_num_replicas = {{ lightbits_default_num_replicas }}
+lightos_skip_ssl_verify = {{ lightbits_skip_ssl_verify }}
+lightos_jwt = {{ lightbits_JWT }}
 {% endif %}
 
 [privsep_entrypoint]

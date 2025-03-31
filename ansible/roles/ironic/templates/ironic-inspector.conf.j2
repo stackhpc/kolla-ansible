@@ -13,6 +13,9 @@ transport_url = {{ rpc_transport_url }}
 transport_url = {{ notify_transport_url }}
 
 [oslo_messaging_rabbit]
+{% if om_enable_queue_manager | bool %}
+use_queue_manager = true
+{% endif %}
 heartbeat_in_pthread = false
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true
@@ -23,6 +26,9 @@ amqp_durable_queues = true
 {% endif %}
 {% if om_enable_rabbitmq_quorum_queues | bool %}
 rabbit_quorum_queue = true
+{% if om_enable_rabbitmq_transient_quorum_queue | bool %}
+rabbit_transient_quorum_queue = true
+{% endif %}
 {% endif %}
 
 [ironic]
@@ -99,4 +105,4 @@ known_devices = /etc/ironic-inspector/known_devices.yaml
 {% endif %}
 
 [oslo_concurrency]
-lock_path = /var/lib/ironic/tmp
+lock_path = /var/lib/ironic-inspector/tmp

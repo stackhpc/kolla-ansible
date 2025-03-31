@@ -1,3 +1,4 @@
+#jinja2: trim_blocks:False
 [DEFAULT]
 debug = {{ octavia_logging_debug }}
 
@@ -123,6 +124,12 @@ rpc_thread_pool_size = 2
 transport_url = {{ notify_transport_url }}
 
 [oslo_messaging_rabbit]
+{% if om_enable_queue_manager | bool %}
+use_queue_manager = true
+{% if service_name == 'octavia-api' %}
+processname = {{ service_name }}
+{% endif %}
+{% endif %}
 heartbeat_in_pthread = {{ service_name == 'octavia-api' }}
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true
@@ -133,6 +140,9 @@ amqp_durable_queues = true
 {% endif %}
 {% if om_enable_rabbitmq_quorum_queues | bool %}
 rabbit_quorum_queue = true
+{% if om_enable_rabbitmq_transient_quorum_queue | bool %}
+rabbit_transient_quorum_queue = true
+{% endif %}
 {% endif %}
 
 {% if octavia_policy_file is defined %}
