@@ -8,6 +8,7 @@ placement_services:
     volumes: "{{ placement_api_default_volumes + placement_api_extra_volumes }}"
     dimensions: "{{ placement_api_dimensions }}"
     healthcheck: "{{ placement_api_healthcheck }}"
+    copy_tls_backend: "{{ enable_placement | bool and placement_enable_tls_backend | bool }}"
     wsgi: "placement.wsgi.api:application"
     haproxy:
       placement_api:

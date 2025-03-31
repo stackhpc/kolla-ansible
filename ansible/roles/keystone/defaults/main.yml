@@ -8,6 +8,7 @@ keystone_services:
     volumes: "{{ keystone_default_volumes + keystone_extra_volumes }}"
     dimensions: "{{ keystone_dimensions }}"
     healthcheck: "{{ keystone_healthcheck }}"
+    copy_tls_backend: "{{ enable_keystone | bool and keystone_enable_tls_backend | bool }}"
     haproxy:
       keystone_internal:
         enabled: "{{ enable_keystone }}"
