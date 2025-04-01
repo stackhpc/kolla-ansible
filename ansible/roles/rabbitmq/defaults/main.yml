@@ -17,6 +17,7 @@ rabbitmq_services:
     volumes: "{{ rabbitmq_default_volumes + rabbitmq_extra_volumes }}"
     dimensions: "{{ rabbitmq_dimensions }}"
     healthcheck: "{{ rabbitmq_healthcheck }}"
+    copy_tls_backend: "{{ enable_rabbitmq | bool and rabbitmq_enable_tls_backend | bool }}"
     haproxy:
       rabbitmq_management:
         enabled: "{{ enable_rabbitmq }}"

@@ -199,6 +199,7 @@ neutron_services:
     volumes: "{{ neutron_tls_proxy_default_volumes + neutron_tls_proxy_extra_volumes }}"
     dimensions: "{{ neutron_tls_proxy_dimensions }}"
     healthcheck: "{{ neutron_tls_proxy_healthcheck }}"
+    copy_tls_backend: "{{ enable_neutron | bool and neutron_enable_tls_backend | bool }}"
     haproxy:
       neutron_tls_proxy:
         enabled: "{{ enable_neutron | bool and neutron_enable_tls_backend | bool }}"

@@ -8,6 +8,7 @@ skyline_services:
     volumes: "{{ skyline_apiserver_default_volumes + skyline_apiserver_extra_volumes }}"
     dimensions: "{{ skyline_apiserver_dimensions }}"
     healthcheck: "{{ skyline_apiserver_healthcheck }}"
+    copy_tls_backend: "{{ enable_skyline | bool and skyline_enable_tls_backend | bool }}"
     haproxy:
       skyline_apiserver:
         enabled: "{{ enable_skyline }}"
@@ -36,6 +37,7 @@ skyline_services:
     volumes: "{{ skyline_console_default_volumes + skyline_console_extra_volumes }}"
     dimensions: "{{ skyline_console_dimensions }}"
     healthcheck: "{{ skyline_console_healthcheck }}"
+    copy_tls_backend: "{{ enable_skyline | bool and skyline_enable_tls_backend | bool }}"
     haproxy:
       skyline_console:
         enabled: "{{ enable_skyline }}"
