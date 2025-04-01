@@ -8,6 +8,7 @@ ironic_services:
     volumes: "{{ ironic_api_default_volumes + ironic_api_extra_volumes }}"
     dimensions: "{{ ironic_api_dimensions }}"
     healthcheck: "{{ ironic_api_healthcheck }}"
+    copy_tls_backend: "{{ enable_ironic | bool and ironic_enable_tls_backend | bool }}"
     haproxy:
       ironic_api:
         enabled: "{{ enable_ironic }}"
