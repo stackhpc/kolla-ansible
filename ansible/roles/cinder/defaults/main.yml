@@ -9,6 +9,7 @@ cinder_services:
     dimensions: "{{ cinder_api_dimensions }}"
     healthcheck: "{{ cinder_api_healthcheck }}"
     wsgi: "cinder.wsgi.api:application"
+    copy_tls_backend: "{{ enable_cinder | bool and cinder_enable_tls_backend | bool }}"
     haproxy:
       cinder_api:
         enabled: "{{ enable_cinder }}"
