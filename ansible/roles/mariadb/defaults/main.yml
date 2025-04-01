@@ -8,6 +8,7 @@ mariadb_services:
     volumes: "{{ mariadb_default_volumes + mariadb_extra_volumes }}"
     dimensions: "{{ mariadb_dimensions }}"
     healthcheck: "{{ mariadb_healthcheck }}"
+    copy_tls_backend: "{{ kolla_enable_tls_backend | bool }}"
     environment:
       MYSQL_USERNAME: "{{ mariadb_monitor_user }}"
       MYSQL_PASSWORD: "{% if enable_proxysql | bool %}{{ mariadb_monitor_password }}{% endif %}"
