@@ -27,6 +27,7 @@ horizon_services:
     volumes: "{{ horizon_default_volumes + horizon_extra_volumes }}"
     dimensions: "{{ horizon_dimensions }}"
     healthcheck: "{{ horizon_healthcheck }}"
+    copy_tls_backend: "{{ enable_horizon | bool and  horizon_enable_tls_backend | bool }}"
     haproxy:
       horizon:
         enabled: "{{ enable_horizon }}"
