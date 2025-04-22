@@ -124,6 +124,12 @@ rpc_thread_pool_size = 2
 transport_url = {{ notify_transport_url }}
 
 [oslo_messaging_rabbit]
+{% if om_enable_queue_manager | bool %}
+use_queue_manager = true
+{% if service_name == 'octavia-api' %}
+processname = {{ service_name }}
+{% endif %}
+{% endif %}
 heartbeat_in_pthread = {{ service_name == 'octavia-api' }}
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true
@@ -134,6 +140,13 @@ amqp_durable_queues = true
 {% endif %}
 {% if om_enable_rabbitmq_quorum_queues | bool %}
 rabbit_quorum_queue = true
+{% if om_enable_rabbitmq_stream_fanout | bool %}
+rabbit_stream_fanout = true
+rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+{% endif %}
+{% if om_enable_rabbitmq_transient_quorum_queue | bool %}
+rabbit_transient_quorum_queue = true
+{% endif %}
 {% endif %}
 
 {% if octavia_policy_file is defined %}
@@ -167,4 +180,9 @@ jobboard_redis_backend_ssl_options = ssl:False
 jobboard_redis_sentinel = kolla
 jobboard_redis_sentinel_ssl_options = ssl:False
 persistence_connection = mysql+pymysql://{{ octavia_persistence_database_user }}:{{ octavia_persistence_database_password }}@{{ octavia_persistence_database_address }}/{{ octavia_persistence_database_name }}
+{% endif %}
+
+{% if om_enable_queue_manager | bool %}
+[oslo_concurrency]
+lock_path = /var/lib/octavia/tmp
 {% endif %}
