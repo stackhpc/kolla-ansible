@@ -17,7 +17,7 @@ keystone_services:
         port: "{{ keystone_internal_port }}"
         listen_port: "{{ keystone_internal_listen_port }}"
         backend_http_extra:
-          - balance "{{ 'source' if enable_keystone_federation | bool else 'roundrobin' }}"
+          - "balance {{ 'source' if enable_keystone_federation | bool else 'roundrobin' }}"
       keystone_external:
         enabled: "{{ enable_keystone }}"
         mode: "http"
@@ -27,7 +27,7 @@ keystone_services:
         port: "{{ keystone_public_port }}"
         listen_port: "{{ keystone_public_listen_port }}"
         backend_http_extra:
-          - balance "{{ 'source' if enable_keystone_federation | bool else 'roundrobin' }}"
+          - "balance {{ 'source' if enable_keystone_federation | bool else 'roundrobin' }}"
   keystone-ssh:
     container_name: "keystone_ssh"
     group: "keystone"
@@ -156,6 +156,7 @@ keystone_default_volumes:
   - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "{{ kolla_dev_repos_directory ~ '/keystone/keystone:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/keystone' if keystone_dev_mode | bool else '' }}"
   - "kolla_logs:/var/log/kolla/"
+  - "{{ '/dev/shm:/dev/shm' if om_enable_queue_manager | bool else '' }}"
   - "keystone_fernet_tokens:/etc/keystone/fernet-keys"
 
 keystone_extra_volumes: "{{ default_extra_volumes }}"

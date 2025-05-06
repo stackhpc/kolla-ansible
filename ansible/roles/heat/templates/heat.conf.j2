@@ -72,6 +72,12 @@ driver = noop
 {% endif %}
 
 [oslo_messaging_rabbit]
+{% if om_enable_queue_manager | bool %}
+use_queue_manager = true
+{% if service_name == 'heat-api' or service_name == 'heat-api-cfn' %}
+processname = {{ service_name }}
+{% endif %}
+{% endif %}
 heartbeat_in_pthread = {{ service_name == 'heat-api' or service_name == 'heat-api-cfn' }}
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true
@@ -82,6 +88,13 @@ amqp_durable_queues = true
 {% endif %}
 {% if om_enable_rabbitmq_quorum_queues | bool %}
 rabbit_quorum_queue = true
+{% if om_enable_rabbitmq_stream_fanout | bool %}
+rabbit_stream_fanout = true
+rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+{% endif %}
+{% if om_enable_rabbitmq_transient_quorum_queue | bool %}
+rabbit_transient_quorum_queue = true
+{% endif %}
 {% endif %}
 
 {% if heat_policy_file is defined %}
@@ -102,4 +115,9 @@ enabled = true
 trace_sqlalchemy = true
 hmac_keys = {{ osprofiler_secret }}
 connection_string = {{ osprofiler_backend_connection_string }}
+{% endif %}
+
+{% if om_enable_queue_manager | bool %}
+[oslo_concurrency]
+lock_path = /var/lib/heat/tmp
 {% endif %}

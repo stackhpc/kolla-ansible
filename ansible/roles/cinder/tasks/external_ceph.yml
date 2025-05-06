@@ -9,9 +9,7 @@
     group: "{{ config_owner_group }}"
     mode: "0770"
   become: true
-  when:
-    - inventory_hostname in groups[service.group]
-    - service.enabled | bool
+  when: service | service_enabled_and_mapped_to_host
   with_items:
     - "cinder-volume"
     - "cinder-backup"
@@ -32,18 +30,16 @@
     mode: "0660"
   become: true
   when:
-    - service.enabled | bool
-    - inventory_hostname in groups[service.group]
+    - service | service_enabled_and_mapped_to_host
     - service_name in services_need_config
   with_nested:
     - "{{ cinder_services | dict2items }}"
     - "{{ cinder_ceph_backends }}"
-  notify:
-    - "Restart {{ service_name }} container"
 
 - name: Copy over Ceph keyring files for cinder-volume
   vars:
     keyring: "{{ item.cluster }}.{{ ceph_cinder_keyring }}"
+    service: "{{ cinder_services['cinder-volume'] }}"
   template:
     src: "{{ node_custom_config }}/cinder/cinder-volume/{{ keyring }}"
     dest: "{{ node_config_directory }}/cinder-volume/ceph/{{ keyring }}"
@@ -52,12 +48,11 @@
   with_items: "{{ cinder_ceph_backends }}"
   when:
     - external_ceph_cephx_enabled | bool
-    - inventory_hostname in groups['cinder-volume']
-    - cinder_services['cinder-volume'].enabled | bool
-  notify:
-    - Restart cinder-volume container
+    - service | service_enabled_and_mapped_to_host
 
 - name: Copy over Ceph keyring files for cinder-backup
+  vars:
+    service: "{{ cinder_services['cinder-backup'] }}"
   template:
     src: "{{ node_custom_config }}/cinder/cinder-backup/{{ item }}"
     dest: "{{ node_config_directory }}/cinder-backup/ceph/{{ item }}"
@@ -69,10 +64,7 @@
     - "{{ cinder_backup_ceph_backend.cluster }}.{{ ceph_cinder_backup_keyring }}"
   when:
     - external_ceph_cephx_enabled | bool
-    - inventory_hostname in groups['cinder-backup']
-    - cinder_services['cinder-backup'].enabled | bool
-  notify:
-    - Restart cinder-backup container
+    - service | service_enabled_and_mapped_to_host
 
 - name: Ensuring config directory has correct owner and permission
   become: true

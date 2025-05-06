@@ -164,6 +164,7 @@
       become: "{{ item.become | default(false) }}"
       vars:
         is_previous_release: "{{ is_upgrade }}"
+        force_config_drive: "{{ 'true' if address_family == 'ipv6' else 'false' }}"
       with_items:
         # Ansible inventory
         - src: "tests/templates/inventory.j2"
@@ -341,6 +342,7 @@
         chdir: "{{ kolla_ansible_src_dir }}"
       environment:
         BASE_DISTRO: "{{ base_distro }}"
+        BASE_DISTRO_TAG: "{{ base_distro_tag | default('') }}"
         BUILD_IMAGE: "{{ need_build_image }}"
         KOLLA_SRC_DIR: "{{ ansible_env.HOME }}/src/opendev.org/openstack/kolla"
         SCENARIO: "{{ scenario }}"
@@ -665,6 +667,7 @@
             dest: "{{ item.dest }}"
           vars:
             is_previous_release: false
+            force_config_drive: "{{ 'true' if address_family == 'ipv6' else 'false' }}"
           with_items:
             # Ansible inventory
             - src: "tests/templates/inventory.j2"

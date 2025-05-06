@@ -36,6 +36,9 @@ ca_file = /etc/ceilometer/vmware_ca
 transport_url = {{ notify_transport_url }}
 
 [oslo_messaging_rabbit]
+{% if om_enable_queue_manager | bool %}
+use_queue_manager = true
+{% endif %}
 heartbeat_in_pthread = false
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true
@@ -46,6 +49,13 @@ amqp_durable_queues = true
 {% endif %}
 {% if om_enable_rabbitmq_quorum_queues | bool %}
 rabbit_quorum_queue = true
+{% if om_enable_rabbitmq_stream_fanout | bool %}
+rabbit_stream_fanout = true
+rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+{% endif %}
+{% if om_enable_rabbitmq_transient_quorum_queue | bool %}
+rabbit_transient_quorum_queue = true
+{% endif %}
 {% endif %}
 
 {% if ceilometer_policy_file is defined %}
@@ -57,3 +67,8 @@ policy_file = {{ ceilometer_policy_file }}
 backend = oslo_cache.memcache_pool
 enabled = True
 memcache_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_address(host) | put_address_in_context('memcache') }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}
+
+{% if om_enable_queue_manager | bool %}
+[oslo_concurrency]
+lock_path = /var/lib/ceilometer/tmp
+{% endif %}
