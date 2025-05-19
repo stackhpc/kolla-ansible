@@ -8,6 +8,7 @@ heat_services:
     volumes: "{{ heat_api_default_volumes + heat_api_extra_volumes }}"
     dimensions: "{{ heat_api_dimensions }}"
     healthcheck: "{{ heat_api_healthcheck }}"
+    copy_tls_backend: "{{ enable_heat | bool and  heat_enable_tls_backend | bool }}"
     haproxy:
       heat_api:
         enabled: "{{ enable_heat }}"
@@ -36,6 +37,7 @@ heat_services:
     volumes: "{{ heat_api_cfn_default_volumes + heat_api_cfn_extra_volumes }}"
     dimensions: "{{ heat_api_cfn_dimensions }}"
     healthcheck: "{{ heat_api_cfn_healthcheck }}"
+    copy_tls_backend: "{{ enable_heat | bool and  heat_enable_tls_backend | bool }}"
     haproxy:
       heat_api_cfn:
         enabled: "{{ enable_heat }}"
