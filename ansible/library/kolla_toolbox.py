@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from distutils.version import StrictVersion
 import json
 import re
 
@@ -19,7 +20,6 @@ from ansible.module_utils.ansible_release import __version__ as ansible_version
 from ansible.module_utils.basic import AnsibleModule
 
 from ast import literal_eval
-from pkg_resources import parse_version
 from shlex import split
 
 DOCUMENTATION = '''
@@ -117,7 +117,7 @@ def gen_commandline(params):
     if params.get('module_name'):
         command.extend(['-m', params.get('module_name')])
     if params.get('module_args'):
-        if parse_version(ansible_version) < parse_version('2.11.0'):
+        if StrictVersion(ansible_version) < StrictVersion('2.11.0'):
             module_args = params.get('module_args')
         else:
             try:
@@ -148,8 +148,8 @@ def get_docker_client():
 
 
 def docker_supports_environment_in_exec(client):
-    docker_version = parse_version(client.api_version)
-    return docker_version >= parse_version('1.25')
+    docker_version = StrictVersion(client.api_version)
+    return docker_version >= StrictVersion('1.25')
 
 
 def use_docker(module):

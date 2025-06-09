@@ -18,7 +18,8 @@ import os
 
 from ansible.module_utils.kolla_container_worker import COMPARE_CONFIG_CMD
 from ansible.module_utils.kolla_container_worker import ContainerWorker
-from pkg_resources import parse_version
+
+from distutils.version import StrictVersion
 
 
 def get_docker_client():
@@ -38,9 +39,9 @@ class DockerWorker(ContainerWorker):
         self.dc = get_docker_client()(**options)
 
         self._cgroupns_mode_supported = (
-            parse_version(self.dc._version) >= parse_version('1.41'))
+            StrictVersion(self.dc._version) >= StrictVersion('1.41'))
         self._dimensions_kernel_memory_removed = (
-            parse_version(self.dc._version) >= parse_version('1.42'))
+            StrictVersion(self.dc._version) >= StrictVersion('1.42'))
 
         if self._dimensions_kernel_memory_removed:
             self.dimension_map.pop('kernel_memory', None)
