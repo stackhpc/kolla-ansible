@@ -14,14 +14,14 @@
             "perm": "0600"
         }{% endif %}{% if nova_backend == "rbd" %},
         {
-            "source": "{{ container_config_directory }}/{{ nova_cell_ceph_backend['cluster'] }}.client.{{ nova_cell_ceph_backend['vms']['user'] }}.keyring",
-            "dest": "/etc/ceph/{{ nova_cell_ceph_backend['cluster'] }}.client.{{ nova_cell_ceph_backend['vms']['user'] }}.keyring",
+            "source": "{{ container_config_directory }}/{{ nova_cell_ceph_backends[0]['cluster'] }}.client.{{ nova_cell_ceph_backends[0]['vms']['user'] }}.keyring",
+            "dest": "/etc/ceph/{{ nova_cell_ceph_backends[0]['cluster'] }}.client.{{ nova_cell_ceph_backends[0]['vms']['user'] }}.keyring",
             "owner": "nova",
             "perm": "0600"
         },
         {
-            "source": "{{ container_config_directory }}/{{ nova_cell_ceph_backend['cluster'] }}.conf",
-            "dest": "/etc/ceph/{{ nova_cell_ceph_backend['cluster'] }}.conf",
+            "source": "{{ container_config_directory }}/{{ nova_cell_ceph_backends[0]['cluster'] }}.conf",
+            "dest": "/etc/ceph/{{ nova_cell_ceph_backends[0]['cluster'] }}.conf",
             "owner": "nova",
             "perm": "0600"
         }{% endif %}{% if nova_compute_virt_type == "vmware" and not vmware_vcenter_insecure | bool %},

@@ -17,6 +17,7 @@
   when:
     - (nova_backend == "rbd" or cinder_backend_ceph | bool)
     - inventory_hostname in groups[nova_cell_compute_group]
+  with_items: "{{ nova_cell_ceph_backends }}"
 
 - name: Check if policies shall be overwritten
   stat:

@@ -87,14 +87,14 @@ nova_cell_config_validation:
 # qemu (1, 6, 0) or later. Set to "" to disable.
 nova_hw_disk_discard: "unmap"
 
-nova_cell_ceph_backend:
-  cluster: "{{ ceph_cluster }}"
-  vms:
-    user: "{{ ceph_nova_user }}"
-    pool: "{{ ceph_nova_pool_name }}"
-  volumes:
-    user: "{{ ceph_cinder_user }}"
-    pool: "{{ ceph_cinder_pool_name }}"
+nova_cell_ceph_backends:
+  - cluster: "{{ ceph_cluster }}"
+    vms:
+      user: "{{ ceph_nova_user }}"
+      pool: "{{ ceph_nova_pool_name }}"
+    volumes:
+      user: "{{ ceph_cinder_user }}"
+      pool: "{{ ceph_cinder_pool_name }}"
 
 ####################
 # Cells Options

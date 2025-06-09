@@ -172,8 +172,8 @@ rados_connect_timeout = 5
 rbd_user = {{ backend.user }}
 rbd_cluster_name = {{ backend.cluster }}
 rbd_keyring_conf = /etc/ceph/{{ backend.cluster }}.client.{{ backend.user }}.keyring
-rbd_secret_uuid = {{ cinder_rbd_secret_uuid }}
-report_discard_supported = True
+rbd_secret_uuid = {{ vars['cinder_rbd_secret_uuid_' ~ backend.name] | default(cinder_rbd_secret_uuid) }}
+report_discard_supported = true
 {% if backend.availability_zone is defined %}
 backend_availability_zone = {{ backend.availability_zone }}
 {% endif %}
