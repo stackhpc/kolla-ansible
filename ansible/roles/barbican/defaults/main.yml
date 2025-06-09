@@ -8,6 +8,7 @@ barbican_services:
     volumes: "{{ barbican_api_default_volumes + barbican_api_extra_volumes }}"
     dimensions: "{{ barbican_api_dimensions }}"
     healthcheck: "{{ barbican_api_healthcheck }}"
+    copy_tls_backend: "{{ enable_barbican | bool and barbican_enable_tls_backend | bool }}"
     haproxy:
       barbican_api:
         enabled: "{{ enable_barbican }}"

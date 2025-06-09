@@ -8,6 +8,7 @@ trove_services:
     volumes: "{{ trove_api_default_volumes + trove_api_extra_volumes }}"
     dimensions: "{{ trove_api_dimensions }}"
     healthcheck: "{{ trove_api_healthcheck }}"
+    copy_tls_backend: "{{ enable_trove | bool and trove_enable_tls_backend | bool }}"
     haproxy:
       trove_api:
         enabled: "{{ enable_trove }}"
