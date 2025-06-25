@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    New variables ``om_rabbitmq_stream_max_segment_size_bytes`` and
+    ``om_rabbitmq_stream_segment_max_age`` are added to make RabbitMQ stream
+    retention policy configurable.
+    These two new variables are only applied when
+    ``om_enable_rabbitmq_stream_fanout`` is set to true.
+    It is recommened to reduce the values based on user's environment to
+    pervent congesting ready messages in fanout queues when using stream.
+fixes:
+  - |
+    Fixes a bug
+    `LP#2115330 <https://bugs.launchpad.net/kolla-ansible/+bug/2115330>`__

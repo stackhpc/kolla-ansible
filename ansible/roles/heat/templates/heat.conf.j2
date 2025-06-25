@@ -85,6 +85,8 @@ rabbit_quorum_queue = true
 {% if om_enable_rabbitmq_stream_fanout | bool %}
 rabbit_stream_fanout = true
 rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+rabbit_stream_max_segment_size_bytes = {{ om_rabbitmq_stream_max_segment_size_bytes }}
+rabbit_transient_queues_ttl = {{ om_rabbitmq_stream_segment_max_age }}
 {% endif %}
 rabbit_transient_quorum_queue = true
 

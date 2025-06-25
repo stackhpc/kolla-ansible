@@ -276,6 +276,10 @@ om_rabbitmq_cacert: "{{ rabbitmq_cacert }}"
 om_rabbitmq_qos_prefetch_count: "1"
 
 om_enable_rabbitmq_stream_fanout: true
+# Maximum size of stream queue segments. RabbitMQ default: 500000000 (500MB)
+om_rabbitmq_stream_max_segment_size_bytes: 500000000
+# Retention time (s) of full stream queue segments once they are full. RabbitMQ default: 1800
+om_rabbitmq_stream_segment_max_age: 1800
 
 ####################
 # Networking options
