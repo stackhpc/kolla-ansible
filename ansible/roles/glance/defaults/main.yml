@@ -44,6 +44,7 @@ glance_services:
     volumes: "{{ glance_tls_proxy_default_volumes + glance_tls_proxy_extra_volumes }}"
     dimensions: "{{ glance_tls_proxy_dimensions }}"
     healthcheck: "{{ glance_tls_proxy_healthcheck }}"
+    copy_tls_backend: "{{ enable_glance | bool and glance_enable_tls_backend | bool }}"
     haproxy:
       glance_tls_proxy:
         enabled: "{{ enable_glance | bool and glance_enable_tls_backend | bool }}"
