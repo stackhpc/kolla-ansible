@@ -4,22 +4,3 @@
     role: service-cert-copy
   vars:
     project_services: "{{ keystone_services }}"
-
-- name: "Copying over MariaDB backend internal TLS certificate as extra CA certificate"
-  vars:
-    certs:
-      - "{{ kolla_certificates_dir }}/{{ inventory_hostname }}/mariadb-cert.pem"
-      - "{{ kolla_certificates_dir }}/{{ inventory_hostname }}-cert.pem"
-      - "{{ kolla_certificates_dir }}/mariadb-cert.pem"
-      - "{{ kolla_tls_backend_cert }}"
-    backend_tls_cert: "{{ lookup('first_found', certs) }}"
-    project_services: "{{ keystone_services }}"
-  copy:
-    src: "{{ backend_tls_cert }}"
-    dest: "{{ node_config_directory }}/{{ item.key }}/ca-certificates/mariadb.crt"
-    mode: "0644"
-  become: true
-  when:
-    - kolla_copy_backend_tls_files | bool
-    - kolla_copy_ca_into_containers | bool
-  with_dict: "{{ project_services | select_services_enabled_and_mapped_to_host }}"
