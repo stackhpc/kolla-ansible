@@ -4,3 +4,12 @@
     role: service-cert-copy
   vars:
     project_services: "{{ keystone_services }}"
+
+- name: "Copying over intermediate CA certificates"
+  become: true
+  copy:
+    src: "{{ kolla_certificates_dir }}/int.crt"
+    dest: "{{ node_config_directory }}/keystone/ca-certificates/int.crt"
+    mode: "0644"
+  when:
+    - database_enable_tls_backend | bool
