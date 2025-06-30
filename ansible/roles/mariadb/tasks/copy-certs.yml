@@ -5,11 +5,3 @@
   vars:
     project_services: "{{ mariadb_services }}"
   when: database_enable_tls_backend | bool
-
-- name: "Copying over intermediate CA certificate"
-  become: true
-  copy:
-    src: "{{ kolla_certificates_dir }}/int.crt"
-    dest: "{{ node_config_directory }}/mariadb/ca-certificates/int.crt"
-    mode: "0644"
-  when: database_enable_tls_backend | bool

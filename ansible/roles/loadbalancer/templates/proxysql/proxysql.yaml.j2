@@ -68,7 +68,7 @@ mysql_variables:
    shun_on_failures: {{ mariadb_shun_on_failures }}
 {% endif %}
 {% if database_enable_tls_backend | bool %}
-   ssl_p2s_ca: "/etc/proxysql/certs/int.crt"
+   ssl_p2s_ca: "/etc/proxysql/certs/root.crt"
    ssl_p2s_cert: "/etc/proxysql/certs/mariadb-cert.pem"
    ssl_p2s_key: "/etc/proxysql/certs/mariadb-key.pem"
    have_ssl: true

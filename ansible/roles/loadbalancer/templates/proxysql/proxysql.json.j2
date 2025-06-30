@@ -33,8 +33,8 @@
         }{% endif %}
         {% if database_enable_tls_backend | bool %},
         {
-            "source": "{{ container_config_directory }}/ca-certificates/int.crt",
-            "dest": "/etc/proxysql/certs/int.crt",
+            "source": "{{ container_config_directory }}/ca-certificates/root.crt",
+            "dest": "/etc/proxysql/certs/root.crt",
             "owner": "proxysql",
             "perm": "0600"
         },

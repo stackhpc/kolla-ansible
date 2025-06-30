@@ -12,7 +12,7 @@ basedir=/usr
 bind-address={{ api_interface_address }}
 port={{ mariadb_port }}
 {% if database_enable_tls_backend | bool %}
-ssl_ca=/etc/mariadb/certs/int.crt
+ssl_ca=/etc/mariadb/certs/root.crt
 ssl_cert=/etc/mariadb/certs/mariadb-cert.pem
 ssl_key=/etc/mariadb/certs/mariadb-key.pem
 {% endif %}
