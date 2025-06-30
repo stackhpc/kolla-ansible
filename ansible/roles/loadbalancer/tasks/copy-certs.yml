@@ -61,3 +61,11 @@
   vars:
     project_services: "{{ loadbalancer_services }}"
     project_name: mariadb
+
+- name: "Copying over intermediate CA certificate"
+  become: true
+  copy:
+    src: "{{ kolla_certificates_dir }}/int.crt"
+    dest: "{{ node_config_directory }}/proxysql/ca-certificates/int.crt"
+    mode: "0644"
+  when: database_enable_tls_backend | bool
