@@ -84,6 +84,17 @@ rabbitmq_message_ttl_ms: 600000
 # If no queue expiry is specified, queues will not expire
 rabbitmq_queue_expiry_ms: 3600000
 rabbitmq_extra_config: {}
+# Maximum size of stream segments. This variable needs to be positive integer.
+# When it is set to zero, it gets ignored and not added to the stream retention
+# policy.
+# RabbitMQ default size of a segment in bytes: 500000000 (500MB)
+rabbitmq_stream_max_segment_size_bytes: 0
+# Retention time of segments that reached the maximum size.
+# This variable needs to be string with valid options of Y, M, D, h, m, s.
+# When it is set to empty string, it gets ignored and not added to the stream
+# retention policy.
+# oslo.messaging default: 1800s
+rabbitmq_stream_segment_max_age: ""
 
 ####################
 # Plugins

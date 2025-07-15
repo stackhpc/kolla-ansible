@@ -161,6 +161,39 @@ different type, the follow procedure will be needed.
 
       kolla-ansible deploy --tags <service-tags>
 
+Streams Retention Period
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+When using RabbitMQ streams for fanout queues by setting
+``om_enable_rabbitmq_stream_fanout: true``, users can set retention policy for
+them with the use of two variables ``rabbitmq_stream_max_segment_size_bytes``
+and ``rabbitmq_stream_segment_max_age`` to avoid running out of disk space
+eventually.
+
+Default configuration set segments of a stream queues to have maximum size of
+500 MB (RabbitMQ default) and the retention time of 1800 seconds once a segment
+reaches the maximum size (oslo.messaging default).
+However, these limits are too lenient for the use case of Kolla-Ansible and can
+congest fanout queues with outdated ready messages.
+Therefore, it is highly recommended to set appropriate retention policy for the
+user's environment.
+
+``rabbitmq_stream_max_segment_size_bytes`` sets the maximum size of stream
+segments. This variable needs to be positive integer.
+When it is set to zero, it gets ignored and not added to the stream retention
+policy.
+``rabbitmq_stream_segment_max_age`` sets the retention time of segments that
+reached the maximum size. This variable needs to be string with valid options
+of Y, M, D, h, m, s (e.g. 60s for 60 seconds).
+When it is set to empty string, it gets ignored and not added to the stream
+retention policy.
+
+.. code-block:: yaml
+
+   # Example retention policy configuration
+   rabbitmq_stream_max_segment_size_bytes: 5000 # 5 KB
+   rabbitmq_stream_segment_max_age: "60s" # 60 seconds
+
 SLURP
 ~~~~~
 

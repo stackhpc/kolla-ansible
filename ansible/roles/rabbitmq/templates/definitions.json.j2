@@ -10,5 +10,27 @@
     {"user": "{{ role_rabbitmq_user }}", "vhost": "/", "configure": ".*", "write": ".*", "read": ".*"}{% if role_rabbitmq_monitoring_user is defined and role_rabbitmq_monitoring_user %},
     {"user": "{{ role_rabbitmq_monitoring_user }}", "vhost": "/", "configure": "^$", "write": "^$", "read": ".*"}{% endif %}
   ],
-  "policies":[]
+{% if om_enable_rabbitmq_stream_fanout and (rabbitmq_stream_max_segment_size_bytes > 0 or rabbitmq_stream_segment_max_age | length > 0) %}
+  "policies": [
+    {
+      "vhost": "/",
+      "name": "stream-retention-policy",
+      "pattern": "._fanout",
+      "apply-to": "streams",
+      "definition": {
+{% if rabbitmq_stream_max_segment_size_bytes > 0 %}
+        "stream-max-segment-size-bytes": {{ rabbitmq_stream_max_segment_size_bytes }}{% if rabbitmq_stream_max_segment_size_bytes > 0 and rabbitmq_stream_segment_max_age | length > 0 %},{% endif %}
+{% endif %}
+
+{% if rabbitmq_stream_segment_max_age | length > 0 %}
+        "max-age": "{{ rabbitmq_stream_segment_max_age }}"
+{% endif %}
+
+      },
+      "priority": 1
+    }
+  ]
+{% else %}
+  "policies": []
+{% endif %}
 }
