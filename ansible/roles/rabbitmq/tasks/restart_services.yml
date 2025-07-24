@@ -16,6 +16,18 @@
     user: root
   become: true
   when: container_info.containers | length > 0
+  ignore_errors: true
+  register: node_to_maintenance
+
+- name: Check again if RabbitMQ node was put into maintenance mode
+  kolla_toolbox:
+    container_engine: "{{ kolla_container_engine }}"
+    module_name: "community.rabbitmq.rabbitmq_upgrade"
+    module_args:
+      action: "drain"
+    user: root
+  when: node_to_maintenance.failed
+  become: true
 
 - name: Restart rabbitmq container
   vars:
