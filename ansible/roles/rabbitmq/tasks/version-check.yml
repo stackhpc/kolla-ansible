@@ -9,6 +9,18 @@
           - "{{ service.container_name }}"
       register: container_facts
 
+    - name: Show container_facts
+      debug:
+        var: container_facts
+
+    - name: Show service.container_name
+      debug:
+        var: service.container_name
+
+    - name: Show container_facts[service.container_name]
+      debug:
+        var: container_facts[service.container_name]
+
     - block:
         - name: Get current RabbitMQ version
           become: true
