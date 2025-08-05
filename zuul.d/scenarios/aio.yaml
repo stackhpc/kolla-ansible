@@ -88,6 +88,18 @@
 
 - job:
     name: kolla-ansible-ubuntu-noble
+    parent: kolla-ansible-base
+    nodeset: kolla-ansible-rocky-10-16GB
+
+- job:
+    name: kolla-ansible-rocky-10-podman
+    parent: kolla-ansible-rocky-10
+    nodeset: kolla-ansible-rocky-10-16GB
+    vars:
+      container_engine: podman
+
+- job:
+    name: kolla-ansible-ubuntu-noble
     parent: kolla-ansible-aio-base
     nodeset: kolla-ansible-ubuntu-noble-16GB
 
