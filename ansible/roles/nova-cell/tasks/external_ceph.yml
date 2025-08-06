@@ -38,6 +38,7 @@
   when:
     - nova_backend == "rbd"
     - external_ceph_cephx_enabled | bool
+    - item.vms is defined
 
 - name: Extract cinder key from file
   set_fact:
@@ -46,6 +47,7 @@
   when:
     - cinder_backend_ceph | bool
     - external_ceph_cephx_enabled | bool
+    - item.volumes is defined
 
 - name: Copy over ceph nova keyring file
   template:
@@ -63,6 +65,7 @@
     - inventory_hostname in groups[nova_cell_compute_group]
     - nova_backend == "rbd"
     - external_ceph_cephx_enabled | bool
+    - item.vms is defined
 
 - name: Copy over ceph cinder keyring file
   template:
@@ -80,6 +83,7 @@
     - inventory_hostname in groups[nova_cell_compute_group]
     - nova_backend == "rbd"
     - external_ceph_cephx_enabled | bool
+    - item.volumes is defined
 
 - name: Copy over ceph.conf
   vars:
@@ -151,8 +155,8 @@
       vars:
         service: "{{ nova_cell_services['nova-libvirt'] }}"
         secrets:
-        uuid: "{{ lookup('vars', 'rbd_secret_uuid_' + item.cluster, default=rbd_secret_uuid) }}"
-        secret_name: "ceph-ephemeral-nova-{{ item.cluster }}"
+        uuid: "{{ lookup('vars', 'rbd_secret_uuid_' + item.name, default=rbd_secret_uuid) }}"
+        secret_name: "ceph-ephemeral-nova-{{ item.name }}"
         description: "Ceph Client Secret for Ephemeral Storage (Nova)"
         enabled: "{{ nova_backend == 'rbd' }}"
       template:
@@ -171,8 +175,8 @@
     - name: Pushing nova cinder secret xml for libvirt
       vars:
         service: "{{ nova_cell_services['nova-libvirt'] }}"
-        uuid: "{{ lookup('vars', 'cinder_rbd_secret_uuid_' + item.cluster, default=cinder_rbd_secret_uuid) }}"
-        secret_name: "ceph-persistent-cinder-{{ item.cluster }}"
+        uuid: "{{ lookup('vars', 'cinder_rbd_secret_uuid_' + item.name, default=cinder_rbd_secret_uuid) }}"
+        secret_name: "ceph-persistent-cinder-{{ item.name }}"
         description: "Ceph Client Secret for Persistent Storage (Cinder)"
         enabled: "{{ cinder_backend_ceph }}"
       template:
@@ -214,7 +218,7 @@
     - name: Pushing cinder secrets key for libvirt
       vars:
         service: "{{ nova_cell_services['nova-libvirt'] }}"
-        uuid: "{{ lookup('vars', 'cinder_rbd_secret_uuid_' + item.cluster, default=cinder_rbd_secret_uuid) }}"
+        uuid: "{{ lookup('vars', 'cinder_rbd_secret_uuid_' + item.name, default=cinder_rbd_secret_uuid) }}"
         result: "{{ cinder_cephx_raw_key | default }}"
         enabled: "{{ cinder_backend_ceph }}"
       template:
