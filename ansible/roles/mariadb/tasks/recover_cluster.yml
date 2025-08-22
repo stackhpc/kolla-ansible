@@ -144,13 +144,21 @@
     - bootstrap_host is defined
     - bootstrap_host == inventory_hostname
 
-- name: Set first MariaDB container as primary
+- name: Refresh galera.cnf to set first MariaDB container as primary
+  vars:
+    service_name: "mariadb"
+    service: "{{ mariadb_services[service_name] }}"
+    primary_host_on_recovery: "{{ bootstrap_host == inventory_hostname }}"
+  merge_configs:
+    sources:
+      - "{{ role_path }}/templates/galera.cnf.j2"
+      - "{{ node_custom_config }}/galera.cnf"
+      - "{{ node_custom_config }}/mariadb/{{ inventory_hostname }}/galera.cnf"
+    dest: "{{ node_config_directory }}/{{ service_name }}/galera.cnf"
+    mode: "0660"
   become: true
-  shell: "{{ kolla_container_engine }} exec {{ mariadb_service.container_name }} mariadb -uroot -p{{ database_password }} -e \"SET GLOBAL wsrep_provider_options='pc.bootstrap=yes';\""
-  no_log: True
   when:
     - bootstrap_host is defined
-    - bootstrap_host == inventory_hostname
 
 - name: Wait for MariaDB to become operational
   become: true
@@ -235,3 +243,20 @@
     - bootstrap_host == inventory_hostname
 
 - import_tasks: check.yml
+
+- name: Unset pc.bootstrap for primary MariaDB galera.cnf for next restart
+  vars:
+    service_name: "mariadb"
+    service: "{{ mariadb_services[service_name] }}"
+    primary_host_on_recovery: false
+  merge_configs:
+    sources:
+      - "{{ role_path }}/templates/galera.cnf.j2"
+      - "{{ node_custom_config }}/galera.cnf"
+      - "{{ node_custom_config }}/mariadb/{{ inventory_hostname }}/galera.cnf"
+    dest: "{{ node_config_directory }}/{{ service_name }}/galera.cnf"
+    mode: "0660"
+  become: true
+  when:
+    - bootstrap_host is defined
+    - bootstrap_host == inventory_hostname
