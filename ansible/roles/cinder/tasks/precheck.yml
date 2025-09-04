@@ -44,6 +44,7 @@
     - not enable_cinder_backend_pure_roce | bool
     - not enable_cinder_backend_pure_nvme_tcp | bool
     - not enable_cinder_backend_lightbits | bool
+    - not enable_cinder_backend_vast | bool
 
 - name: Checking LVM volume group exists for Cinder
   become: true

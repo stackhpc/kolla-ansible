@@ -299,6 +299,9 @@ that appears in cinder.conf:
    * - Lightbits Labs storage backend
      - cinder_backend_lightbits_name
      - Lightbits-NVMe-TCP
+   * - VAST storage backend
+     - cinder_backend_vast_name
+     - vast-nvme-tcp
 
 These are the names you use when
 `configuring <https://docs.openstack.org/cinder/latest/admin/multi-backend.html#volume-type>`_

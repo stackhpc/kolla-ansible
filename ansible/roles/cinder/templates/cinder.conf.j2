@@ -248,6 +248,18 @@ lightos_skip_ssl_verify = {{ lightbits_skip_ssl_verify }}
 lightos_jwt = {{ lightbits_JWT }}
 {% endif %}
 
+{% if enable_cinder_backend_vast | bool %}
+[{{ cinder_backend_vast_name }}]
+volume_driver = cinder.volume.drivers.vastdata.driver.VASTVolumeDriver
+volume_backend_name = {{ vast_backend_name }}
+vast_vippool_name = {{ vast_vippool_name }}
+vast_subsystem = {{ vast_subsystem }}
+san_ip = {{ vast_ip }}
+san_api_port = {{ vast_port }}
+san_login = {{ vast_username }}
+san_password = {{ vast_password }}
+{% endif %}
+
 [privsep_entrypoint]
 helper_command=sudo cinder-rootwrap /etc/cinder/rootwrap.conf privsep-helper --config-file /etc/cinder/cinder.conf
 
