@@ -242,6 +242,11 @@ manila_backends:
     enabled: "{{ enable_manila_backend_flashblade | bool }}"
     protocols:
       - "NFS"
+  - name: "vast"
+    driver: "vast"
+    enabled: "{{ enable_manila_backend_vast | bool }}"
+    protocols:
+      - "NFS"
 
 
 manila_ceph_backends:

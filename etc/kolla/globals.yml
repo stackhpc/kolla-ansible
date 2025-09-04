@@ -396,6 +396,7 @@ workaround_ansible_issue_8743: yes
 #enable_manila_backend_cephfs_nfs: "no"
 #enable_manila_backend_glusterfs_nfs: "no"
 #enable_manila_backend_flashblade: "no"
+#enable_manila_backend_vast: "no"
 #enable_mariabackup: "no"
 #enable_masakari: "no"
 #enable_mistral: "no"
@@ -717,6 +718,13 @@ workaround_ansible_issue_8743: yes
 # and define 'manila_glusterfs_ssh_password'
 #manila_glusterfs_target:
 #manila_glusterfs_mount_point_base:
+
+# Vast configuration for Manila
+#manila_vast_mgmt_host:
+#manila_vast_mgmt_user:
+#manila_vast_mgmt_password:
+#manila_vast_vippool_name:
+#vast_root_export:
 
 ###################################
 # VMware - OpenStack VMware support
