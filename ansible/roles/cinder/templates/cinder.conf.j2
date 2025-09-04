@@ -251,13 +251,13 @@ lightos_jwt = {{ lightbits_JWT }}
 {% if enable_cinder_backend_vast | bool %}
 [{{ cinder_backend_vast_name }}]
 volume_driver = cinder.volume.drivers.vastdata.driver.VASTVolumeDriver
-volume_backend_name = {{ vast_backend_name }}
-vast_vippool_name = {{ vast_vippool_name }}
-vast_subsystem = {{ vast_subsystem }}
-san_ip = {{ vast_ip }}
-san_api_port = {{ vast_port }}
-san_login = {{ vast_username }}
-san_password = {{ vast_password }}
+volume_backend_name = {{ cinder_backend_vast_name }}
+vast_vippool_name = {{ cinder_vast_vippool_name }}
+vast_subsystem = {{ cinder_vast_subsystem }}
+san_ip = {{ cinder_vast_ip }}
+san_api_port = {{ cinder_vast_port }}
+san_login = {{ cinder_vast_username }}
+san_password = {{ cinder_vast_password }}
 {% endif %}
 
 [privsep_entrypoint]
