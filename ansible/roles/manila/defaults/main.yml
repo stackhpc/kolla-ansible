@@ -242,6 +242,11 @@ manila_backends:
     enabled: "{{ enable_manila_backend_flashblade | bool }}"
     protocols:
       - "NFS"
+  - name: "vast1"
+    driver: "vast"
+    enabled: "{{ enable_manila_backend_vast | bool }}"
+    protocols:
+      - "NFS"
 
 
 manila_ceph_backends:
@@ -318,3 +323,10 @@ manila_cephfs_filesystem_name: ""
 ####################
 manila_glusterfs_share_layout: "layout_volume.GlusterfsVolumeMappedLayout"
 manila_glusterfs_nfs_server_type: "Gluster"
+
+####################
+# VAST
+####################
+manila_vast_host: "{{ vast_host }}"
+manila_vast_port: "{{ vast_port }}"
+manila_vast_root_export: "manila"

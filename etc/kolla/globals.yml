@@ -395,6 +395,7 @@ workaround_ansible_issue_8743: yes
 #enable_manila_backend_cephfs_nfs: "no"
 #enable_manila_backend_glusterfs_nfs: "no"
 #enable_manila_backend_flashblade: "no"
+#enable_manila_backend_vast: "no"
 #enable_mariabackup: "no"
 #enable_masakari: "no"
 #enable_mistral: "no"
@@ -733,6 +734,13 @@ workaround_ansible_issue_8743: yes
 #vmware_datastore_name:
 #vmware_vcenter_name:
 #vmware_vcenter_cluster_name:
+
+# Vast configuration for Manila
+#manila_vast_host:
+#manila_vast_port: 443
+#manila_vast_user:
+#manila_vast_vippool_name:
+#manila_vast_root_export:
 
 ############
 # Prometheus
