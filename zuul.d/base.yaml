@@ -46,7 +46,7 @@
     pre-run: tests/pre.yml
     run: tests/run.yml
     post-run: tests/post.yml
-    timeout: 7200
+    timeout: 9000
     post-timeout: 1800
     required-projects:
       - openstack/ansible-collection-kolla
@@ -77,6 +77,8 @@
     parent: kolla-ansible-base
     voting: false
     files:
+      - ^ansible/group_vars/all.yml
+      - ^ansible/roles/common/
       - ^requirements-core.yml
       - ^ansible/roles/(nova-cell)/
       - ^tests/templates/nova-compute-overrides.j2

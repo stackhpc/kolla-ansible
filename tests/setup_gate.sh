@@ -37,7 +37,7 @@ function prepare_images {
         GATE_IMAGES+=",^aodh,^tacker,^mistral,^redis,^barbican"
     fi
     if [[ $SCENARIO == "ironic" ]]; then
-        GATE_IMAGES+=",^dnsmasq,^ironic,^iscsid"
+        GATE_IMAGES+=",^dnsmasq,^ironic,^iscsid,^prometheus"
     fi
     if [[ $SCENARIO == "magnum" ]]; then
         GATE_IMAGES+=",^designate,^magnum,^trove"
@@ -85,6 +85,12 @@ EOF
     if [[ $BASE_DISTRO == "debian" || $BASE_DISTRO == "ubuntu" ]]; then
         sudo tee -a /etc/kolla/kolla-build.conf <<EOF
 base_image = quay.io/openstack.kolla/${BASE_DISTRO}
+EOF
+    fi
+
+    if [[ $BASE_DISTRO_TAG != "" ]]; then
+        sudo tee -a /etc/kolla/kolla-build.conf <<EOF
+base_tag = ${BASE_DISTRO_TAG}
 EOF
     fi
 

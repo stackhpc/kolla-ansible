@@ -41,6 +41,7 @@ monitoring
 
 [tls-backend:children]
 control
+network
 
 # Caso
 [caso:children]

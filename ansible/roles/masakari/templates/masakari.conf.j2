@@ -51,6 +51,12 @@ driver = noop
 {% endif %}
 
 [oslo_messaging_rabbit]
+{% if om_enable_queue_manager | bool %}
+use_queue_manager = true
+{% if service_name == 'masakari-api' %}
+processname = {{ service_name }}
+{% endif %}
+{% endif %}
 heartbeat_in_pthread = {{ service_name == 'masakari-api' }}
 {% if om_enable_rabbitmq_tls | bool %}
 ssl = true
@@ -61,6 +67,13 @@ amqp_durable_queues = true
 {% endif %}
 {% if om_enable_rabbitmq_quorum_queues | bool %}
 rabbit_quorum_queue = true
+{% if om_enable_rabbitmq_stream_fanout | bool %}
+rabbit_stream_fanout = true
+rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+{% endif %}
+{% if om_enable_rabbitmq_transient_quorum_queue | bool %}
+rabbit_transient_quorum_queue = true
+{% endif %}
 {% endif %}
 
 [oslo_middleware]
@@ -83,4 +96,9 @@ backend_url = {{ redis_connection_string }}
 # tooz defaults to a newer version, we should explicitly specify `v3`
 backend_url = etcd3+{{ internal_protocol }}://{{ kolla_internal_fqdn }}:{{ etcd_client_port }}?api_version=v3{% if openstack_cacert %}?ca_cert={{ openstack_cacert }}{% endif %}
 {% endif %}
+{% endif %}
+
+{% if om_enable_queue_manager | bool %}
+[oslo_concurrency]
+lock_path = /var/lib/masakari/tmp
 {% endif %}

@@ -10,6 +10,10 @@ network_interface: "{{ api_interface_name }}"
 network_address_family: "{{ address_family }}"
 kolla_container_engine: "{{ container_engine }}"
 docker_restart_policy: "no"
+{% if base_distro_version is defined and base_distro_version == "noble" %}
+distro_python_version: "3.12"
+kolla_base_distro_version: "noble"
+{% endif %}
 
 docker_apt_url: "http://{{ zuul_site_mirror_fqdn }}:8080/docker/{{ ansible_facts.distribution | lower }}"
 docker_yum_url: "http://{{ zuul_site_mirror_fqdn }}:8080/docker/centos"
@@ -54,6 +58,8 @@ mariadb_wsrep_extra_provider_options:
   - "evs.keepalive_period=PT3S"
 
 nova_compute_virt_type: "{{ virt_type }}"
+
+neutron_agents_wrappers: "yes"
 
 enable_openstack_core: "{{ openstack_core_enabled }}"
 enable_horizon: "{{ dashboard_enabled }}"
@@ -150,6 +156,7 @@ enable_rabbitmq: "no"
 {% if scenario == "cephadm" %}
 # kolla-ansible vars
 enable_cinder: "yes"
+enable_neutron_agent_ha: "yes"
 # External Ceph
 glance_backend_ceph: "yes"
 cinder_backend_ceph: "yes"

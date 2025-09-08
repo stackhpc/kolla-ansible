@@ -3,7 +3,7 @@
     @type copy
     <store>
        @type opensearch
-       host { opensearch_address }}
+       host {{ opensearch_address }}
        port {{ opensearch_port }}
        logstash_format true
        logstash_prefix apel
@@ -38,10 +38,12 @@
        reconnect_on_error true
        request_timeout {{ fluentd_opensearch_request_timeout }}
        suppress_type_name true
+       bulk_message_request_threshold {{ fluentd_bulk_message_request_threshold }}
        <buffer>
          @type file
          path /var/lib/fluentd/data/opensearch.buffer/openstack.*
          flush_interval 15s
+         chunk_limit_size {{ fluentd_buffer_chunk_limit_size }}
        </buffer>
     </store>
 </match>
