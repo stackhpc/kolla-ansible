@@ -14,8 +14,8 @@
             "perm": "0600"
         }{% endif %}{% if nova_backend == "rbd" %},
         {
-            "source": "{{ container_config_directory }}/ceph.{{ ceph_nova_keyring }}",
-            "dest": "/etc/ceph/ceph.{{ ceph_nova_keyring }}",
+            "source": "{{ container_config_directory }}/{{ nova_ceph_cluster }}.{{ ceph_nova_keyring }}",
+            "dest": "/etc/ceph/{{ nova_ceph_cluster }}.{{ ceph_nova_keyring }}",
             "owner": "nova",
             "perm": "0600"
         },
