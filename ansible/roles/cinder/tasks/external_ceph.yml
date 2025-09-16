@@ -50,8 +50,23 @@
     - external_ceph_cephx_enabled | bool
     - service | service_enabled_and_mapped_to_host
 
-- name: Copy over Ceph keyring files for cinder-backup
+- name: Copy over Ceph non backup keyring files for cinder-backup
   vars:
+    keyring: "{{ item.cluster }}.{{ ('client.' + item.user + '.keyring') if item.user is defined else ceph_cinder_keyring }}"
+    service: "{{ cinder_services['cinder-backup'] }}"
+  template:
+    src: "{{ node_custom_config }}/cinder/cinder-backup/{{ keyring }}"
+    dest: "{{ node_config_directory }}/cinder-backup/ceph/{{ keyring }}"
+    mode: "0660"
+  become: true
+  with_items: "{{ cinder_ceph_backends }}"
+  when:
+    - external_ceph_cephx_enabled | bool
+    - service | service_enabled_and_mapped_to_host
+
+- name: Copy over Ceph backup keyring files for cinder-backup
+  vars:
+    keyring: "{{ item.cluster }}.{{ ('client.' + item.user + '.keyring') if item.user is defined else ceph_cinder_keyring }}"
     service: "{{ cinder_services['cinder-backup'] }}"
   template:
     src: "{{ node_custom_config }}/cinder/cinder-backup/{{ item }}"
@@ -60,7 +75,6 @@
   become: true
   register: cinder_backup_ceph_keyring
   with_items:
-    - "{{ cinder_backup_ceph_backend.cluster }}.{{ ceph_cinder_keyring }}"
     - "{{ cinder_backup_ceph_backend.cluster }}.{{ ceph_cinder_backup_keyring }}"
   when:
     - external_ceph_cephx_enabled | bool
