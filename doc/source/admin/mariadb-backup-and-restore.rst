@@ -88,8 +88,8 @@ following options on the first database node:
    (dbrestore) $ cd /backup
    (dbrestore) $ rm -rf /backup/restore
    (dbrestore) $ mkdir -p /backup/restore/full
-   (dbrestore) $ gunzip mysqlbackup-04-10-2018.qp.xbc.xbs.gz
-   (dbrestore) $ mbstream -x -C /backup/restore/full/ < mysqlbackup-04-10-2018.qp.xbc.xbs
+   (dbrestore) $ gunzip full-24-10-2025-1761300803/backup-full-24-10-2025-1761300803.mbs.gz
+   (dbrestore) $ mbstream -x -C /backup/restore/full/ < full-24-10-2025-1761300803/backup-full-24-10-2025-1761300803.mbs
    (dbrestore) $ mariabackup --prepare --target-dir /backup/restore/full
 
 Stop the MariaDB instance on all nodes:
@@ -134,15 +134,38 @@ case, first copy MariaDB backup file from the external source into
 ``mariadb_backup`` volume on the first node of the cluster. From there,
 use the same steps as mentioned in the procedure above.
 
+Due to current limitation of Mariabackup, XA transactions that were prepared
+during backup can be not handled very well and stuck in pending state.
+This can cause recovery failure as MariaDB cannot determine to commit or
+rollback the transactions. Kolla Ansible will notify you if this happens
+during recovery.
+
+.. code-block:: console
+
+   Your database is probably affected by MariaDB bug https://jira.mariadb.org/browse/MDEV-37663
+   and needs tc-heuristic-recovery first.
+   To perform the recovery, run the database recovery command again with extra variable
+   ``-e mariadb_attempt_tc_heuristic_recover=true`` set.
+
+If the message turns up, you can try TC heuristic recovery by adding the extra
+variable mentioned in the message.
+
+.. code-block:: console
+
+   kolla-ansible mariadb_recovery -i multinode -e mariadb_recover_inventory_name=controller1 -e mariadb_attempt_tc_heuristic_recover=true
+
+This will rollback all pending transactions in backup then attempt recovery
+again.
+
 Incremental
 -----------
 
 This starts off similar to the full backup restore procedure above, but we
 must apply the logs from the incremental backups first of all before doing
 the final preparation required prior to restore. In the example below, I have
-a full backup - ``mysqlbackup-06-11-2018-1541505206.qp.xbc.xbs``, and an
+a full backup - ``backup-full-20-10-2025-1761300803.mbs``, and an
 incremental backup,
-``incremental-11-mysqlbackup-06-11-2018-1541505223.qp.xbc.xbs``.
+``backup-incremental-10-17-16-24-10-2025.mbs``.
 
 .. code-block:: console
 
@@ -154,10 +177,10 @@ incremental backup,
    (dbrestore) $ rm -rf /backup/restore
    (dbrestore) $ mkdir -p /backup/restore/full
    (dbrestore) $ mkdir -p /backup/restore/inc
-   (dbrestore) $ gunzip mysqlbackup-06-11-2018-1541505206.qp.xbc.xbs.gz
-   (dbrestore) $ gunzip incremental-11-mysqlbackup-06-11-2018-1541505223.qp.xbc.xbs.gz
-   (dbrestore) $ mbstream -x -C /backup/restore/full/ < mysqlbackup-06-11-2018-1541505206.qp.xbc.xbs
-   (dbrestore) $ mbstream -x -C /backup/restore/inc < incremental-11-mysqlbackup-06-11-2018-1541505223.qp.xbc.xbs
+   (dbrestore) $ gunzip full-20-10-2025-1761300803/backup-full-20-10-2025-1761300803.mbs.gz
+   (dbrestore) $ gunzip incr-10-17-16-24-10-2025-since-20-10-2025-1761300803/backup-incremental-10-17-16-24-10-2025.mbs.gz
+   (dbrestore) $ mbstream -x -C /backup/restore/full/ < full-20-10-2025-1761300803/backup-full-20-10-2025-1761300803.mbs
+   (dbrestore) $ mbstream -x -C /backup/restore/inc < incr-10-17-16-24-10-2025-since-20-10-2025-1761300803/backup-incremental-10-17-16-24-10-2025.mbs
    (dbrestore) $ mariabackup --prepare --target-dir /backup/restore/full
    (dbrestore) $ mariabackup --prepare --incremental-dir=/backup/restore/inc --target-dir /backup/restore/full
 

@@ -77,11 +77,50 @@ function test_backup_with_retries {
     return 1  # Return an error if all attempts fail
 }
 
+function prepare_restore_backup {
+    MARIADB_IMAGE=$(sudo $container_engine inspect --format '{{.Config.Image}}' mariadb)
+    sudo $container_engine run --rm -it --detach --volumes-from mariadb --name dbrestore \
+    --volume mariadb_backup:/backup \
+    $MARIADB_IMAGE \
+    /bin/bash
+    sudo $container_engine exec dbrestore bash -c "rm -rf /backup/restore"
+    sudo $container_engine exec dbrestore bash -c "mkdir -p /backup/restore/full"
+    sudo $container_engine exec dbrestore bash -c "gunzip -c \$(cat /backup/last_full_file) > /backup/last_full_backup.mbs"
+    sudo $container_engine exec dbrestore bash -c "mbstream -x -C /backup/restore/full/ < /backup/last_full_backup.mbs"
+    sudo $container_engine exec dbrestore bash -c "mariabackup --prepare --target-dir /backup/restore/full"
+    sudo $container_engine stop dbrestore
+}
+
+function restore_backup {
+    MARIADB_IMAGE=$(sudo $container_engine inspect --format '{{.Config.Image}}' mariadb)
+    sudo $container_engine run --rm -it --detach --volumes-from mariadb --name dbrestore \
+    --volume mariadb_backup:/backup \
+    $MARIADB_IMAGE \
+    /bin/bash
+    sudo $container_engine exec dbrestore bash -c "rm -rf /var/lib/mysql/*"
+    sudo $container_engine exec dbrestore bash -c "rm -rf /var/lib/mysql/\.[^\.]*"
+    sudo $container_engine exec dbrestore bash -c "mariabackup --copy-back --target-dir /backup/restore/full"
+    sudo $container_engine stop dbrestore
+}
+
+function test_db_restore_from_backup {
+    echo "Testing restoring DB from recent full backup"
+    test_backup_with_retries
+    prepare_restore_backup
+    mariadb_stop
+    restore_backup
+    echo "Recovering the database cluster"
+    kolla-ansible mariadb-recovery -i ${RAW_INVENTORY} -vvv --tags mariadb --skip-tags common \
+    -e mariadb_recover_inventory_name=primary \
+    -e mariadb_attempt_tc_heuristic_recover=true
+}
+
 function test_mariadb_logged {
     RAW_INVENTORY=/etc/kolla/inventory
     source $KOLLA_ANSIBLE_VENV_PATH/bin/activate
     test_backup_with_retries
     test_recovery
+    test_db_restore_from_backup
 }
 
 function test_mariadb {

@@ -127,14 +127,14 @@
   when:
     - bootstrap_host is defined
 
-- name: Starting first MariaDB container
+- name: "Starting first MariaDB container {{ 'with tc-heuristic-recovery' if mariadb_attempt_tc_heuristic_recover is defined and mariadb_attempt_tc_heuristic_recover | bool }}"
   become: true
   kolla_container:
     action: "start_container"
     common_options: "{{ docker_common_options }}"
     environment:
       KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
-      BOOTSTRAP_ARGS: "--wsrep-new-cluster"
+      BOOTSTRAP_ARGS: "--wsrep-new-cluster {% if mariadb_attempt_tc_heuristic_recover is defined and mariadb_attempt_tc_heuristic_recover | bool %}--tc-heuristic-recover=rollback{% endif %}"
     image: "{{ mariadb_service.image }}"
     labels:
       BOOTSTRAP:
@@ -142,6 +142,61 @@
     restart_policy: oneshot
     volumes: "{{ mariadb_service.volumes }}"
   when:
+    - bootstrap_host is defined
+    - bootstrap_host == inventory_hostname
+
+- name: Wait 1 minute before checking logs
+  pause:
+    minutes: 1
+  when:
+    - bootstrap_host is defined
+    - bootstrap_host == inventory_hostname
+
+- name: Get latest logs
+  become: true
+  command: tail -n 5 /var/log/kolla/mariadb/mariadb.log
+  register: latest_logs
+  changed_when: false
+  when:
+    - bootstrap_host is defined
+    - bootstrap_host == inventory_hostname
+
+- name: Fail if tc-heuristic-recover is needed
+  fail:
+    msg: Your database is probably affected by MariaDB bug https://jira.mariadb.org/browse/MDEV-37663
+         and needs tc-heuristic-recovery first.
+         To perform the recovery, run the database recovery command again with extra variable
+         ``-e mariadb_attempt_tc_heuristic_recover=true`` set.
+  when:
+    - bootstrap_host is defined
+    - bootstrap_host == inventory_hostname
+    - not (mariadb_attempt_tc_heuristic_recover is defined and mariadb_attempt_tc_heuristic_recover | bool)
+    - '"You have to start server with --tc-heuristic-recover" in latest_logs.stdout'
+    - '"[ERROR] Aborting" in latest_logs.stdout'
+
+- block:
+    - name: Fail if heuristic recovery failed
+      fail:
+        msg: MariaDB tc heuristic recovery failed. Please check the MariaDB log.
+      when: '"[Note] Please restart without --tc-heuristic-recover" not in latest_logs.stdout'
+
+    - name: Boot first MariaDB container again without --tc-heuristic-recover=rollback
+      become: true
+      kolla_container:
+        action: "start_container"
+        common_options: "{{ docker_common_options }}"
+        environment:
+          KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+          BOOTSTRAP_ARGS: "--wsrep-new-cluster"
+        image: "{{ mariadb_service.image }}"
+        labels:
+          BOOTSTRAP:
+        name: "{{ mariadb_service.container_name }}"
+        restart_policy: oneshot
+        volumes: "{{ mariadb_service.volumes }}"
+  when:
+    - mariadb_attempt_tc_heuristic_recover is defined
+    - mariadb_attempt_tc_heuristic_recover | bool
     - bootstrap_host is defined
     - bootstrap_host == inventory_hostname
 
