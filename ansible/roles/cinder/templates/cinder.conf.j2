@@ -163,12 +163,12 @@ target_protocol = iscsi
 [{{ backend.name }}]
 volume_driver = cinder.volume.drivers.rbd.RBDDriver
 volume_backend_name = {{ backend.name }}
-rbd_pool = {{ ceph_cinder_pool_name }}
+rbd_pool = {{ backend.pool | default(ceph_cinder_pool_name) }}
 rbd_ceph_conf = /etc/ceph/{{ backend.cluster }}.conf
 rados_connect_timeout = 5
-rbd_user = {{ ceph_cinder_user }}
+rbd_user = {{ backend.user | default(ceph_cinder_user) }}
 rbd_cluster_name = {{ backend.cluster }}
-rbd_keyring_conf = /etc/ceph/{{ backend.cluster }}.{{ ceph_cinder_keyring }}
+rbd_keyring_conf = /etc/ceph/{{ backend.cluster }}.{{ ('client.' + backend.user + '.keyring') if backend.user is defined else ceph_cinder_keyring }}
 rbd_secret_uuid = {{ cinder_rbd_secret_uuid }}
 report_discard_supported = True
 {% if backend.availability_zone is defined %}

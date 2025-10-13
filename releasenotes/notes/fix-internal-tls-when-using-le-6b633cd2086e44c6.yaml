@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixes an issue with internal TLS certificate not being copied to HAproxy
+    container when Let's Encrypt is enabled.

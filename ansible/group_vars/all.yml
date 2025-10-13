@@ -347,6 +347,8 @@ blazar_api_port: "1234"
 blazar_api_public_port: "{{ haproxy_single_external_frontend_public_port if haproxy_single_external_frontend | bool else blazar_api_port }}"
 blazar_api_listen_port: "{{ blazar_api_port }}"
 
+caso_tcp_output_port: "24224"
+
 ceph_rgw_internal_fqdn: "{{ kolla_internal_fqdn }}"
 ceph_rgw_external_fqdn: "{{ kolla_external_fqdn }}"
 ceph_rgw_port: "6780"
@@ -545,8 +547,16 @@ opensearch_dashboards_listen_port: "{{ opensearch_dashboards_port }}"
 
 ovn_nb_db_port: "6641"
 ovn_sb_db_port: "6642"
+# OVN SB Relay related variables
+ovn_sb_db_relay_count: "{{ ((groups['ovn-controller'] | length) / ovn_sb_db_relay_compute_per_relay | int) | round(0, 'ceil') | int }}"
+ovn_sb_db_relay_compute_per_relay: "50"
+ovn_sb_db_relay_port_prefix: "1664"
+ovn_sb_db_relay_port: "{{ ovn_sb_db_relay_port_prefix ~ ovn_sb_db_relay_client_group_id }}"
+ovn_sb_db_relay_client_group_id: "{{ range(1, ovn_sb_db_relay_count | int + 1) | random(seed=inventory_hostname) }}"
 ovn_nb_connection: "{% for host in groups['ovn-nb-db'] %}tcp:{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ ovn_nb_db_port }}{% if not loop.last %},{% endif %}{% endfor %}"
-ovn_sb_connection: "{% for host in groups['ovn-sb-db'] %}tcp:{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ ovn_sb_db_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+ovn_sb_connection: "{{ ovn_sb_connection_relay if enable_ovn_sb_db_relay | bool else ovn_sb_connection_no_relay }}"
+ovn_sb_connection_no_relay: "{% for host in groups['ovn-sb-db'] %}tcp:{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ ovn_sb_db_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+ovn_sb_connection_relay: "{% for host in groups['ovn-sb-db-relay'] %}tcp:{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ ovn_sb_db_relay_port }}{% if not loop.last %},{% endif %}{% endfor %}"
 
 ovsdb_port: "6640"
 
@@ -740,6 +750,7 @@ enable_haproxy_memcached: "no"
 enable_aodh: "no"
 enable_barbican: "no"
 enable_blazar: "no"
+enable_caso: "no"
 enable_ceilometer: "no"
 enable_ceilometer_ipmi: "no"
 enable_ceilometer_prometheus_pushgateway: "no"
@@ -832,6 +843,7 @@ enable_octavia_driver_agent: "{{ enable_octavia | bool and neutron_plugin_agent 
 enable_octavia_jobboard: "{{ enable_octavia | bool and 'amphora' in octavia_provider_drivers }}"
 enable_openvswitch: "{{ enable_neutron | bool and neutron_plugin_agent != 'linuxbridge' }}"
 enable_ovn: "{{ enable_neutron | bool and neutron_plugin_agent == 'ovn' }}"
+enable_ovn_sb_db_relay: "no"
 enable_ovs_dpdk: "no"
 enable_osprofiler: "no"
 enable_placement: "{{ enable_nova | bool or enable_zun | bool }}"
@@ -1084,6 +1096,7 @@ designate_notifications_topic_name: "notifications_designate"
 #######################
 neutron_bgp_router_id: "1.1.1.1"
 neutron_bridge_name: "{{ 'br-dvs' if neutron_plugin_agent == 'vmware_dvs' else 'br_dpdk' if enable_ovs_dpdk | bool else 'br-ex' }}"
+neutron_physical_networks: "{% for bridge in neutron_bridge_name.split(',') %}physnet{{ loop.index }}{% if not loop.last %},{% endif %}{% endfor %}"
 # Comma-separated type of enabled ml2 type drivers
 neutron_type_drivers: "flat,vlan,vxlan{% if neutron_plugin_agent == 'ovn' %},geneve{% endif %}"
 # Comma-separated types of tenant networks (should be listed in 'neutron_type_drivers')

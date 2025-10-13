@@ -20,13 +20,20 @@ Neutron external interface is used for communication with the external world,
 for example provider networks, routers and floating IPs.
 For setting up the neutron external interface modify
 ``/etc/kolla/globals.yml`` setting ``neutron_external_interface`` to the
-desired interface name. This interface is used by hosts in the ``network``
-group. It is also used by hosts in the ``compute`` group if
+desired interface name or comma-separated list of interface names. Its default
+value is ``eth1``. These external interfaces are used by hosts in the
+``network`` group.  They are also used by hosts in the ``compute`` group if
 ``enable_neutron_provider_networks`` is set or DVR is enabled.
 
-The interface is plugged into a bridge (Open vSwitch or Linux Bridge, depending
-on the driver) defined by ``neutron_bridge_name``, which defaults to ``br-ex``.
-The default Neutron physical network is ``physnet1``.
+The external interfaces are each plugged into a bridge (Open vSwitch or Linux
+Bridge, depending on the driver) defined by ``neutron_bridge_name``, which
+defaults to ``br-ex``. When there are multiple external interfaces,
+``neutron_bridge_name`` should be a comma-separated list of the same length.
+
+The default Neutron physical network is ``physnet1``, or ``physnet1`` to
+``physnetN`` when there are multiple external network interfaces. This may be
+changed by setting ``neutron_physical_networks`` to a comma-separated list of
+networks of the same length.
 
 Example: single interface
 -------------------------
@@ -53,6 +60,30 @@ These two lists are "zipped" together, such that ``eth1`` is plugged into the
 ``br-ex1`` bridge, and ``eth2`` is plugged into the ``br-ex2`` bridge.  Kolla
 Ansible maps these interfaces to Neutron physical networks ``physnet1`` and
 ``physnet2`` respectively.
+
+Example: custom physical networks
+---------------------------------
+
+Sometimes we may want to customise the physical network names used. This may be
+to allow for not all hosts having access to all physical networks, or to use
+more descriptive names.
+
+For example, in an environment with a separate physical network for Ironic
+provisioning, controllers might have access to two physical networks:
+
+.. code-block:: yaml
+
+   neutron_external_interface: "eth1,eth2"
+   neutron_bridge_name: "br-ex1,br-ex2"
+   neutron_physical_network: "physnet1,physnet2"
+
+While compute nodes have access only to ``physnet2``.
+
+.. code-block:: yaml
+
+   neutron_external_interface: "eth1"
+   neutron_bridge_name: "br-ex1"
+   neutron_physical_network: "physnet2"
 
 Example: shared interface
 -------------------------
@@ -200,6 +231,33 @@ To change this behaviour you need to set the following:
 
    neutron_ovn_distributed_fip: "yes"
 
+By default, the number of relay groups (``ovn_sb_db_relay_count``) is computed
+by dividing the total number of ``ovn-controller`` hosts by the value in
+``ovn_sb_db_relay_compute_per_relay`` (which defaults to 50), and rounding up.
+For instance, if you have 120 hosts in the ``ovn-controller`` group, you would
+get ``ceil(120 / 50) = 3`` relay groups.
+You can override ``ovn_sb_db_relay_compute_per_relay`` to scale how many hosts
+each relay group handles, for example:
+
+.. code-block:: yaml
+
+   ovn_sb_db_relay_compute_per_relay: 25
+
+You can also bypass the automatic calculation and manually set a fixed number
+of relay groups with ``ovn_sb_db_relay_count``:
+
+.. code-block:: yaml
+
+   ovn_sb_db_relay_count: 10
+
+.. note::
+   If you set ``ovn_sb_db_relay_count`` explicitly, it effectively overrides
+   the calculated count based on ``ovn_sb_db_relay_compute_per_relay``.
+
+It is also possible to set a static mapping between a ``ovn-controller`` host
+(network node or hypervisor) and particular OVN relay using an Ansible host_var
+``ovn_sb_db_relay_client_group_id``.
+
 Similarly - in order to have Neutron DHCP agents deployed in OVN networking
 scenario, use:
 
@@ -277,3 +335,18 @@ In this example:
 - `neutron_modules_extra`: Allows users to specify additional modules and
   their associated parameters. The given configuration adjusts the
   `hashsize` parameter for the `nf_conntrack_tftp` module.
+
+Running Neutron agents subprocesses in separate containers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There is an experimental feature in Kolla-Ansible that allows to overcome
+the issue of breaking data plane connectivity and dhcp services when
+restarting neutron-l3-agent and neutron-dhcp-agent.
+
+To enable it, modify the configuration in ``/etc/kolla/globals.yml``:
+
+.. code-block:: yaml
+
+   neutron_agents_wrappers: "yes"
+
+For additional details see `bug 1891469 <https://launchpad.net/bugs/1891469>`_

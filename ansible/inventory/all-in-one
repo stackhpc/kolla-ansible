@@ -18,6 +18,10 @@ localhost       ansible_connection=local
 [deployment]
 localhost       ansible_connection=local
 
+# Caso
+[caso:children]
+monitoring
+
 # You can explicitly specify which hosts run each project by updating the
 # groups in the sections below. Common services are grouped together.
 
@@ -591,6 +595,9 @@ ovn-database
 ovn-database
 
 [ovn-sb-db:children]
+ovn-database
+
+[ovn-sb-db-relay:children]
 ovn-database
 
 [venus-api:children]

@@ -18,8 +18,7 @@
     state: stopped
   when:
     - container_facts['letsencrypt_webserver'] is not defined
-    - inventory_hostname in groups[service.group]
-    - service.enabled | bool
+    - service | service_enabled_and_mapped_to_host
 
 - name: Validating letsencrypt email variable
   run_once: true
@@ -31,3 +30,14 @@
   when:
     - enable_letsencrypt | bool
     - kolla_enable_tls_external | bool
+
+- name: Validating letsencrypt EAB variables
+  run_once: true
+  assert:
+    that:
+      - letsencrypt_eab_key_id != ""
+      - letsencrypt_eab_hmac != ""
+    fail_msg: "Both letsencrypt_eab_key_id and letsencrypt_eab_hmac must be set when External account binding is turned on."
+  when:
+    - enable_letsencrypt | bool
+    - letsencrypt_external_account_binding | bool
