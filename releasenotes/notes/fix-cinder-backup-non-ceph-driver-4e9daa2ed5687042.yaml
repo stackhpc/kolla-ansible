@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixes 'cinder' role from attempting to use a non-existent ceph backend when
+    'cinder_backup_driver' is not equal to 'ceph'. The 'cinder' role
+    will no longer attempt to copy configuration files or keyrings that do not
+    exist when 'cinder_backup_driver' is not equal to 'ceph'.
