@@ -2,4 +2,4 @@
 collections:
   - name: https://opendev.org/openstack/ansible-collection-kolla
     type: git
-    version: unmaintained/2023.1
+    version: 2023.1-eol
