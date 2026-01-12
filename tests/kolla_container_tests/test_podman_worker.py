@@ -430,7 +430,8 @@ class TestContainer(base.BaseTestCase):
                                          'auth_username': 'fake_user',
                                          'auth_password': 'fake_psw',
                                          'auth_registry': 'myrepo/myapp',
-                                         'auth_email': 'fake_mail@foogle.com'})
+                                         'auth_email': 'fake_mail@foogle.com'}
+                                        )
         self.pw = get_PodmanWorker(self.fake_data['params'])
         self.pw.pc.images = mock.MagicMock(
             return_value=self.fake_data['images'])
@@ -1094,15 +1095,71 @@ class TestAttrComp(base.BaseTestCase):
         super(TestAttrComp, self).setUp()
         self.fake_data = copy.deepcopy(FAKE_DATA)
 
-    def test_compare_cap_add_neg(self):
-        container_info = {'HostConfig': dict(CapAdd=['data'])}
-        self.pw = get_PodmanWorker({'cap_add': ['data']})
+    def test_compare_cap_add_unprivileged_no_user_caps(self):
+        container_info = {'HostConfig': dict(
+            CapAdd=['CAP_AUDIT_WRITE'],
+            Privileged=False
+        )}
+        self.pw = get_PodmanWorker({'cap_add': []})
         self.assertFalse(self.pw.compare_cap_add(container_info))
 
-    def test_compare_cap_add_pos(self):
-        container_info = {'HostConfig': dict(CapAdd=['data1'])}
-        self.pw = get_PodmanWorker({'cap_add': ['data2']})
+    def test_compare_cap_add_unprivileged_with_user_caps(self):
+        container_info = {'HostConfig': dict(
+            CapAdd=['CAP_NET_ADMIN', 'CAP_AUDIT_WRITE'],
+            Privileged=False
+        )}
+        self.pw = get_PodmanWorker({'cap_add': ['net_admin']})
+        self.assertFalse(self.pw.compare_cap_add(container_info))
+
+    def test_compare_cap_add_privileged_no_audit_write(self):
+        container_info = {'HostConfig': dict(
+            CapAdd=['CAP_NET_ADMIN'],
+            Privileged=True
+        )}
+        self.pw = get_PodmanWorker(
+            {'cap_add': ['net_admin'], 'privileged': True})
+        self.assertFalse(self.pw.compare_cap_add(container_info))
+
+    def test_compare_cap_add_format_normalization(self):
+        container_info = {'HostConfig': dict(
+            CapAdd=['CAP_SYS_ADMIN', 'CAP_AUDIT_WRITE'],
+            Privileged=False
+        )}
+        self.pw = get_PodmanWorker({'cap_add': ['sys_admin']})
+        self.assertFalse(self.pw.compare_cap_add(container_info))
+
+    def test_compare_cap_add_podman_bug_workaround(self):
+        container_info = {'HostConfig': dict(
+            CapAdd=[],
+            Privileged=False
+        )}
+        self.pw = get_PodmanWorker({'cap_add': []})
+        self.assertFalse(self.pw.compare_cap_add(container_info))
+
+    def test_compare_cap_add_difference_detected(self):
+        container_info = {'HostConfig': dict(
+            CapAdd=['CAP_NET_ADMIN', 'CAP_AUDIT_WRITE'],
+            Privileged=False
+        )}
+        self.pw = get_PodmanWorker({'cap_add': ['sys_admin']})
         self.assertTrue(self.pw.compare_cap_add(container_info))
+
+    def test_compare_cap_add_mixed_case_formats(self):
+        container_info = {'HostConfig': dict(
+            CapAdd=['CAP_SYS_ADMIN', 'CAP_NET_ADMIN', 'CAP_AUDIT_WRITE'],
+            Privileged=False
+        )}
+        self.pw = get_PodmanWorker(
+            {'cap_add': ['SYS_ADMIN', 'cap_net_admin']})
+        self.assertFalse(self.pw.compare_cap_add(container_info))
+
+    def test_compare_cap_add_empty_current(self):
+        container_info = {'HostConfig': dict(
+            CapAdd=None,
+            Privileged=False
+        )}
+        self.pw = get_PodmanWorker({'cap_add': []})
+        self.assertFalse(self.pw.compare_cap_add(container_info))
 
     def test_compare_ipc_mode_neg(self):
         container_info = {'HostConfig': dict(IpcMode='data')}
@@ -1233,19 +1290,149 @@ class TestAttrComp(base.BaseTestCase):
     def test_compare_volumes_neg(self):
         container_info = {
             'Config': dict(Volumes=['/var/log/kolla/']),
-            'HostConfig': dict(Binds=['kolla_logs:/var/log/kolla/:rw'])}
-        self.pw = get_PodmanWorker(
-            {'volumes': ['kolla_logs:/var/log/kolla/:rw']})
-
+            'HostConfig': dict(Binds=[
+                'kolla_logs:/var/log/kolla/:rw,rprivate,nosuid,nodev,rbind'
+            ])
+        }
+        self.pw = get_PodmanWorker({
+            'volumes': ['kolla_logs:/var/log/kolla/']
+        })
         self.assertFalse(self.pw.compare_volumes(container_info))
 
     def test_compare_volumes_pos(self):
         container_info = {
             'Config': dict(Volumes=['/var/log/kolla/']),
-            'HostConfig': dict(Binds=['kolla_logs:/var/log/kolla/:rw'])}
-        self.pw = get_PodmanWorker(
-            {'volumes': ['/dev/:/dev/:rw']})
+            'HostConfig': dict(Binds=[
+                'kolla_logs:/var/log/kolla/:ro,rprivate,nosuid,nodev,rbind'
+            ])
+        }
+        self.pw = get_PodmanWorker({
+            'volumes': ['kolla_logs:/var/log/kolla/']
+        })
+        self.assertTrue(self.pw.compare_volumes(container_info))
 
+    def test_compare_volumes_empty_add(self):
+        container_info = {
+            'Config': dict(Volumes=[]),
+            'HostConfig': dict(Binds=[])
+        }
+        self.pw = get_PodmanWorker({
+            'volumes': ['kolla_logs:/var/log/kolla/']
+        })
+        self.assertTrue(self.pw.compare_volumes(container_info))
+
+    def test_compare_volumes_empty_del(self):
+        container_info = {
+            'Config': dict(Volumes=['/var/log/kolla/']),
+            'HostConfig': dict(Binds=[
+                'kolla_logs:/var/log/kolla/:ro,rprivate,nosuid,nodev,rbind'
+            ])
+        }
+        self.pw = get_PodmanWorker({
+            'volumes': []
+        })
+        self.assertTrue(self.pw.compare_volumes(container_info))
+
+    def test_compare_volumes_noexec_default(self):
+        container_info = {
+            'Config': dict(Volumes=['/proc/', '/run/libvirt', '/sys/']),
+            'HostConfig': dict(Binds=[
+                '/proc/:/proc/:rw,shared,rprivate,nosuid,nodev,noexec,rbind',
+                '/run/libvirt:/run/libvirt:rw,nosuid,nodev,noexec,rbind',
+                '/sys/:/sys/:rw,rprivate,nosuid,nodev,noexec,rbind',
+            ])
+        }
+        self.pw = get_PodmanWorker({
+            'volumes': [
+                '/proc/:/proc/:shared',
+                '/run/libvirt:/run/libvirt:rprivate',
+                '/sys/:/sys/:rprivate'
+            ]
+        })
+        self.assertFalse(self.pw.compare_volumes(container_info))
+
+    def test_compare_volumes_shared_vs_rw(self):
+        container_info = {
+            'Config': dict(Volumes=['/run/libvirt/']),
+            'HostConfig': dict(Binds=[
+                '/run/libvirt:/run/libvirt:rw,rprivate,nosuid,nodev,rbind'
+            ])
+        }
+        self.pw = get_PodmanWorker({
+            'volumes': ['/run/libvirt:/run/libvirt:shared']
+        })
+        self.assertTrue(self.pw.compare_volumes(container_info))
+
+    def test_compare_volumes_implicit_rw_both_sides(self):
+        container_info = {
+            'Config': dict(Volumes=['/dev/shm/']),  # nosec
+            'HostConfig': dict(Binds=[
+                '/dev/shm:/dev/shm:rprivate,nosuid,nodev,rbind'  # nosec
+            ])
+        }
+        self.pw = get_PodmanWorker({
+            'volumes': ['/dev/shm:/dev/shm']  # nosec
+        })
+        self.assertFalse(self.pw.compare_volumes(container_info))
+
+    def test_compare_volumes_explicit_rw_vs_implicit(self):
+        container_info = {
+            'Config': dict(Volumes=['/data/']),
+            'HostConfig': dict(Binds=[
+                '/host/data:/data:rprivate,nosuid,nodev,rbind'
+            ])
+        }
+        self.pw = get_PodmanWorker({
+            'volumes': ['/host/data:/data:rw']
+        })
+        self.assertFalse(self.pw.compare_volumes(container_info))
+
+    def test_compare_volumes_var_run_noexec(self):
+        container_info = {
+            'Config': dict(Volumes=['/var/run/libvirt/']),
+            'HostConfig': dict(Binds=[
+                '/var/run/libvirt:/var/run/libvirt:'
+                'rw,rprivate,nosuid,nodev,noexec,rbind'
+            ])
+        }
+        self.pw = get_PodmanWorker({
+            'volumes': ['/var/run/libvirt:/var/run/libvirt']
+        })
+        self.assertFalse(self.pw.compare_volumes(container_info))
+
+    def test_compare_volumes_multiple_binds(self):
+        container_info = {
+            'Config': dict(Volumes=[  # nosec
+                '/var/log/kolla/', '/etc/kolla/', '/dev/shm/']),
+            'HostConfig': dict(Binds=[
+                'kolla_logs:/var/log/kolla/:rw,rprivate,nosuid,nodev,rbind',
+                '/etc/kolla:/etc/kolla:ro,rprivate,nosuid,nodev,rbind',
+                '/dev/shm:/dev/shm:rprivate,nosuid,nodev,rbind'  # nosec
+            ])
+        }
+        self.pw = get_PodmanWorker({
+            'volumes': [
+                'kolla_logs:/var/log/kolla/',
+                '/etc/kolla:/etc/kolla:ro',
+                '/dev/shm:/dev/shm'  # nosec
+            ]
+        })
+        self.assertFalse(self.pw.compare_volumes(container_info))
+
+    def test_compare_volumes_multiple_binds_one_diff(self):
+        container_info = {
+            'Config': dict(Volumes=['/var/log/kolla/', '/etc/kolla/']),
+            'HostConfig': dict(Binds=[
+                'kolla_logs:/var/log/kolla/:rw,rprivate,nosuid,nodev,rbind',
+                '/etc/kolla:/etc/kolla:ro,rprivate,nosuid,nodev,rbind'
+            ])
+        }
+        self.pw = get_PodmanWorker({
+            'volumes': [
+                'kolla_logs:/var/log/kolla/',
+                '/etc/kolla:/etc/kolla:rw'
+            ]
+        })
         self.assertTrue(self.pw.compare_volumes(container_info))
 
     def test_compare_environment_neg(self):
@@ -1368,27 +1555,93 @@ class TestAttrComp(base.BaseTestCase):
 
     def test_compare_ulimits_pos(self):
         self.fake_data['params']['dimensions'] = {
-            'ulimits': {'nofile': {'soft': 131072, 'hard': 131072}}}
+            'ulimits': {
+                'memlock': {'soft': 67108864, 'hard': 67108864}}
+        }
         container_info = dict()
         container_info['HostConfig'] = {
             'CpuPeriod': 0, 'KernelMemory': 0, 'Memory': 0, 'CpuQuota': 0,
             'CpusetCpus': '', 'CpuShares': 0, 'BlkioWeight': 0,
             'CpusetMems': '', 'MemorySwap': 0, 'MemoryReservation': 0,
-            'Ulimits': []}
+            'Ulimits': [
+                {'Name': 'RLIMIT_NOFILE', 'Soft': 1024, 'Hard': 4096},
+                {'Name': 'RLIMIT_NPROC', 'Soft': 4096, 'Hard': 4096}
+            ]}
         self.pw = get_PodmanWorker(self.fake_data['params'])
         self.assertTrue(self.pw.compare_dimensions(container_info))
 
     def test_compare_ulimits_neg(self):
         self.fake_data['params']['dimensions'] = {
-            'ulimits': {'nofile': {'soft': 131072, 'hard': 131072}}}
-        ulimits_nofile = {'Name': 'nofile',
-                          'Soft': 131072, 'Hard': 131072}
+            'ulimits': {
+                'memlock': {'soft': 67108864, 'hard': 67108864}}
+        }
         container_info = dict()
         container_info['HostConfig'] = {
             'CpuPeriod': 0, 'KernelMemory': 0, 'Memory': 0, 'CpuQuota': 0,
             'CpusetCpus': '', 'CpuShares': 0, 'BlkioWeight': 0,
             'CpusetMems': '', 'MemorySwap': 0, 'MemoryReservation': 0,
-            'Ulimits': [ulimits_nofile]}
+            'Ulimits': [
+                {'Name': 'RLIMIT_NOFILE', 'Soft': 1024, 'Hard': 4096},
+                {'Name': 'RLIMIT_NPROC', 'Soft': 4096, 'Hard': 4096},
+                {'Name': 'RLIMIT_MEMLOCK', 'Soft': 67108864, 'Hard': 67108864}
+            ]}
+        self.pw = get_PodmanWorker(self.fake_data['params'])
+        self.assertFalse(self.pw.compare_dimensions(container_info))
+
+    def test_compare_ulimits_ignore_podman_defaults(self):
+        self.fake_data['params']['dimensions'] = {'ulimits': {}}
+        container_info = dict()
+        container_info['HostConfig'] = {
+            'CpuPeriod': 0, 'KernelMemory': 0, 'Memory': 0, 'CpuQuota': 0,
+            'CpusetCpus': '', 'CpuShares': 0, 'BlkioWeight': 0,
+            'CpusetMems': '', 'MemorySwap': 0, 'MemoryReservation': 0,
+            'Ulimits': [
+                # These ulimits are not settable by the user and
+                # are set by default on every podman container.
+                # We should ignore them on dimensions check.
+                {'Name': 'RLIMIT_NOFILE', 'Soft': 1024, 'Hard': 4096},
+                {'Name': 'RLIMIT_NPROC', 'Soft': 4096, 'Hard': 4096}
+            ]}
+        self.pw = get_PodmanWorker(self.fake_data['params'])
+        self.assertFalse(self.pw.compare_dimensions(container_info))
+
+    def test_compare_ulimits_filter_defaults_both_sides(self):
+        self.fake_data['params']['dimensions'] = {
+            'ulimits': {
+                'RLIMIT_NOFILE': {'soft': 1048576, 'hard': 1048576},
+                'RLIMIT_NPROC': {'soft': 1048576, 'hard': 1048576}
+            }
+        }
+        container_info = dict()
+        container_info['HostConfig'] = {
+            'CpuPeriod': 0, 'KernelMemory': 0, 'Memory': 0, 'CpuQuota': 0,
+            'CpusetCpus': '', 'CpuShares': 0, 'BlkioWeight': 0,
+            'CpusetMems': '', 'MemorySwap': 0, 'MemoryReservation': 0,
+            'Ulimits': [
+                {'Name': 'RLIMIT_NOFILE', 'Soft': 1048576, 'Hard': 1048576},
+                {'Name': 'RLIMIT_NPROC', 'Soft': 1048576, 'Hard': 1048576}
+            ]}
+        self.pw = get_PodmanWorker(self.fake_data['params'])
+        self.assertFalse(self.pw.compare_dimensions(container_info))
+
+    def test_compare_ulimits_with_other_limits_and_defaults(self):
+        self.fake_data['params']['dimensions'] = {
+            'ulimits': {
+                'RLIMIT_NOFILE': {'soft': 1048576, 'hard': 1048576},
+                'RLIMIT_NPROC': {'soft': 1048576, 'hard': 1048576},
+                'memlock': {'soft': 67108864, 'hard': 67108864}
+            }
+        }
+        container_info = dict()
+        container_info['HostConfig'] = {
+            'CpuPeriod': 0, 'KernelMemory': 0, 'Memory': 0, 'CpuQuota': 0,
+            'CpusetCpus': '', 'CpuShares': 0, 'BlkioWeight': 0,
+            'CpusetMems': '', 'MemorySwap': 0, 'MemoryReservation': 0,
+            'Ulimits': [
+                {'Name': 'RLIMIT_NOFILE', 'Soft': 1048576, 'Hard': 1048576},
+                {'Name': 'RLIMIT_NPROC', 'Soft': 1048576, 'Hard': 1048576},
+                {'Name': 'RLIMIT_MEMLOCK', 'Soft': 67108864, 'Hard': 67108864}
+            ]}
         self.pw = get_PodmanWorker(self.fake_data['params'])
         self.assertFalse(self.pw.compare_dimensions(container_info))
 

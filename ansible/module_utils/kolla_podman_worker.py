@@ -192,6 +192,7 @@ class PodmanWorker(ContainerWorker):
                     )
                 if src == 'devpts':
                     mount_item = dict(
+                        source=src,
                         target=dest,
                         type='devpts'
                     )
@@ -306,6 +307,42 @@ class PodmanWorker(ContainerWorker):
             self.changed = True
         return self.changed
 
+    def compare_cap_add(self, container_info):
+        new_cap_add = self.params.get('cap_add', list()).copy()
+
+        new_cap_add = [
+            'CAP_' + cap.upper()
+            if not cap.upper().startswith('CAP_')
+            else cap.upper()
+            for cap in new_cap_add
+        ]
+
+        try:
+            current_cap_add = (
+                container_info['HostConfig'].get('CapAdd', None) or []
+            )
+        except (KeyError, TypeError):
+            current_cap_add = []
+
+        current_cap_add = [cap.upper() for cap in current_cap_add]
+
+        privileged = container_info['HostConfig'].get('Privileged', False)
+        if not privileged:
+            # NOTE(blanson): prepare_container_args() always adds AUDIT_WRITE
+            # for non-privileged containers. Also works around Podman <4.4 bug
+            # where AUDIT_WRITE doesn't appear in inspect. Since capabilities
+            # can't be modified post-creation, this won't mask real drift.
+            if 'CAP_AUDIT_WRITE' not in new_cap_add:
+                new_cap_add.append('CAP_AUDIT_WRITE')
+
+            if 'CAP_AUDIT_WRITE' not in current_cap_add:
+                current_cap_add.append('CAP_AUDIT_WRITE')
+
+        if set(new_cap_add).symmetric_difference(set(current_cap_add)):
+            return True
+
+        return False
+
     def compare_pid_mode(self, container_info):
         new_pid_mode = self.params.get('pid_mode') or self.params.get('pid')
         current_pid_mode = container_info['HostConfig'].get('PidMode')
@@ -349,50 +386,65 @@ class PodmanWorker(ContainerWorker):
             else:
                 return string
 
+        # NOTE(blanson): Podman automatically appends default flags
+        # such as rprivate, nosuid, nodev, rbind to all mounts.
+        # For special paths like /proc, /run, /sys, and /var/run,
+        # noexec is also added by default. We remove these defaults
+        # because they do not reflect a meaningful difference
+        # between the requested and current container configuration.
+        # Additionally, if neither 'ro' nor 'rw' is specified,
+        # we implicitly assume 'rw' (Podman's default behavior).
+        def normalize_mode(path, mode):
+            default_flags = {'rprivate', 'nosuid', 'nodev', 'rbind'}
+            special_paths_noexec = {'/proc', '/run', '/sys', '/var/run'}
+
+            flags = set(mode.split(',')) if mode else set()
+            flags -= default_flags
+
+            if any(path.startswith(p) for p in special_paths_noexec):
+                flags.discard('noexec')
+            if not (flags & {'ro', 'rw'}):
+                flags.add('rw')
+            return flags
+
+        # NOTE(blanson): Convert a binds dict into a list of
+        # (src, dst, normalized_flags) tuples. Normalization ignores
+        # default Podman flags and noexec for special paths to allow
+        # consistent comparison.
+        def build_bind_list(binds_dict):
+            lst = []
+            for src, info in (binds_dict or {}).items():
+                src_path = check_slash(src)
+                dst_path = check_slash(info['bind'])
+                mode_flags = normalize_mode(
+                    dst_path,
+                    info['mode'],
+                )
+                lst.append((src_path, dst_path, mode_flags))
+            return lst
+
+        binds_input = container_info['HostConfig'].get('Binds')
         raw_volumes, binds = self.generate_volumes()
-        raw_vols, current_binds = self.generate_volumes(
-            container_info['HostConfig'].get('Binds'))
+        raw_vols, current_binds = (
+            [], {}
+        ) if not binds_input else self.generate_volumes(binds_input)
 
-        current_vols = [check_slash(vol) for vol in raw_vols if vol]
-        volumes = [check_slash(vol) for vol in raw_volumes if vol]
+        volumes = [check_slash(v) for v in raw_volumes or [] if v]
+        current_vols = [check_slash(v) for v in raw_vols or [] if v]
 
-        if not volumes:
-            volumes = list()
-        if not current_vols:
-            current_vols = list()
-        if not current_binds:
-            current_binds = list()
-
-        volumes.sort()
-        current_vols.sort()
-
-        if set(volumes).symmetric_difference(set(current_vols)):
+        if set(volumes) != set(current_vols):
             return True
 
-        new_binds = list()
-        new_current_binds = list()
-        if binds:
-            for k, v in binds.items():
-                k = check_slash(k)
-                v['bind'] = check_slash(v['bind'])
-                new_binds.append(
-                    "{}:{}:{}".format(k, v['bind'], v['mode']))
+        req_bind_list = [
+            (src, dst, frozenset(flags))
+            for src, dst, flags in build_bind_list(binds)
+        ]
+        cur_bind_list = [
+            (src, dst, frozenset(flags))
+            for src, dst, flags in build_bind_list(current_binds)
+        ]
 
-        if current_binds:
-            for k, v in current_binds.items():
-                k = check_slash(k)
-                v['bind'] = check_slash(v['bind'])
-                if 'ro' in v['mode']:
-                    v['mode'] = 'ro'
-                else:
-                    v['mode'] = 'rw'
-                new_current_binds.append(
-                    "{}:{}:{}".format(k, v['bind'], v['mode'][0:2]))
-
-        new_binds.sort()
-        new_current_binds.sort()
-
-        if set(new_binds).symmetric_difference(set(new_current_binds)):
+        if set(req_bind_list) != set(cur_bind_list):
             return True
 
     def compare_dimensions(self, container_info):
@@ -416,15 +468,53 @@ class PodmanWorker(ContainerWorker):
                 failed=True, msg=repr("Unsupported dimensions"),
                 unsupported_dimensions=unsupported)
         current_dimensions = container_info['HostConfig']
+
+        # NOTE(blanson): We normalize ulimits names because the podman api
+        # returns them as RLIMIT_<UPPER_STRING>
+        def normalize_ulimit_name(name):
+            name = name.upper()
+            if not name.startswith('RLIMIT_'):
+                return 'RLIMIT_' + name
+            return name
+
         for key1, key2 in dimension_map.items():
-            # NOTE(mgoddard): If a resource has been explicitly requested,
-            # check for a match. Otherwise, ensure it is set to the default.
-            if key1 in new_dimensions:
-                if key1 == 'ulimits':
-                    if self.compare_ulimits(new_dimensions[key1],
-                                            current_dimensions[key2]):
-                        return True
-                elif new_dimensions[key1] != current_dimensions[key2]:
+            if key1 == 'ulimits':
+                current_ulimits = current_dimensions.get(key2, [])
+
+                # NOTE(blanson): We strip podman default ulimits
+                # because they are not settable by users anyways
+                # and break idempotency.
+                filtered_current_ulimits = [
+                    u for u in current_ulimits
+                    if u.get('Name') not in ('RLIMIT_NOFILE', 'RLIMIT_NPROC')
+                ]
+
+                desired_ulimits = new_dimensions.get('ulimits', {})
+
+                desired_ulimits = {
+                    normalize_ulimit_name(name): limits
+                    for name, limits in desired_ulimits.items()
+                    if normalize_ulimit_name(name) not in (
+                        'RLIMIT_NOFILE', 'RLIMIT_NPROC')
+                }
+
+                normalized_current = [
+                    {
+                        'Name': normalize_ulimit_name(u['Name']),
+                        'Soft': u.get('Soft'),
+                        'Hard': u.get('Hard')
+                    }
+                    for u in filtered_current_ulimits
+                ]
+
+                if self.compare_ulimits(
+                    desired_ulimits,
+                    normalized_current
+                ):
+                    return True
+
+            elif key1 in new_dimensions:
+                if new_dimensions[key1] != current_dimensions.get(key2):
                     return True
             elif current_dimensions[key2]:
                 # The default values of all (except ulimits) currently
