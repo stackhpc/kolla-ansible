@@ -12,6 +12,16 @@
      mkdir -p /var/log/kolla/nginx &&
      chown {{ nginx_user }}:{{ nginx_user }} /var/log/kolla/nginx'
 
+# NOTE(priteau): Disable bifrost-registry-install until it can work in a
+# container
+- name: Disable bifrost-registry-install
+  become: true
+  changed_when: true
+  command: >
+     {{ kolla_container_engine }} exec bifrost_deploy
+     bash -c
+     'sed -i /bifrost-registry-install/d /bifrost/playbooks/install.yaml'
+
 - name: Bootstrap bifrost (this may take several minutes)
   become: true
   changed_when: true
