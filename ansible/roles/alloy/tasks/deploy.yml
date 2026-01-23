@@ -1,0 +1,12 @@
+---
+- name: Configure alloy
+  import_tasks: config.yml
+
+- name: Check alloy containers
+  import_tasks: check-containers.yml
+
+- name: Bootstrap alloy service
+  import_tasks: bootstrap.yml
+
+- name: Flush handlers
+  meta: flush_handlers

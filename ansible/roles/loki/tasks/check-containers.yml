@@ -1,0 +1,4 @@
+---
+- name: Check loki containers
+  import_role:
+    name: service-check-containers

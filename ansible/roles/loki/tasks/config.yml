@@ -1,0 +1,32 @@
+---
+- name: Ensuring config directories exist
+  file:
+    path: "{{ node_config_directory }}/loki"
+    state: "directory"
+    owner: "{{ config_owner_user }}"
+    group: "{{ config_owner_group }}"
+    mode: "0770"
+  become: true
+  with_dict: "{{ loki_services | select_services_enabled_and_mapped_to_host }}"
+
+- name: Copying over config.json files
+  template:
+    src: "{{ item.key }}.json.j2"
+    dest: "{{ node_config_directory }}/loki/config.json"
+    mode: "0660"
+  become: true
+  with_dict: "{{ loki_services | select_services_enabled_and_mapped_to_host }}"
+
+- name: Copying over loki config file
+  vars:
+    service: "{{ loki_services['loki'] }}"
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/loki/config.yaml"
+    mode: "0660"
+  become: true
+  when: service | service_enabled_and_mapped_to_host
+  with_first_found:
+    - "{{ node_custom_config }}/loki/{{ inventory_hostname }}/config.yaml"
+    - "{{ node_custom_config }}/config.yaml"
+    - "config.yaml.j2"

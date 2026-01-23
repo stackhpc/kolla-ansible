@@ -1,0 +1,18 @@
+{
+    "command": "/usr/bin/alloy run /etc/alloy/config.alloy --storage.path=/var/lib/alloy/data",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/config.alloy",
+            "dest": "/etc/alloy/config.alloy",
+            "owner": "alloy",
+            "perm": "0600"
+        }
+    ],
+    "permissions": [
+        {
+            "path": "/var/lib/alloy/data",
+            "owner": "alloy:alloy",
+            "recurse": true
+        }
+    ]
+}

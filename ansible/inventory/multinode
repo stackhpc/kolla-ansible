@@ -199,6 +199,12 @@ control
 [opensearch-dashboards:children]
 opensearch
 
+[loki:children]
+monitoring
+
+[alloy:children]
+common
+
 # Glance
 [glance-api:children]
 glance

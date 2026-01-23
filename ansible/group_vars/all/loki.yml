@@ -1,0 +1,12 @@
+---
+enable_loki: false
+
+####################
+# Loki options
+####################
+loki_address: "{{ kolla_internal_fqdn }}"
+loki_datadir_volume: "loki"
+
+loki_internal_endpoint: "{{ kolla_internal_fqdn | kolla_url(internal_protocol, loki_http_port) }}"
+
+loki_http_port: "3100"

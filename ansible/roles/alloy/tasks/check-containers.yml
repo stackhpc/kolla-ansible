@@ -1,0 +1,4 @@
+---
+- name: Check alloy containers
+  import_role:
+    name: service-check-containers

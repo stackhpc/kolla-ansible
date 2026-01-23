@@ -1,0 +1,50 @@
+---
+- name: Ensuring config directories exist
+  vars:
+    service_name: "alloy"
+    service: "{{ alloy_services[service_name] }}"
+  file:
+    path: "{{ node_config_directory }}/{{ service_name }}"
+    state: "directory"
+    owner: "{{ config_owner_user }}"
+    group: "{{ config_owner_group }}"
+    mode: "0770"
+  become: true
+  when: service | service_enabled_and_mapped_to_host
+
+- name: Copying over TLS certificates
+  include_tasks: copy-certs.yml
+  when:
+    - kolla_copy_ca_into_containers | bool
+
+- name: Ensure /var/log/journal exists on EL systems
+  become: true
+  file:
+    path: /var/log/journal
+    state: directory
+    owner: root
+    group: systemd-journal
+    mode: "2755"
+  when: kolla_base_distro in ['centos', 'rocky']
+
+- name: Copying over alloy config file
+  vars:
+    service: "{{ alloy_services['alloy'] }}"
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/alloy/config.alloy"
+    mode: "0660"
+  become: true
+  when: service | service_enabled_and_mapped_to_host
+  with_first_found:
+    - "{{ node_custom_config }}/alloy/{{ inventory_hostname }}/config.alloy"
+    - "{{ node_custom_config }}/config.alloy"
+    - "config.alloy.j2"
+
+- name: Copying over config.json files for services
+  template:
+    src: "{{ item.key }}.json.j2"
+    dest: "{{ node_config_directory }}/{{ item.key }}/config.json"
+    mode: "0660"
+  become: true
+  with_dict: "{{ alloy_services | select_services_enabled_and_mapped_to_host }}"

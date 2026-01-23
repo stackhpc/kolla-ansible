@@ -1,0 +1,9 @@
+---
+- name: Configure loki
+  import_tasks: config.yml
+
+- name: Check loki containers
+  import_tasks: check-containers.yml
+
+- name: Flush handlers
+  meta: flush_handlers

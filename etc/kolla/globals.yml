@@ -334,13 +334,15 @@ workaround_ansible_issue_8743: true
 #enable_rabbitmq: "{{ 'true' if om_rpc_transport == 'rabbit' or om_notify_transport == 'rabbit' else 'false' }}"
 
 # OpenStack services can be enabled or disabled with these options
+#enable_alloy: "{{ enable_central_logging == 'loki' }}"
 #enable_aodh: false
 #enable_barbican: false
 #enable_blazar: false
 #enable_ceilometer: false
 #enable_ceilometer_ipmi: false
 #enable_cells: false
-#enable_central_logging: false
+# Valid options are [ 'opensearch', 'loki' ]
+#enable_central_logging: opensearch
 #enable_ceph_rgw: false
 #enable_ceph_rgw_loadbalancer: "{{ enable_ceph_rgw | bool }}"
 #enable_cinder: false
@@ -389,6 +391,7 @@ workaround_ansible_issue_8743: true
 #enable_ironic_prometheus_exporter: "{{ enable_ironic | bool and enable_prometheus | bool }}"
 #enable_ironic_pxe_filter: false
 #enable_iscsid: "{{ enable_cinder | bool and enable_cinder_backend_iscsi | bool }}"
+#enable_loki: "{{ enable_central_logging == 'loki' }}"
 #enable_magnum: false
 #enable_manila: false
 #enable_manila_backend_generic: false
@@ -421,12 +424,7 @@ workaround_ansible_issue_8743: true
 #enable_octavia: false
 #enable_octavia_driver_agent: "{{ enable_octavia | bool and neutron_plugin_agent == 'ovn' }}"
 #enable_octavia_jobboard: "{{ enable_octavia | bool and 'amphora' in octavia_provider_drivers }}"
-#enable_opensearch: >-
-#  {{
-#    enable_central_logging | bool
-#    or enable_osprofiler | bool
-#    or (enable_cloudkitty | bool and cloudkitty_storage_backend == 'opensearch')
-#  }}
+#enable_opensearch: "{{ enable_central_logging == 'opensearch' or enable_osprofiler | bool or (enable_cloudkitty | bool and cloudkitty_storage_backend == 'opensearch') }}"
 #enable_opensearch_dashboards: "{{ enable_opensearch | bool }}"
 #enable_opensearch_dashboards_external: "{{ enable_opensearch_dashboards | bool }}"
 #enable_openvswitch: "{{ enable_neutron }}"
@@ -874,3 +872,24 @@ workaround_ansible_issue_8743: true
 # If `etcd_remove_deleted_members` is enabled, Kolla Ansible will automatically
 # remove etcd members from the cluster that are no longer in the inventory.
 #etcd_remove_deleted_members: false
+
+###################
+# Loki options
+###################
+# Storage backend for Loki. Valid options are [ filesystem, s3 ]
+#loki_storage_type: "filesystem"
+
+# S3 Configuration (Required if loki_storage_type is 's3')
+# loki_s3_endpoint: "127.0.0.1:8000"
+# loki_s3_access_key: "loki_access_key"
+# loki_s3_secret_key: "loki_secret_key"
+# loki_s3_bucket_name: "loki-data"
+
+# Performance Tuning - Local Cache before S3 upload
+#loki_ingester_chunk_idle_period: "2h"
+#loki_ingester_max_chunk_age: "4h"
+#loki_ingester_chunk_target_size: 1572864
+
+# Results caching
+#loki_results_cache_enabled: true
+#loki_results_cache_max_size_mb: 512

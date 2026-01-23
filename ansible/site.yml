@@ -23,6 +23,7 @@
         key: "{{ item }}"
       changed_when: false
       with_items:
+        - enable_alloy_{{ enable_alloy | bool }}
         - enable_aodh_{{ enable_aodh | bool }}
         - enable_barbican_{{ enable_barbican | bool }}
         - enable_blazar_{{ enable_blazar | bool }}
@@ -46,6 +47,7 @@
         - enable_keystone_{{ enable_keystone | bool }}
         - enable_letsencrypt_{{ enable_letsencrypt | bool }}
         - enable_loadbalancer_{{ enable_loadbalancer | bool }}
+        - enable_loki_{{ enable_loki | bool }}
         - enable_magnum_{{ enable_magnum | bool }}
         - enable_manila_{{ enable_manila | bool }}
         - enable_mariadb_{{ enable_mariadb | bool }}
@@ -123,6 +125,19 @@
     - cron
   roles:
     - role: cron
+
+- name: Apply role alloy
+  gather_facts: false
+  hosts:
+    - alloy
+    - "&enable_alloy_True"
+  serial: '{{ kolla_serial|default("0") }}'
+  max_fail_percentage: >-
+    {{ alloy_max_fail_percentage |
+       default(kolla_max_fail_percentage) |
+       default(100) }}
+  roles:
+    - { role: alloy, tags: alloy }
 
 - name: Apply role fluentd
   gather_facts: false
@@ -388,6 +403,19 @@
             name: loadbalancer
             tasks_from: check-containers
           when: kolla_action != 'config'
+
+- name: Apply role loki
+  gather_facts: false
+  hosts:
+    - loki
+    - "&enable_loki_True"
+  serial: '{{ kolla_serial|default("0") }}'
+  max_fail_percentage: >-
+    {{ loki_max_fail_percentage |
+       default(kolla_max_fail_percentage) |
+       default(100) }}
+  roles:
+    - { role: loki, tags: loki }
 
 - name: Apply role opensearch
   gather_facts: false

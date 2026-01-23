@@ -1,0 +1,23 @@
+{
+    "command": "/usr/bin/loki --config.file /etc/loki/config.yaml",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/config.yaml",
+            "dest": "/etc/loki/config.yaml",
+            "owner": "loki",
+            "perm": "0600"
+        }
+    ],
+    "permissions": [
+        {
+            "path": "/var/lib/loki",
+            "owner": "loki:loki",
+            "recurse": true
+        },
+        {
+            "path": "/var/log/kolla/loki",
+            "owner": "loki:loki",
+            "recurse": true
+        }
+    ]
+}

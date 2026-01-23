@@ -16,7 +16,8 @@ the following:
 
 .. code-block:: yaml
 
-   enable_central_logging: true
+   # Valid options are [ 'opensearch', 'loki' ]
+   enable_central_logging: "opensearch"
 
 OpenSearch
 ~~~~~~~~~~
@@ -30,6 +31,7 @@ By default OpenSearch is deployed on port ``9200``.
    OpenSearch stores a lot of logs, so if you are running centralized logging,
    remember to give ``/var/lib/docker`` adequate space.
 
+   By default, data is stored locally on each node within the cluster.
    Alternatively it is possible to use a local directory instead of the volume
    ``opensearch`` to store the data of OpenSearch. The path can be set via
    the variable ``opensearch_datadir_volume``.
@@ -243,6 +245,64 @@ item can be exported separately by selecting it in the menu. All of the items
 can also be exported at once by choosing *export everything* option.
 In the same tab (Settings - Objects) one can also import saved items by
 choosing *import* option.
+
+Loki & Alloy
+~~~~~~~~~~~~
+
+Kolla Ansible supports an alternative centralized logging stack using
+**Grafana Loki** for storage and **Grafana Alloy** for log collection and
+forwarding. This stack is optimized for performance and works well with
+S3 storage.
+
+* **Loki**: A horizontally scalable, highly available log aggregation system.
+* **Alloy**: A flexible telemetry collector deployed on all nodes to tail
+  Kolla logs and push them to Loki.
+
+To enable the Loki/Alloy stack, set the following in ``globals.yml``:
+
+.. code-block:: yaml
+
+   enable_central_logging: "loki"
+
+Loki Storage Options
+--------------------
+
+Loki can store data locally or in S3-compatible storage. The default is
+filesystem storage:
+
+.. code-block:: yaml
+
+   loki_storage_type: "filesystem"
+
+For S3 backends (e.g., Ceph RGW), configure the following:
+
+.. code-block:: yaml
+
+   loki_storage_type: "s3"
+   loki_s3_endpoint: "127.0.0.1:8000"
+   loki_s3_access_key: "loki_access_key"
+   loki_s3_secret_key: "loki_secret_key"
+   loki_s3_bucket_name: "loki-data"
+
+Optimization and Cache
+----------------------
+
+To minimize S3 overhead, data is cached locally before being pushed to S3.
+These periods can be adjusted:
+
+* ``loki_ingester_chunk_idle_period``: Time chunks are held in memory
+  without new data (default: 2h).
+* ``loki_ingester_max_chunk_age``: Maximum age of a chunk before flushing
+  to S3 (default: 4h).
+
+Visualizing Loki logs
+---------------------
+
+Loki logs are visualized using Grafana. Ensure Grafana is enabled:
+
+.. code-block:: yaml
+
+   enable_grafana: "yes"
 
 Custom log rules
 ~~~~~~~~~~~~~~~~

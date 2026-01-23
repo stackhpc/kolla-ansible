@@ -85,6 +85,16 @@ grafana_data_sources:
       basicAuthUser: "{{ prometheus_alertmanager_user }}"
       secureJsonData:
         basicAuthPassword: "{{ prometheus_alertmanager_password }}"
+  loki:
+    enabled: "{{ enable_loki | bool }}"
+    data:
+      name: "Loki"
+      type: "loki"
+      access: "proxy"
+      url: "{{ loki_internal_endpoint }}"
+      basicAuth: false
+      jsonData:
+        tlsAuthWithCACert: true
 
 ##########
 # Grafana

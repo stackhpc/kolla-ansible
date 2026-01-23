@@ -1,0 +1,15 @@
+---
+features:
+  - |
+    Added support for a new centralized logging stack using **Grafana Loki**
+    and **Grafana Alloy**. This provides a lightweight alternative to the
+    default OpenSearch stack.
+  - |
+    The ``enable_central_logging`` variable in ``globals.yml`` now accepts
+    ``opensearch`` or ``loki`` as values.
+  - |
+    Added new roles for ``loki`` (log storage) and ``alloy`` (log collection).
+    Loki supports both local filesystem and S3-compatible storage backends.
+  - |
+    Updated Grafana role to automatically configure Loki as a data source
+    when enabled.

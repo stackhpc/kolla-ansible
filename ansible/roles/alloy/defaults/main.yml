@@ -1,0 +1,35 @@
+---
+alloy_services:
+  alloy:
+    container_name: alloy
+    group: alloy
+    enabled: "{{ enable_alloy | bool }}"
+    image: "{{ alloy_image_full }}"
+    environment:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    volumes: "{{ alloy_default_volumes + alloy_extra_volumes }}"
+    dimensions: "{{ alloy_dimensions }}"
+
+####################
+# Docker
+####################
+alloy_tag: "{{ openstack_tag }}"
+alloy_dimensions: "{{ default_container_dimensions }}"
+
+alloy_image: "{{ docker_image_url }}alloy"
+alloy_image_full: "{{ alloy_image }}:{{ alloy_tag }}"
+
+alloy_default_volumes:
+  - "{{ node_config_directory }}/alloy/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "kolla_logs:/var/log/kolla/"
+  - "alloy_data:/var/lib/alloy/data/"
+  - "/var/log/journal:/var/log/journal:ro"
+alloy_extra_volumes: "{{ default_extra_volumes }}"
+
+####################
+# Alloy
+####################
+
+loki_port: 3100
+loki_hosts: "{% for host in groups['loki'] %}{{ 'api' | kolla_address(host) }}{% if not loop.last %},{% endif %}{% endfor %}"

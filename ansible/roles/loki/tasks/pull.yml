@@ -1,0 +1,4 @@
+---
+- name: Pull loki images
+  import_role:
+    role: service-images-pull

@@ -1,0 +1,52 @@
+---
+loki_services:
+  loki:
+    container_name: loki
+    group: loki
+    enabled: true
+    image: "{{ loki_image_full }}"
+    volumes: "{{ loki_default_volumes + loki_extra_volumes }}"
+    dimensions: "{{ loki_dimensions }}"
+    haproxy:
+      loki_http:
+        enabled: "{{ enable_loki }}"
+        mode: "http"
+        external: false
+        port: "{{ loki_http_port }}"
+        backend_http_extra:
+          - "option httpchk GET /ready"
+          - "http-check expect status 200"
+
+####################
+# loki
+####################
+
+loki_storage_type: "filesystem"
+ceph_rgw_endpoint: "127.0.0.1:8000"
+loki_s3_access_key: "loki_access_key"
+loki_s3_secret_key: "loki_secret_key"
+loki_s3_bucket_name: "loki-data"
+
+loki_ingester_chunk_idle_period: "2h"
+loki_ingester_max_chunk_age: "4h"
+loki_ingester_chunk_target_size: 1572864
+loki_results_cache_enabled: true
+loki_results_cache_max_size_mb: 512
+
+####################
+# Docker
+####################
+
+loki_tag: "{{ openstack_tag }}"
+loki_image: "{{ docker_image_url }}loki"
+loki_image_full: "{{ loki_image }}:{{ loki_tag }}"
+loki_dimensions: "{{ default_container_dimensions }}"
+loki_datadir_volume: "loki"
+
+loki_default_volumes:
+  - "{{ node_config_directory }}/loki/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "{{ loki_datadir_volume }}:/var/lib/loki"
+  - "kolla_logs:/var/log/kolla/"
+
+loki_extra_volumes: "{{ default_extra_volumes }}"

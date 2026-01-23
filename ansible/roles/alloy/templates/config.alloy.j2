@@ -1,0 +1,85 @@
+loki.write "local_loki" {
+{% for host in loki_hosts.split(',') %}
+    endpoint {
+        url = "http://{{ host }}:{{ loki_port }}/loki/api/v1/push"
+        batch_size = "1.5MiB"
+    }
+{% endfor %}
+}
+
+local.file_match "kolla_logs" {
+    path_targets = [
+        { "__address__" = "localhost", "__path__" = "/var/log/kolla/*/*.log" },
+    ]
+}
+
+loki.source.file "kolla_files" {
+    targets    = local.file_match.kolla_logs.targets
+    forward_to = [loki.process.labels.receiver]
+}
+
+loki.process "labels" {
+    forward_to = [loki.write.local_loki.receiver]
+
+    stage.static_labels {
+        values = {
+            hostname = "{{ ansible_facts.hostname }}",
+        }
+    }
+
+    stage.regex {
+        expression = "/var/log/kolla/(?P<service_name>[^/]+)/(?P<program_name>[^/\\.]+)"
+        source     = "filename"
+    }
+
+    stage.regex {
+        expression = "^(?P<ts_standard>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d+)"
+    }
+
+    stage.timestamp {
+        source   = "ts_standard"
+        format   = "2006-01-02 15:04:05.000"
+        location = "Local"
+    }
+
+    stage.regex {
+        expression = "\\[(?P<ts_uwsgi>\\w{3} \\w{3}\\s+\\d{1,2} \\d{2}:\\d{2}:\\d{2} \\d{4})\\]"
+    }
+
+    stage.timestamp {
+        source   = "ts_uwsgi"
+        format   = "Mon Jan _2 15:04:05 2006"
+        location = "Local"
+    }
+
+    stage.labels {
+        values = {
+            service_name = "service_name",
+            program      = "program_name",
+        }
+    }
+
+    stage.regex {
+        expression = "(?i)(?P<ext_level>INFO|DEBUG|ERROR|WARN|WARNING|CRITICAL|FATAL)"
+    }
+
+    stage.template {
+        source   = "ext_level"
+        template = "{% raw %}{{ .Value | lower }}{% endraw %}"
+    }
+
+    stage.labels {
+        values = {
+            level = "ext_level",
+        }
+    }
+}
+
+loki.source.journal "systemd" {
+    forward_to = [loki.write.local_loki.receiver]
+    labels     = {
+        job          = "systemd",
+        hostname     = "{{ ansible_facts.hostname }}",
+        service_name = "systemd",
+    }
+}
