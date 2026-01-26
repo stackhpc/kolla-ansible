@@ -23,6 +23,11 @@
     command: "{{ service.command | default(omit) }}"
     cgroupns_mode: "{{ service.cgroupns_mode | default(omit) }}"
   loop: "{{ range(1, (iterate_count | int) + 1) | list }}"
+  when:
+    # NOTE(dougszu): Due to issues with nova-compute-ironic HA, we can't have
+    # more than one instance for a given 'item'. Eg. nova_compute_ironic_1
+    # should never run on more than one host.
+    - service_name != 'nova-compute-ironic' or (service_name == 'nova-compute-ironic' and inventory_hostname in groups['nova-compute-ironic-' + item | string])
   register: container_check
 
 # NOTE(yoctozepto): Must be a separate task because one cannot see the whole

@@ -4,6 +4,10 @@
 
 - import_tasks: version-check.yml
 
+# NOTE(dougszu): Currently only covers nova-compute-ironic
+- name: Cleanup stale configuration
+  ansible.builtin.import_tasks: cleanup.yml
+
 - import_tasks: config-host.yml
 
 - import_tasks: config.yml

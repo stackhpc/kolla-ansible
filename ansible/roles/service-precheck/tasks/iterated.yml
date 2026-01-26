@@ -1,0 +1,31 @@
+---
+- name: "Validate inventory groups for {{ project_name }}"
+  vars:
+    service_name: "{{ item.key }}"
+    service: "{{ item.value }}"
+  ansible.builtin.fail:
+    msg: >-
+      Ansible inventory does not contain the expected group {{ service.group }}
+      for service {{ service_name }} in {{ project_name }}.
+  loop: "{{ query('dict', service_precheck_services) }}"
+  when:
+    - not (service.iterate | default(False)) | bool
+    - "'group' in service"
+    - service.group not in groups
+  loop_control:
+    label: "{{ service_name }}"
+
+- name: "Validate inventory groups (iterated) for {{ project_name }}"
+  vars:
+    service_name: "{{ outer_item.key }}"
+    service: "{{ outer_item.value }}"
+    service_group: "{{ service.group + '-' + item | string }}"
+  ansible.builtin.fail:
+    msg: >-
+      Ansible inventory does not contain the expected group {{ service_group }}
+      for service {{ service_name }} in {{ project_name }}.
+  loop: "{{ range(1, (service.iterate_var | int) + 1) | list }}"
+  when:
+    - (service.iterate | default(False)) | bool
+    - "'group' in service"
+    - service_group not in groups

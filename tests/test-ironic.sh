@@ -26,6 +26,13 @@ function test_ironic_logged {
     openstack baremetal node power off tk0
     openstack baremetal node show tk0
     openstack baremetal node manage tk0
+    if [[ "$MULTI_COMPUTE_IRONIC" = "True" ]]; then
+        # NOTE(dougszu): The node is registered by Tenks with no conductor
+        # group set. Setting the conductor group below will move the node to
+        # another conductor. This *should* be fine.
+        openstack baremetal node set --shard shard_1 tk0
+        openstack baremetal node set --conductor-group location_1 tk0
+    fi
     openstack baremetal node show tk0
     openstack baremetal node provide tk0
     openstack baremetal node show tk0

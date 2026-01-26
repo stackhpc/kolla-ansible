@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Adds support for deploying multiple instances of the Nova Compute Ironic
+    service on the same host. This is useful in large baremetal deployments.

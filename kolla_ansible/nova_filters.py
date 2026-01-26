@@ -85,8 +85,31 @@ def namespace_haproxy_for_cell(services, cell_name):
     return services
 
 
+def get_expected_ironic_compute_services(ironic_compute_conf):
+    """Return a List of expected Ironic compute services
+
+      :param ironic_compute_conf: Nova compute Ironic instance config
+      :returns: A list of Nova Compute Ironic service hostnames.
+    """
+    classic_config = ironic_compute_conf['classic']
+    multi_compute_config = ironic_compute_conf['multi']
+
+    expected_services = []
+    if len(multi_compute_config) == 0:
+        if len(classic_config) > 0:
+            expected_services.append(classic_config[0] + '-ironic')
+        return expected_services
+
+    for item in multi_compute_config[0]:
+        cg = item.get("conductor_group") or "default"
+        sk = item.get("shard_key") or "default"
+        expected_services.append(f"{cg}-{sk}-ironic")
+    return expected_services
+
+
 def get_filters():
     return {
         "extract_cell": extract_cell,
         "namespace_haproxy_for_cell": namespace_haproxy_for_cell,
+        "get_expected_ironic_compute_services": get_expected_ironic_compute_services,  # noqa
     }

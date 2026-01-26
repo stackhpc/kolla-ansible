@@ -73,6 +73,48 @@ class TestFilters(unittest.TestCase):
         self.assertRaisesRegex(jinja2.TemplateRuntimeError, 'duplicates',
                                self._test_extract_cell, test_data, 'cell0001')
 
+    def test_get_expected_ironic_compute_services_multi_compute(self):
+        example_ironic_compute_conf = {
+            'classic': ['custom-host-nova-compute'],
+            'multi': [[
+                {},
+                {"shard_key": "shard_1", "conductor_group": "location_1"},
+                {"shard_key": "shard_2", "conductor_group": "location_1"},
+                {"conductor_group": "location_2"},
+                {"shard_key": "shard_1"},
+            ]]
+        }
+        actual = filters.get_expected_ironic_compute_services(
+            example_ironic_compute_conf)
+        expected = [
+            'default-default-ironic',
+            'location_1-shard_1-ironic',
+            'location_1-shard_2-ironic',
+            'location_2-default-ironic',
+            'default-shard_1-ironic',
+        ]
+        self.assertListEqual(actual, expected)
+
+    def test_get_expected_ironic_compute_services_no_compute(self):
+        example_ironic_compute_conf = {
+            'classic': [],
+            'multi': []
+        }
+        actual = filters.get_expected_ironic_compute_services(
+            example_ironic_compute_conf)
+        expected = []
+        self.assertListEqual(actual, expected)
+
+    def test_get_expected_ironic_compute_services_classic_compute(self):
+        example_ironic_compute_conf = {
+            'classic': ['custom-foo'],
+            'multi': []
+        }
+        actual = filters.get_expected_ironic_compute_services(
+            example_ironic_compute_conf)
+        expected = ['custom-foo-ironic']
+        self.assertListEqual(actual, expected)
+
     def test_namespace_haproxy_for_cell_with_empty_name(self):
         example_services = {
             'nova-novncproxy': {
