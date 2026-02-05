@@ -28,5 +28,8 @@ cpu_mode = {{ nova_libvirt_cpu_mode }}
 volume_use_multipath = True
 {% endif %}
 num_pcie_ports = 16
+{% if enable_shared_var_lib_nova_mnt | bool and enable_cinder_backend_nfs | bool %}
+nfs_mount_point_base = /var/lib/nova-mnt
+{% endif %}
 [workarounds]
 skip_cpu_compare_on_dest = True
