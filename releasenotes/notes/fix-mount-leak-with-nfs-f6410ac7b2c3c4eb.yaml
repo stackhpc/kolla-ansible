@@ -1,0 +1,13 @@
+---
+fixes:
+  - |
+    Fixes an issue where mount points would leak from Nova containers when
+    using the Cinder NFS backend.
+    `LP#1783978 <https://bugs.launchpad.net/kolla-ansible/+bug/1783978>`__
+upgrade:
+  - |
+    The NFS/Quobyte mount point base for nova-compute moved from
+    ``/var/lib/nova/mnt`` to ``/var/lib/nova-mnt`` (both on the host and in
+    the containers). Running instances keep using the old path until they are
+    live migrated or hard rebooted; leftover mounts under the old path can
+    then be unmounted.
