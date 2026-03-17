@@ -6,10 +6,16 @@
         label: centos-9-stream
 
 - nodeset:
-    name: kolla-ansible-debian-bookworm-8GB
+    name: kolla-ansible-centos10s
     nodes:
       - name: primary
-        label: debian-bookworm-8GB
+        label: centos-10-stream-8GB
+
+- nodeset:
+    name: kolla-ansible-debian-bookworm
+    nodes:
+      - name: primary
+        label: debian-bookworm
 
 - nodeset:
     name: kolla-ansible-debian-bookworm-16GB
@@ -60,6 +66,18 @@
     nodes:
       - name: primary
         label: rockylinux-9
+
+- nodeset:
+    name: kolla-ansible-rocky10-8GB
+    nodes:
+      - name: primary
+        label: rockylinux-10-8GB
+
+- nodeset:
+    name: kolla-ansible-rocky-10-16GB
+    nodes:
+      - name: primary
+        label: rockylinux-10-16GB
 
 - nodeset:
     name: kolla-ansible-ubuntu-noble-multi-8GB

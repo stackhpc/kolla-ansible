@@ -2,7 +2,10 @@
 - project:
     queue: kolla
     templates:
-      - check-requirements
+      # NOTE(bbezak): requirement check disabled due to
+      # setuptools pin.
+      # https://setuptools.pypa.io/en/stable/history.html#v82-0-0
+      # - check-requirements
       - openstack-cover-jobs
       - ansible-role-jobs
       - publish-openstack-docs-pti
@@ -15,10 +18,13 @@
         - openstack-tox-py311
         - openstack-tox-py312
         - kolla-ansible-centos9s
+        - kolla-ansible-centos10s
         - kolla-ansible-debian
         - kolla-ansible-debian-podman
         - kolla-ansible-rocky9
         - kolla-ansible-rocky9-podman
+        - kolla-ansible-rocky10
+        - kolla-ansible-rocky10-podman
         - kolla-ansible-ubuntu
         - kolla-ansible-ubuntu-podman
         - kolla-ansible-rocky9-kvm
