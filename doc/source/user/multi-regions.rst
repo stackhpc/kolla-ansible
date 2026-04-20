@@ -29,8 +29,8 @@ Keystone and Horizon are enabled:
 
 .. code-block:: console
 
-   enable_keystone: "yes"
-   enable_horizon: "yes"
+   enable_keystone: true
+   enable_horizon: true
 
 Then, change the value of ``multiple_regions_names`` to add names of other
 regions. In this example, we consider two regions. The current one,
@@ -70,14 +70,6 @@ the value of ``kolla_internal_fqdn`` in RegionOne:
    kolla_internal_fqdn_r1: 10.10.10.254
 
    keystone_internal_url: "{{ internal_protocol }}://{{ kolla_internal_fqdn_r1 }}:{{ keystone_public_port }}"
-
-   openstack_auth:
-       auth_url: "{{ keystone_internal_url }}"
-       username: "{{ keystone_admin_user }}"
-       password: "{{ keystone_admin_password }}"
-       user_domain_name: "{{ default_user_domain_name }}"
-       project_name: "{{ keystone_admin_project }}"
-       domain_name: "default"
 
 .. note::
 
@@ -151,7 +143,7 @@ unnecessary in this region and run ``kolla-ansible``:
 
 .. code-block:: yaml
 
-   enable_keystone: "no"
-   enable_horizon: "no"
+   enable_keystone: false
+   enable_horizon: false
 
 The configuration is the same for any other region.

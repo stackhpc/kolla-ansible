@@ -164,6 +164,8 @@
         - neutron
         - nova
         - bifrost
+        - keystone-httpd/federation/oidc/metadata
+        - keystone-httpd/federation/oidc/attribute_maps
 
     - name: Generate configuration files
       template:
@@ -210,6 +212,19 @@
         - src: "tests/templates/tenks-deploy-config.yml.j2"
           dest: "{{ ansible_env.HOME }}/tenks.yml"
           when: "{{ scenario == 'ironic' }}"
+        # keystone-federation config
+        - src: "tests/templates/keystone-federation/idp.example.org%2Frealms%2Fexample.conf.j2"
+          dest: "/etc/kolla/config/keystone-httpd/federation/oidc/metadata/idp.example.org%2Frealms%2Fexample.conf"
+          when: "{{ scenario == 'federation' }}"
+        - src: "tests/templates/keystone-federation/idp.example.org%2Frealms%2Fexample.provider.j2"
+          dest: "/etc/kolla/config/keystone-httpd/federation/oidc/metadata/idp.example.org%2Frealms%2Fexample.provider"
+          when: "{{ scenario == 'federation' }}"
+        - src: "tests/templates/keystone-federation/idp.example.org%2Frealms%2Fexample.client.j2"
+          dest: "/etc/kolla/config/keystone-httpd/federation/oidc/metadata/idp.example.org%2Frealms%2Fexample.client"
+          when: "{{ scenario == 'federation' }}"
+        - src: "tests/templates/keystone-federation/attribute_mapping.json"
+          dest: "/etc/kolla/config/keystone-httpd/federation/oidc/attribute_maps/attribute_mapping.json"
+          when: "{{ scenario == 'federation' }}"
       when: item.when | default(true)
 
     - block:
@@ -413,6 +428,14 @@
             EXT_NET_DEMO_ROUTER_ADDR: "{{ neutron_external_network_prefix }}10"
             SCENARIO: "{{ scenario }}"
           when: openstack_core_tested or scenario in ['ironic', 'magnum', 'nfv', 'zun', 'octavia']
+
+        - name: Test OVN VPNaaS
+          import_role:
+            name: test-ovn-vpnaas
+          when:
+            - scenario == 'ovn'
+            # FIXME(neutron): Enable when https://bugs.launchpad.net/neutron/+bug/2146308 is fixed
+            - not (ansible_facts.os_family == 'RedHat' and ansible_facts.distribution_major_version == '10')
 
         - name: Run test-ovn.sh script
           script:
@@ -787,6 +810,10 @@
             cmd: tests/check-logs.sh
             executable: /bin/bash
             chdir: "{{ kolla_ansible_src_dir }}"
+
+        - name: Import role kolla-ansible-check
+          import_role:
+            name: kolla-ansible-check
 
 - hosts: primary
   any_errors_fatal: true

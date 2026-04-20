@@ -255,17 +255,16 @@ common
 {% if is_upgrade | bool %}
 [kolla-logs:children]
 common
-{% endif %}
 
 [kolla-toolbox:children]
 common
+{% endif %}
 
 [kolla_logs:children]
-control
-network
-compute
-storage
-monitoring
+common
+
+[kolla_toolbox:children]
+common
 
 [opensearch:children]
 control
@@ -347,6 +346,9 @@ control
 [neutron-ovn-metadata-agent:children]
 compute
 network
+
+[neutron-ovn-vpn-agent:children]
+neutron
 
 # Cinder
 [cinder-api:children]
@@ -630,6 +632,10 @@ monitoring
 
 [prometheus-libvirt-exporter:children]
 compute
+
+[prometheus-openstack-network-exporter:children]
+compute
+network
 
 # NOTE(yoctozepto): In CI we want to test Masakari HA but not of other services,
 # to conserve the resources. Hence, we set Masakari groups to use both

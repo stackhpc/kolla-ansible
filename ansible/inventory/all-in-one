@@ -175,10 +175,10 @@ common
 [fluentd:children]
 common
 
-[kolla-toolbox:children]
+[kolla_logs:children]
 common
 
-[kolla_logs:children]
+[kolla_toolbox:children]
 common
 
 [opensearch:children]
@@ -237,6 +237,9 @@ neutron
 neutron
 
 [neutron-metadata-agent:children]
+neutron
+
+[neutron-ovn-vpn-agent:children]
 neutron
 
 [neutron-metering-agent:children]
@@ -542,6 +545,10 @@ monitoring
 
 [prometheus-libvirt-exporter:children]
 compute
+
+[prometheus-openstack-network-exporter:children]
+compute
+network
 
 [prometheus-valkey-exporter:children]
 valkey

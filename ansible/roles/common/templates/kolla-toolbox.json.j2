@@ -1,7 +1,13 @@
 {
     "command": "kolla_toolbox",
     "config_files": [
-        {% if enable_rabbitmq | bool %}{
+        {
+            "source": "{{ container_config_directory }}/clouds.yaml",
+            "dest": "/var/lib/ansible/.config/openstack/clouds.yaml",
+            "owner": "ansible",
+            "perm": "0600"
+        }{% if enable_rabbitmq | bool %},
+        {
             "source": "{{ container_config_directory }}/rabbitmq-erlang.cookie",
             "dest": "/var/lib/rabbitmq/.erlang.cookie",
             "owner": "rabbitmq",
@@ -18,7 +24,7 @@
             "dest": "/etc/rabbitmq/erl_inetrc",
             "owner": "rabbitmq",
             "perm": "0600"
-        }{% endif %}{% if kolla_copy_ca_into_containers | bool %}{% if enable_rabbitmq | bool %},{% endif %}
+        }{% endif %}{% if kolla_copy_ca_into_containers | bool %},
         {
             "source": "{{ container_config_directory }}/ca-certificates",
             "dest": "/var/lib/kolla/share/ca-certificates",
