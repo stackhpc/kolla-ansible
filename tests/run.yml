@@ -61,7 +61,7 @@
           - python3.12-devel
           - python3.12-pip
         state: latest
-      when: ansible_facts.os_family == 'RedHat'
+      when: ansible_facts.os_family == 'RedHat' and ansible_facts.distribution_major_version == '9'
       become: true
 
     # NOTE(kevko): While in Rocky, virtualenv is included as part of the packages above, in Debuntu, virtualenv is in a separate package.
@@ -400,6 +400,7 @@
             LE_ENABLED: "{{ le_enabled }}"
             KOLLA_ANSIBLE_VENV_PATH: "{{ kolla_ansible_venv_path }}"
             HAS_UPGRADE: "{{ is_upgrade | bool | ternary('yes', 'no') }}"
+            MIGRATE_VALKEY: "{{ migrate_valkey | default(false) | bool | ternary('yes', 'no') }}"
 
         # NOTE(yoctozepto): this is nice as the first step after the deployment
         # because it waits for the services to stabilize well enough so that
