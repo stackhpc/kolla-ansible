@@ -770,6 +770,9 @@ internal_protocol: "{{ 'https' if kolla_enable_tls_internal | bool else 'http' }
 enable_external_api_firewalld: "false"
 external_api_firewalld_zone: "public"
 
+enable_internal_api_firewalld: "false"
+internal_api_firewalld_zone: "internal"
+
 ####################
 # OpenStack options
 ####################

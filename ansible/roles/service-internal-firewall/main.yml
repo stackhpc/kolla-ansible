@@ -1,0 +1,13 @@
+---
+- name: Applying internal API firewall rules for {{ project_name }}
+  firewalld:
+    immediate: true
+    offline: true
+    permanent: true
+    port: "{{ item }}"
+    state: "enabled"
+    zone: "{{ internal_api_firewalld_zone }}"
+  become: true
+  when:
+    - enable_internal_api_firewalld | bool
+  loop: "{{ project_internal_ports }}"
