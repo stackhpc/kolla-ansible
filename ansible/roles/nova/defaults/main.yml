@@ -76,6 +76,12 @@ nova_services:
     dimensions: "{{ nova_super_conductor_dimensions }}"
     healthcheck: "{{ nova_super_conductor_healthcheck }}"
 
+nova_internal_ports:
+  - "{{ nova_api_port }}"
+  - "{{ nova_api_public_port }}"
+  - "{{ nova_api_listen_port }}"
+  - "{{ nova_api_metadata_port }}"
+
 ####################
 # Config Validate
 ####################

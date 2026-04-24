@@ -139,3 +139,5 @@
   loop:
     - { name: "nova-api", port: "{{ nova_api_listen_port }}", workers: "{{ nova_api_workers }}" }
     - { name: "nova-metadata", port: "{{ nova_metadata_listen_port }}", workers: "{{ nova_metadata_api_workers }}" }
+
+- include_tasks: firewall.yml
