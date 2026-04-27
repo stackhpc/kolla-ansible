@@ -138,6 +138,22 @@ enable_proxysql: "yes"
 enable_prometheus_proxysql_exporter: "yes"
 {% endif %}
 
+{% if scenario == "multi-compute-ironic" %}
+nova_multi_compute_ironic_config:
+  - {}
+  - "shard_key": "shard_1"
+    "conductor_group": "location_1"
+  - "shard_key": "shard_2"
+    "conductor_group": "location_1"
+  - "conductor_group": "location_2"
+
+enable_ironic: "yes"
+enable_ironic_pxe_filter: "yes"
+ironic_dnsmasq_dhcp_ranges:
+  - range: "10.42.0.2,10.42.0.254,255.255.255.0"
+ironic_internal_endpoint: http://192.0.2.1:6385
+{% endif %}
+
 {% if scenario == "mariadb" %}
 enable_fluentd: "yes"
 enable_mariadb: "yes"
@@ -195,7 +211,9 @@ neutron_plugin_agent: "ovn"
 neutron_ovn_distributed_fip: "yes"
 neutron_enable_ovn_agent: "yes"
 ovn_sb_db_relay_count: "3"
+{%     if not is_upgrade %}
 enable_neutron_vpnaas: "yes"
+{%     endif %}
 enable_octavia: "yes"
 octavia_provider_drivers: "ovn:OVN provider"
 octavia_provider_agents: "ovn"
