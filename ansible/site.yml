@@ -101,18 +101,6 @@
         name: nova
         tasks_from: firewall
 
-- name: Debug
-  gather_facts: false
-  hosts:
-    - nova
-    - '&enable_nova_True'
-  roles:
-    - service-internal-firewall
-  tags: nova
-  vars:
-    project_internal_ports: "22/tcp"
-    project_name: "test"
-
 - name: Apply role common
   gather_facts: false
   hosts:

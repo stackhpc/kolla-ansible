@@ -80,7 +80,7 @@ nova_internal_ports:
   - "{{ nova_api_port }}/tcp"
   - "{{ nova_api_public_port }}/tcp"
   - "{{ nova_api_listen_port }}/tcp"
-  - "{{ nova_api_metadata_port }}/tcp"
+  - "{{ nova_metadata_port }}/tcp"
 
 ####################
 # Config Validate
