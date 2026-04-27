@@ -1,7 +1,6 @@
 ---
-- name: "Configure firewall for {{ project_name }}"
+- name: "Configure internal net firewall for {{ project_name }}"
   import_role:
     name: service-internal-firewall
   vars:
     project_internal_ports: "{{ nova_internal_ports }}"
-  tags: always
