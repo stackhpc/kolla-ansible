@@ -79,9 +79,11 @@
     # configure for [DEFAULT] host in nova.conf.
     ironic_compute_service_hosts: >-
       {{ ironic_computes_in_batch |
-         map('extract', hostvars) | json_query('[].nova_compute_ironic_custom_host || [].ansible_facts.hostname') |
-         map('regex_replace', '^(.*)$', '\1-ironic') |
-         list }}
+         map('extract', hostvars) |
+         json_query(
+           '{classic: [].nova_compute_ironic_custom_host || [].ansible_facts.hostname,
+             multi: [].nova_multi_compute_ironic_config}') |
+         get_expected_ironic_compute_services }}
     expected_compute_service_hosts: "{{ virt_compute_service_hosts + ironic_compute_service_hosts }}"
 
 - name: Include discover_computes.yml

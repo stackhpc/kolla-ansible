@@ -218,10 +218,10 @@
         # ironic.conf
         - src: "tests/templates/ironic-overrides.j2"
           dest: /etc/kolla/config/ironic.conf
-          when: "{{ scenario == 'ironic' }}"
+          when: "{{ scenario == 'ironic' or scenario == 'multi-compute-ironic' }}"
         - src: "tests/templates/tenks-deploy-config.yml.j2"
           dest: "{{ ansible_env.HOME }}/tenks.yml"
-          when: "{{ scenario == 'ironic' }}"
+          when: "{{ scenario == 'ironic' or scenario == 'multi-compute-ironic' }}"
       when: item.when | default(true)
 
     - block:
@@ -240,7 +240,7 @@
               dest: ironic-agent.initramfs
             - src: "tinyipa-{{ zuul.branch | replace('/', '-') }}.vmlinuz"
               dest: ironic-agent.kernel
-      when: scenario == "ironic"
+      when: scenario == "ironic" or scenario == "multi-compute-ironic"
 
     - block:
         - name: Slurp requirements.yml
@@ -430,7 +430,7 @@
             EXT_NET_GATEWAY: "{{ neutron_external_network_prefix }}1"
             EXT_NET_DEMO_ROUTER_ADDR: "{{ neutron_external_network_prefix }}10"
             SCENARIO: "{{ scenario }}"
-          when: openstack_core_tested or scenario in ['ironic', 'magnum', 'scenario_nfv', 'zun', 'octavia']
+          when: openstack_core_tested or scenario in ['ironic', 'multi-compute-ironic, ''magnum', 'scenario_nfv', 'zun', 'octavia']
 
         - name: Run test-ovn.sh script
           script:
@@ -492,7 +492,8 @@
                 chdir: "{{ kolla_ansible_src_dir }}"
               environment:
                 TLS_ENABLED: "{{ tls_enabled }}"
-          when: scenario == "ironic"
+                MULTI_COMPUTE_IRONIC: "{{ scenario == 'multi-compute-ironic' }}"
+          when: scenario == "ironic" or scenario == "multi-compute-ironic"
 
         - name: Run test-magnum.sh script
           script:

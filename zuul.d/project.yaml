@@ -45,6 +45,7 @@
         - kolla-ansible-rocky9-ironic
         - kolla-ansible-debian-ironic
         - kolla-ansible-ubuntu-ironic
+        - kolla-ansible-scenario-multi-compute-ironic
         - kolla-ansible-rocky9-upgrade
         - kolla-ansible-debian-upgrade:
             voting: false
