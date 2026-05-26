@@ -42,10 +42,6 @@ function check_fluentd_missing_logs {
         /var/log/kolla/fluentd/fluentd.log)
             continue
             ;;
-        # TODO(mnasiadka): Remove me after G/2026.1 release
-        /var/log/kolla/glance-tls-proxy/glance-tls-proxy.log)
-            continue
-            ;;
         /var/log/kolla/gnocchi/*)
             continue
             ;;
@@ -58,10 +54,6 @@ function check_fluentd_missing_logs {
         /var/log/kolla/haproxy/*)
             continue
             ;;
-        # TODO(mnasiadka): Remove me after G/2026.1 release
-        /var/log/kolla/keystone/*apache*)
-            continue
-            ;;
         /var/log/kolla/ironic/dnsmasq.log)
             continue
             ;;
@@ -72,10 +64,6 @@ function check_fluentd_missing_logs {
             continue
             ;;
         /var/log/kolla/neutron/dnsmasq.log)
-            continue
-            ;;
-        # TODO(mnasiadka): Remove me after G/2026.1 release
-        /var/log/kolla/neutron-tls-proxy/neutron-tls-proxy.log)
             continue
             ;;
         /var/log/kolla/opensearch/*)
@@ -91,10 +79,6 @@ function check_fluentd_missing_logs {
             continue
             ;;
         /var/log/kolla/rabbitmq/*upgrade.log)
-            continue
-            ;;
-        # TODO(gkoper) Remove after G/2026.1 release
-        /var/log/kolla/redis/*)
             continue
             ;;
         /var/log/kolla/skyline/skyline.log)
