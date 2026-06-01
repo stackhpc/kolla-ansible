@@ -79,6 +79,7 @@ novncproxy_base_url = {{ nova_novncproxy_fqdn | kolla_url(public_protocol,  nova
 enabled = false
 [spice]
 enabled = true
+require_secure = {{ nova_spice_require_secure | bool }}
 server_listen = {{ api_interface_address }}
 image_compression = {{ nova_spice_image_compression }}
 jpeg_compression = {{ nova_spice_jpeg_compression }}
@@ -254,7 +255,7 @@ cafile = {{ openstack_cacert }}
 valid_interfaces = internal
 
 [notifications]
-{% if enable_ceilometer | bool or enable_designate | bool or enable_neutron_infoblox_ipam_agent | bool %}
+{% if enable_ceilometer | bool or enable_designate | bool %}
 notify_on_state_change = vm_and_task_state
 {% endif %}
 

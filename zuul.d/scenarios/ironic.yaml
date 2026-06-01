@@ -6,12 +6,13 @@
     files: !inherit
       - ^ansible/group_vars/all/(nova|nova-cell|ironic).yml
       - ^ansible/roles/(nova|nova-cell|ironic)/
-      - ^tests/deploy-tenks\.sh$
+      - ^roles/deploy-tenks/
       - ^tests/templates/ironic-overrides\.j2$
       - ^tests/templates/tenks-deploy-config\.yml\.j2$
       - ^tests/test-dashboard\.sh$
       - ^tests/test-ironic\.sh$
     required-projects:
+      - openstack/openstacksdk
       - openstack/tenks
     vars:
       scenario: ironic
@@ -32,6 +33,11 @@
     name: kolla-ansible-debian-trixie-ironic-upgrade
     parent: kolla-ansible-debian-trixie-ironic
     nodeset: kolla-ansible-debian-trixie-16GB
+
+- job:
+    name: kolla-ansible-debian-trixie-aarch64-ironic
+    parent: kolla-ansible-debian-trixie-ironic
+    nodeset: kolla-ansible-debian-trixie-aarch64-16GB
 
 - job:
     name: kolla-ansible-rocky-10-ironic
@@ -65,3 +71,6 @@
         - kolla-ansible-rocky-10-ironic-upgrade
         - kolla-ansible-ubuntu-noble-ironic
         - kolla-ansible-ubuntu-noble-ironic-upgrade
+    check-arm64:
+      jobs:
+        - kolla-ansible-debian-trixie-aarch64-ironic
