@@ -7,7 +7,7 @@
       - ^ansible/group_vars/all/(common|cron|fluentd|glance|haproxy|heat|horizon|keepalived|keystone|loadbalancer|neutron|nova|nova-cell|openvswitch|placement|proxysql|rabbitmq).yml
       - ^ansible/group_vars/baremetal/ansible-python-interpreter.yml
       - ^ansible/(action_plugins|filter_plugins|library|module_utils)/
-      - ^ansible/roles/(common|cron|fluentd|glance|haproxy-config|heat|horizon|keystone|loadbalancer|loadbalancer-config|neutron|nova|nova-cell|openvswitch|placement|proxysql|rabbitmq|service.*)/
+      - ^ansible/roles/(common|cron|fluentd|glance|haproxy-config|heat|horizon|keystone|kolla-toolbox|loadbalancer|loadbalancer-config|neutron|nova|nova-cell|openvswitch|placement|proxysql|rabbitmq|service.*)/
       - ^ansible/templates/
       - ^kolla_ansible/
       - ^roles/kolla-ansible-(deploy|tempest|test-dashboard|reconfigure)/
@@ -146,12 +146,6 @@
         - kolla-ansible-ubuntu-noble
         - kolla-ansible-ubuntu-noble-podman
         - kolla-ansible-ubuntu-noble-upgrade
-    check-arm64:
-      jobs:
-        - kolla-ansible-debian-trixie-aarch64
-        - kolla-ansible-debian-trixie-aarch64-podman
-        - kolla-ansible-debian-trixie-aarch64-upgrade
-        - kolla-ansible-ubuntu-noble-aarch64
     gate:
       jobs:
         - kolla-ansible-debian-trixie
@@ -163,3 +157,9 @@
         - kolla-ansible-ubuntu-noble
         - kolla-ansible-ubuntu-noble-upgrade
         - kolla-ansible-ubuntu-noble-podman
+    experimental:
+      jobs:
+        - kolla-ansible-debian-trixie-aarch64
+        - kolla-ansible-debian-trixie-aarch64-podman
+        - kolla-ansible-debian-trixie-aarch64-upgrade
+        - kolla-ansible-ubuntu-noble-aarch64
