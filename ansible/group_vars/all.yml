@@ -1339,6 +1339,13 @@ distro_python_version: "3"
 
 kolla_base_distro_version: "{{ kolla_base_distro_version_default_map[kolla_base_distro] }}"
 
+###################
+VAST common options
+###################
+# For VAST Cinder and Manila backends if a common appliance is used.
+vast_host:
+vast_port: 443
+
 #############
 # S3 options
 #############

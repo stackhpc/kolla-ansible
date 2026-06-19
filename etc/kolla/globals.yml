@@ -438,6 +438,13 @@ workaround_ansible_issue_8743: yes
 #enable_watcher: "no"
 #enable_zun: "no"
 
+##############
+# VAST options
+##############
+# Common options for VAST Cinder and Manila backends.
+#vast_host:
+#vast_port: 443
+
 #############
 # S3 options
 #############
