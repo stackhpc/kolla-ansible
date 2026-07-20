@@ -171,7 +171,6 @@ manila_data_healthcheck:
 
 manila_share_default_volumes:
   - "{{ node_config_directory }}/manila-share/:{{ container_config_directory }}/:ro"
-  - "/etc/localtime:/etc/localtime:ro"
   - "/run:/run{{ ':shared' if kolla_container_engine == 'docker' else '' }}"
   - "kolla_logs:/var/log/kolla/"
   - "{{ '/dev/shm:/dev/shm' }}"
@@ -179,19 +178,16 @@ manila_share_default_volumes:
   - "{{ kolla_dev_repos_directory ~ '/manila:/dev-mode/manila' if manila_dev_mode | bool else '' }}"
 manila_scheduler_default_volumes:
   - "{{ node_config_directory }}/manila-scheduler/:{{ container_config_directory }}/:ro"
-  - "/etc/localtime:/etc/localtime:ro"
   - "kolla_logs:/var/log/kolla/"
   - "{{ '/dev/shm:/dev/shm' }}"
   - "{{ kolla_dev_repos_directory ~ '/manila:/dev-mode/manila' if manila_dev_mode | bool else '' }}"
 manila_api_default_volumes:
   - "{{ node_config_directory }}/manila-api/:{{ container_config_directory }}/:ro"
-  - "/etc/localtime:/etc/localtime:ro"
   - "kolla_logs:/var/log/kolla/"
   - "{{ '/dev/shm:/dev/shm' }}"
   - "{{ kolla_dev_repos_directory ~ '/manila:/dev-mode/manila' if manila_dev_mode | bool else '' }}"
 manila_data_default_volumes:
   - "{{ node_config_directory }}/manila-data/:{{ container_config_directory }}/:ro"
-  - "/etc/localtime:/etc/localtime:ro"
   - "/dev/:/dev/"
   - "/run:/run{{ ':shared' if kolla_container_engine == 'docker' else '' }}"
   - "kolla_logs:/var/log/kolla/"
@@ -246,6 +242,11 @@ manila_backends:
   - name: "fb1"
     driver: "flashblade"
     enabled: "{{ enable_manila_backend_flashblade | bool }}"
+    protocols:
+      - "NFS"
+  - name: "vast1"
+    driver: "vast"
+    enabled: "{{ enable_manila_backend_vast | bool }}"
     protocols:
       - "NFS"
 
@@ -328,6 +329,13 @@ manila_cephfs_filesystem_name: ""
 ####################
 manila_glusterfs_share_layout: "layout_volume.GlusterfsVolumeMappedLayout"
 manila_glusterfs_nfs_server_type: "Gluster"
+
+####################
+# VAST
+####################
+manila_vast_host: "{{ vast_host }}"
+manila_vast_port: "{{ vast_port }}"
+manila_vast_root_export: "manila"
 
 # Database
 manila_database_enable_tls_internal: "{{ database_enable_tls_internal | bool }}"
