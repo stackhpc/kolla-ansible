@@ -206,6 +206,49 @@ the following parameter must be specified in ``globals.yml``:
 
 Also ``enable_cinder_backend_lvm`` should be set to ``no`` in this case.
 
+VAST Data NVMe/TCP backend
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To use the ``VAST Data NVMe/TCP`` Cinder backend, enable and configure the
+VAST Data Cinder driver in ``globals.yml``:
+
+.. code-block:: yaml
+
+   enable_cinder_backend_vast: true
+
+.. end
+
+The following parameters must also be set in ``globals.yml``:
+
+* ``cinder_vast_ip`` - management IP address of the VAST storage system
+* ``cinder_vast_vippool_name`` - name of the Virtual IP pool configured for
+                                 NVMe/TCP connections
+* ``cinder_vast_subsystem`` - NVMe subsystem identifier
+
+Authentication is configured using either an API token (recommended) or
+username and password. Set the following in ``passwords.yml``:
+
+* ``cinder_vast_api_token`` - management API token (recommended)
+
+If an API token is not available, the following parameter must instead be set
+in ``passwords.yml``:
+
+* ``cinder_vast_password`` - management API password
+
+The following parameters may optionally be overridden in ``globals.yml``:
+
+* ``cinder_backend_vast_name`` - volume backend name,
+                                 (default: ``vast-nvme-tcp``)
+* ``cinder_vast_port`` - management API port (default: ``443``)
+* ``cinder_vast_username`` - management API username (default: ``admin``)
+
+For details on these parameters and additional options, refer to the
+`VAST Data Cinder driver documentation <https://kb.vastdata.com/documentation/docs/vast-driver-for-cinder>`_
+and the `VAST Data Cinder Reference Guide <https://docs.openstack.org/cinder/latest/configuration/block-storage/drivers/vastdata-volume-driver.html>`_.
+
+On the VAST cluster, a VIP pool and NVMe subsystem must be configured for
+block storage operations prior to deploying this backend.
+
 Skip Cinder prechecks for Custom backends
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -299,6 +342,9 @@ that appears in cinder.conf:
    * - Lightbits Labs storage backend
      - cinder_backend_lightbits_name
      - Lightbits-NVMe-TCP
+   * - VAST storage backend
+     - cinder_backend_vast_name
+     - vast-nvme-tcp
 
 These are the names you use when
 `configuring <https://docs.openstack.org/cinder/latest/admin/multi-backend.html#volume-type>`_

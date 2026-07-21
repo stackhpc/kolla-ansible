@@ -871,6 +871,7 @@ enable_cinder_backend_pure_fc: "no"
 enable_cinder_backend_pure_roce: "no"
 enable_cinder_backend_pure_nvme_tcp: "no"
 enable_cinder_backend_lightbits: "no"
+enable_cinder_backend_vast: "no"
 enable_cloudkitty: "no"
 enable_collectd: "no"
 enable_cyborg: "no"
@@ -919,6 +920,7 @@ enable_manila_backend_cephfs_native: "no"
 enable_manila_backend_cephfs_nfs: "no"
 enable_manila_backend_glusterfs_nfs: "no"
 enable_manila_backend_flashblade: "no"
+enable_manila_backend_vast: "no"
 enable_mariabackup: "no"
 enable_masakari: "no"
 enable_masakari_instancemonitor: "{{ enable_masakari | bool }}"
@@ -1382,6 +1384,13 @@ kolla_base_distro_version_default_map: {
 distro_python_version: "3"
 
 kolla_base_distro_version: "{{ kolla_base_distro_version_default_map[kolla_base_distro] }}"
+
+###################
+VAST common options
+###################
+# For VAST Cinder and Manila backends if a common appliance is used.
+vast_host:
+vast_port: 443
 
 #############
 # S3 options
