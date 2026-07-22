@@ -1,0 +1,57 @@
+FROM {{ namespace }}/{{ image_prefix }}ironic-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}"
+{% endblock %}
+
+{% block ironic_vnc_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{% if base_package_type == 'rpm' %}
+    {% set ironic_vnc_packages = [
+        'firefox',
+        'dumb-init',
+        'iproute',
+        'procps',
+        'psmisc',
+        'python3-requests',
+        'x11vnc',
+        'xorg-x11-server-Xvfb'
+    ] %}
+
+{{ macros.install_packages(ironic_vnc_packages | customizable("packages")) }}
+{% elif base_package_type == 'deb' %}
+{{ macros.enable_extra_repos(['mozilla']) }}
+    {% set ironic_vnc_packages = [
+        'dumb-init',
+        'iproute2',
+        'procps',
+        'psmisc',
+        'python3-requests',
+        'software-properties-common',
+        'x11vnc',
+        'xvfb',
+        'firefox-esr'
+    ] %}
+{{ macros.install_packages(ironic_vnc_packages | customizable("packages")) }}
+{% endif %}
+
+ENV DISPLAY_WIDTH=1280
+ENV DISPLAY_HEIGHT=960
+
+ENV APP='fake'
+ENV APP_INFO={}
+ENV READ_ONLY=False
+ENV DEBUG=0
+ENV FIREFOX=firefox-esr
+ENV FIREFOX_CONFIG_DIR=/home/firefox/.mozilla/firefox-esr
+ENV EXTENSION_PATH="/usr/lib/firefox-esr-addons/extensions/@ironic-console.openstack.org"
+
+ADD bin/* /usr/local/bin
+ADD drivers /drivers
+ADD extension /usr/lib/firefox-esr-addons/extensions/@ironic-console.openstack.org
+
+{{ macros.kolla_patch_sources() }}
+
+{% block ironic_vnc_footer %}{% endblock %}
+{% block footer %}{% endblock %}
