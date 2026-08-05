@@ -86,6 +86,14 @@ ironic_services:
     image: "{{ ironic_prometheus_exporter_image_full }}"
     volumes: "{{ ironic_prometheus_exporter_default_volumes + ironic_prometheus_exporter_extra_volumes }}"
     dimensions: "{{ ironic_prometheus_exporter_dimensions }}"
+  ironic-novncproxy:
+    container_name: ironic_novncproxy
+    group: ironic-conductor
+    enabled: "{{ enable_ironic_graphical_console }}"
+    image: "{{ ironic_novncproxy_image_full }}"
+    volumes: "{{ ironic_novncproxy_default_volumes + ironic_novncproxy_extra_volumes }}"
+    dimensions: "{{ ironic_novncproxy_dimensions }}"
+    healthcheck: "{{ ironic_novncproxy_healthcheck }}"
 
 ####################
 # Config Validate
@@ -150,6 +158,14 @@ ironic_http_image: "{{ docker_image_url }}httpd"
 ironic_http_tag: "{{ ironic_tag }}"
 ironic_http_image_full: "{{ ironic_http_image }}:{{ ironic_http_tag }}"
 
+ironic_novncproxy_image: "{{ docker_image_url }}ironic-novncproxy"
+ironic_novncproxy_tag: "{{ ironic_tag }}"
+ironic_novncproxy_image_full: "{{ ironic_novncproxy_image }}:{{ ironic_novncproxy_tag }}"
+
+ironic_vnc_container_image: "{{ docker_image_url }}ironic-vnc-container"
+ironic_vnc_container_tag: "{{ ironic_tag }}"
+ironic_vnc_container_image_full: "{{ ironic_vnc_container_image }}:{{ ironic_vnc_container_tag }}"
+
 ironic_api_dimensions: "{{ default_container_dimensions }}"
 ironic_conductor_dimensions: "{{ default_container_dimensions }}"
 ironic_tftp_dimensions: "{{ default_container_dimensions }}"
@@ -157,6 +173,7 @@ ironic_http_dimensions: "{{ default_container_dimensions }}"
 ironic_dnsmasq_dimensions: "{{ default_container_dimensions }}"
 ironic_pxe_filter_dimensions: "{{ default_container_dimensions }}"
 ironic_prometheus_exporter_dimensions: "{{ default_container_dimensions }}"
+ironic_novncproxy_dimensions: "{{ default_container_dimensions }}"
 
 ironic_api_enable_healthchecks: "{{ enable_container_healthchecks }}"
 ironic_api_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
@@ -203,6 +220,21 @@ ironic_http_healthcheck:
   test: "{% if ironic_http_enable_healthchecks | bool %}{{ ironic_http_healthcheck_test }}{% else %}NONE{% endif %}"
   timeout: "{{ ironic_http_healthcheck_timeout }}"
 
+ironic_novncproxy_enable_healthchecks: "{{ enable_container_healthchecks }}"
+ironic_novncproxy_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
+ironic_novncproxy_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
+ironic_novncproxy_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
+ironic_novncproxy_healthcheck_test:
+  - CMD-SHELL
+  - "healthcheck_curl http://{{ api_interface_address | put_address_in_context('url') }}:{{ ironic_novncproxy_port }}/vnc_lite.html"
+ironic_novncproxy_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
+ironic_novncproxy_healthcheck:
+  interval: "{{ ironic_novncproxy_healthcheck_interval }}"
+  retries: "{{ ironic_novncproxy_healthcheck_retries }}"
+  start_period: "{{ ironic_novncproxy_healthcheck_start_period }}"
+  test: "{% if ironic_novncproxy_enable_healthchecks | bool %}{{ ironic_novncproxy_healthcheck_test }}{% else %}NONE{% endif %}"
+  timeout: "{{ ironic_novncproxy_healthcheck_timeout }}"
+
 ironic_api_default_volumes:
   - "{{ node_config_directory }}/ironic-api/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
@@ -220,6 +252,7 @@ ironic_conductor_default_volumes:
   - "ironic:/var/lib/ironic"
   - "{{ kolla_dev_repos_directory ~ '/ironic:/dev-mode/ironic' if ironic_dev_mode | bool else '' }}"
   - "{{ 'ironic_prometheus_exporter_data:/var/lib/ironic-metrics' if enable_ironic_prometheus_exporter | bool else '' }}"
+  - "{{ '/var/lib/containers:/var/lib/containers' if enable_ironic_graphical_console | bool and kolla_container_engine == 'podman' else '' }}"
 ironic_tftp_default_volumes:
   - "{{ node_config_directory }}/ironic-tftp/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
@@ -247,6 +280,11 @@ ironic_prometheus_exporter_default_volumes:
   - "/etc/localtime:/etc/localtime:ro"
   - "kolla_logs:/var/log/kolla"
   - "ironic_prometheus_exporter_data:/var/lib/ironic-metrics"
+ironic_novncproxy_default_volumes:
+  - "{{ node_config_directory }}/ironic-novncproxy/:{{ container_config_directory }}/:ro"
+  - "kolla_logs:/var/log/kolla/"
+  - "{{ '/dev/shm:/dev/shm' }}"
+  - "{{ kolla_dev_repos_directory ~ '/ironic:/dev-mode/ironic' if ironic_dev_mode | bool else '' }}"
 
 ironic_extra_volumes: "{{ default_extra_volumes }}"
 ironic_api_extra_volumes: "{{ ironic_extra_volumes }}"
@@ -256,6 +294,7 @@ ironic_http_extra_volumes: "{{ ironic_extra_volumes }}"
 ironic_dnsmasq_extra_volumes: "{{ ironic_extra_volumes }}"
 ironic_pxe_filter_extra_volumes: "{{ ironic_extra_volumes }}"
 ironic_prometheus_exporter_extra_volumes: "{{ ironic_extra_volumes }}"
+ironic_novncproxy_extra_volumes: "{{ ironic_extra_volumes }}"
 
 ####################
 # OpenStack

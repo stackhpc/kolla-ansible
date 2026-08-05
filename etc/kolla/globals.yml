@@ -397,6 +397,7 @@ workaround_ansible_issue_8743: true
 #enable_ironic_neutron_agent: false
 #enable_ironic_prometheus_exporter: "{{ enable_ironic | bool and enable_prometheus | bool }}"
 #enable_ironic_pxe_filter: false
+#enable_ironic_graphical_console: false
 #enable_iscsid: "{{ enable_cinder | bool and enable_cinder_backend_iscsi | bool }}"
 #enable_magnum: false
 #enable_manila: false

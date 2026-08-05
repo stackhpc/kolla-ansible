@@ -202,3 +202,12 @@ lock_path = /var/lib/ironic/tmp
 
 [pxe_filter]
 dhcp_hostsdir = /etc/dnsmasq/dhcp-hostsdir
+
+
+{% if enable_ironic_graphical_console | bool %}
+[vnc]
+enabled = true
+port = {{ ironic_novncproxy_port }}
+host_ip = {{ api_interface_address }}
+public_url = http://{{ api_interface_address }}:{{ ironic_novncproxy_port }}/vnc_auto.html
+{% endif %}
