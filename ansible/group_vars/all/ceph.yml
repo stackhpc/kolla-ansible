@@ -4,6 +4,7 @@
 ###################
 # External Ceph - cephx auth enabled (this is the standard nowadays, defaults to yes)
 external_ceph_cephx_enabled: true
+external_ceph_cephx_aes256_enabled: false
 
 ceph_cluster: "ceph"
 

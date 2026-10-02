@@ -500,6 +500,9 @@ workaround_ansible_issue_8743: true
 # External Ceph - cephx auth enabled (this is the standard nowadays, defaults to yes)
 #external_ceph_cephx_enabled: true
 
+# Whether to push updated crypt keys for Libvirt
+#external_ceph_cephx_aes256_enabled: false
+
 # Glance
 #ceph_glance_user: "glance"
 #ceph_glance_pool_name: "images"
