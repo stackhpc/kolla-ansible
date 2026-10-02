@@ -298,11 +298,11 @@
       with_items:
         - uuid: "{{ rbd_aes256_secret_uuid }}"
           name: "ceph-ephemeral-nova-aes256"
-          desc: "Ceph Client Secret for Ephemeral Storage (Nova)"
+          desc: "Ceph AES256 Client Secret for Ephemeral Storage (Nova)"
           enabled: "{{ nova_backend == 'rbd' }}"
         - uuid: "{{ cinder_rbd_aes256_secret_uuid }}"
           name: "ceph-persistent-cinder-aes256"
-          desc: "Ceph Client Secret for Persistent Storage (Cinder)"
+          desc: "Ceph AES256 Client Secret for Persistent Storage (Cinder)"
           enabled: "{{ cinder_backend_ceph }}"
       notify: "{{ libvirt_restart_handlers }}"
 
