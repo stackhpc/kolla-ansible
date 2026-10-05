@@ -11,12 +11,8 @@ network_address_family: "{{ address_family }}"
 kolla_container_engine: "{{ container_engine }}"
 docker_restart_policy: "no"
 
-# TODO(bbezak): Drop the condition once the mirror in VexxHost ca-ymq-1 is
-# reliable.
-{% if nodepool.region != 'ca-ymq-1' %}
 docker_apt_url: "http://{{ zuul_site_mirror_fqdn }}:8080/docker/{{ ansible_facts.distribution | lower }}"
 docker_yum_url: "http://{{ zuul_site_mirror_fqdn }}:8080/docker/centos"
-{% endif %}
 
 {% if container_engine == 'podman' %}
 podman_debug: true
@@ -172,10 +168,6 @@ nova_backend_ceph: "yes"
 rabbitmq_cluster_partition_handling: "autoheal"
 rabbitmq_extra_config:
   cluster_keepalive_interval: 50000
-# TODO(bbezak): Remove in H/2026.2 cycle
-{%     if is_slurp and is_previous_release %}
-enable_redis: "yes"
-{%     endif %}
 
 enable_ceph_rgw: "yes"
 ceph_rgw_hosts:
