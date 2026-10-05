@@ -266,6 +266,15 @@ neutron
 [ironic-neutron-agent:children]
 neutron
 
+[neutron-eswitchd:children]
+compute
+
+[neutron-mlnx-agent:children]
+compute
+
+[neutron-sriov-agent:children]
+compute
+
 # Cinder
 [cinder-api:children]
 cinder

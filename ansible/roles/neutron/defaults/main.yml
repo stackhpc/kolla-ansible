@@ -107,7 +107,7 @@ neutron_services:
     image: "{{ neutron_sriov_agent_image_full }}"
     privileged: True
     enabled: "{{ enable_neutron_sriov | bool and neutron_plugin_agent not in ['vmware_nsxv', 'vmware_nsxv3', 'vmware_nsxp'] }}"
-    host_in_groups: "{{ inventory_hostname in groups['compute'] }}"
+    host_in_groups: "{{ inventory_hostname in groups['neutron-sriov-agent'] }}"
     volumes: "{{ neutron_sriov_agent_default_volumes + neutron_sriov_agent_extra_volumes }}"
     dimensions: "{{ neutron_sriov_agent_dimensions }}"
     healthcheck: "{{ neutron_sriov_agent_healthcheck }}"
@@ -115,7 +115,7 @@ neutron_services:
     container_name: "neutron_mlnx_agent"
     image: "{{ neutron_mlnx_agent_image_full }}"
     enabled: "{{ enable_neutron_mlnx | bool and neutron_plugin_agent not in ['vmware_nsxv', 'vmware_nsxv3', 'vmware_nsxp'] }}"
-    host_in_groups: "{{ inventory_hostname in groups['compute'] }}"
+    host_in_groups: "{{ inventory_hostname in groups['neutron-mlnx-agent'] }}"
     volumes: "{{ neutron_mlnx_agent_default_volumes + neutron_mlnx_agent_extra_volumes }}"
     dimensions: "{{ neutron_mlnx_agent_dimensions }}"
   neutron-eswitchd:
@@ -124,6 +124,7 @@ neutron_services:
     privileged: True
     enabled: "{{ enable_neutron_mlnx | bool and neutron_plugin_agent not in ['vmware_nsxv', 'vmware_nsxv3', 'vmware_nsxp'] }}"
     host_in_groups: "{{ inventory_hostname in groups['compute'] }}"
+    host_in_groups: "{{ inventory_hostname in groups['neutron-eswitchd'] }}"
     volumes: "{{ neutron_eswitchd_default_volumes + neutron_eswitchd_extra_volumes }}"
     dimensions: "{{ neutron_eswitchd_dimensions }}"
   neutron-metadata-agent:

@@ -285,6 +285,15 @@ neutron
 compute
 network
 
+[neutron-eswitchd:children]
+compute
+
+[neutron-mlnx-agent:children]
+compute
+
+[neutron-sriov-agent:children]
+compute
+
 # Cinder
 [cinder-api:children]
 cinder
