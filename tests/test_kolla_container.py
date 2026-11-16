@@ -104,6 +104,7 @@ class ModuleArgsTest(base.BaseTestCase):
             client_timeout=dict(required=False, type='int'),
             healthcheck=dict(required=False, type='dict'),
             ignore_missing=dict(required=False, type='bool', default=False),
+            wait_for_healthy=dict(required=False, type='bool', default=False),
         )
         required_if = [
             ['action', 'pull_image', ['image']],

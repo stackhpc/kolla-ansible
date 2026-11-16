@@ -16,6 +16,7 @@ import grp
 import logging
 import os
 import shlex
+from time import sleep
 
 from ansible.module_utils.kolla_systemd_worker import SystemdWorker
 
@@ -744,6 +745,49 @@ class ContainerWorker(ABC):
     @abstractmethod
     def ensure_image(self):
         pass
+
+    def wait_for_healthy(self):
+        if not self.params.get('wait_for_healthy'):
+            return
+
+        container_info = self.get_container_info()
+        if not container_info:
+            return
+
+        healthcheck = container_info['Config'].get('Healthcheck')
+        if not healthcheck or healthcheck.get('Test', ['NONE'])[0] == 'NONE':
+            return
+
+        timeout = self.params.get('client_timeout', 120)
+        interval = 1
+        elapsed = 0
+
+        while elapsed <= timeout:
+            container_info = self.get_container_info()
+            if not container_info:
+                self.module.fail_json(
+                    changed=True,
+                    msg="Container {} disappeared while waiting for healthy "
+                        "state".format(self.params.get('name'))
+                )
+            health = container_info.get('State', {}).get('Health', {})
+            status = health.get('Status')
+            if status == 'healthy':
+                return
+            if status == 'unhealthy':
+                self.module.fail_json(
+                    changed=True,
+                    msg="Container {} reported unhealthy".format(
+                        self.params.get('name'))
+                )
+            sleep(interval)
+            elapsed += interval
+
+        self.module.fail_json(
+            changed=True,
+            msg="Timed out waiting for container {} to become "
+                "healthy".format(self.params.get('name'))
+        )
 
     def _get_host_timezone(self):
         try:

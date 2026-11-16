@@ -16,7 +16,9 @@
 # limitations under the License.
 
 from ansible.module_utils.basic import AnsibleModule
-import atexit
+import base64
+import fnmatch
+import glob
 import os
 import subprocess
 import tempfile
@@ -29,8 +31,10 @@ module: kolla_ansible_password_check
 short_description: Check kolla-ansible passwords.yml for leaked secrets
 description:
   - Reads a kolla-ansible passwords.yml file and searches the systemd journal
-    for any occurrences of the password values.
-  - Reports which variable names had their secrets found in the journal.
+    for any occurrences of the password values, both in plain text and
+    base64-encoded (e.g. inside HTTP Basic auth headers).
+  - Optionally also searches log files, such as saved kolla-ansible output.
+  - Reports which variable names had their secrets found, and where.
   - Fails if any leaked secrets are detected.
   - All secret values are handled internally and never appear in Ansible
     output, logs, or return values — only variable names are ever surfaced.
@@ -58,6 +62,21 @@ options:
         automatically.
     type: str
     default: ""
+  log_files:
+    description:
+      - List of log file paths or glob patterns on the remote host to search
+        in addition to the journal (e.g. C(/tmp/logs/ansible/*)).
+      - Patterns that match no files produce a warning.
+    type: list
+    elements: str
+    default: []
+  exclude_log_files:
+    description:
+      - List of glob patterns for files matched by C(log_files) that should
+        not be searched.
+    type: list
+    elements: str
+    default: []
   fail_on_leaked:
     description:
       - Whether to fail the task when leaked secrets are found.
@@ -90,10 +109,15 @@ notes:
   - Requires C(journalctl) and C(grep) to be available on the remote host.
   - Must be run with sufficient privileges to read the journal
     (typically requires C(become: true)).
-  - The journal is dumped once to a temporary file and then C(grep -F) is
-    run per password against that file, which is significantly faster than
-    running C(journalctl --grep) once per password.
-  - The temporary file is deleted automatically when the module exits.
+  - The journal and any C(log_files) are read once by a single C(grep -F)
+    run that searches for all passwords and their base64 forms at the same
+    time.
+  - Base64 matching covers a password embedded at any position in a larger
+    base64 string (e.g. C(user:password)), by searching for the three
+    possible 3-byte alignments of its encoding.
+  - The search patterns are written to a temporary file readable only by
+    the module user, which is deleted as soon as the search finishes.
+  - Values containing newlines are skipped.
   - Secret values are B(never) included in module return data, only variable
     names are returned, making this safe to use without C(no_log).
 requirements:
@@ -121,6 +145,16 @@ EXAMPLES = r"""
     journalctl_args: '--since "24 hours ago"'
   become: true
   register: audit_result
+
+# Also search saved kolla-ansible output
+- name: Check kolla passwords for journal and log leaks
+  kolla_ansible_password_check:
+    passwords_file: /etc/kolla/passwords.yml
+    log_files:
+      - /tmp/logs/ansible/*
+    exclude_log_files:
+      - /tmp/logs/ansible/test-*
+  become: true
 """
 
 RETURN = r"""
@@ -132,6 +166,20 @@ leaked_keys:
   elements: str
   returned: always
   sample: ["keystone_db_password", "nova_keystone_password"]
+base64_leaked_keys:
+  description:
+    - Subset of C(leaked_keys) whose values were found base64-encoded.
+  type: list
+  elements: str
+  returned: always
+  sample: ["prometheus_haproxy_password"]
+leaked_sources:
+  description:
+    - Mapping of leaked variable names to where they were found, either
+      C(journal) or a log file path.
+  type: dict
+  returned: always
+  sample: {"prometheus_haproxy_password": ["/tmp/logs/ansible/deploy"]}
 checked_count:
   description: Number of password entries that were actually checked.
   type: int
@@ -140,7 +188,7 @@ checked_count:
 skipped_count:
   description:
     - Number of entries skipped because their value was empty, null,
-      non-string, or shorter than min_password_length.
+      non-string, multi-line, or shorter than min_password_length.
   type: int
   returned: always
   sample: 5
@@ -148,10 +196,11 @@ msg:
   description: Human-readable summary of the check result.
   type: str
   returned: always
-  sample: "No secrets found in journal. Checked 42 entries."
+  sample: "No secrets found in journal or log files. Checked 42 entries."
 leaked_entries:
   description:
-    - Mapping of leaked variable names to their journalctl output.
+    - Mapping of leaked variable names to the matching lines, each prefixed
+      with its source (C(journal:) or the log file path).
     - Only populated when C(return_stdout: true) and leaks are found.
     - The journalctl output will contain the secret value — treat accordingly.
   type: dict
@@ -166,6 +215,13 @@ ignored_leaked_keys:
   elements: str
   returned: always
   sample: ["deployment_ssh_key"]
+ignored_leaked_sources:
+  description:
+    - Mapping of C(ignored_leaked_keys) to where they were found, either
+      C(journal) or a log file path.
+  type: dict
+  returned: always
+  sample: {"database_password": ["/tmp/logs/ansible/deploy", "journal"]}
 """
 
 try:
@@ -208,94 +264,109 @@ def load_passwords(module, passwords_file):
     return data
 
 
-def dump_journal(module, extra_args):
-    """Dump the full journal to a temporary file.
+def b64_variants(value):
+    """Return the base64 forms of value at each of the 3 byte alignments.
 
-    Returns the path to the temp file. The file is registered for deletion
-    via atexit so it is cleaned up even if the module exits unexpectedly.
+    A value embedded in a larger base64 string (e.g. user:password in an
+    HTTP Basic auth header) is encoded at one of three alignments depending
+    on the length of what precedes it. Only characters derived solely from
+    value are kept, so the variants match whatever surrounds it.
     """
-    try:
-        tmp = tempfile.NamedTemporaryFile(
-            prefix="kolla_password_check_",
-            suffix=".log",
-            delete=False,
-        )
-        tmp.close()
-    except OSError as exc:
-        module.fail_json(msg="Failed to create temp file: {}".format(str(exc)))
+    data = value.encode("utf-8")
+    variants = set()
+    for offset in range(3):
+        encoded = base64.b64encode(b"\0" * offset + data).decode("ascii")
+        # Drop characters mixed with the preceding/following bytes.
+        start = -(-8 * offset // 6)
+        end = (8 * (offset + len(data))) // 6
+        variants.add(encoded[start:end])
+    return variants
 
-    # Register cleanup before the subprocess so the file is always removed.
-    atexit.register(_unlink_silent, tmp.name)
 
-    cmd = ["journalctl", "--no-pager"]
+def resolve_log_files(module, log_files, exclude_log_files):
+    """Expand log_files glob patterns into a sorted list of files."""
+    files = set()
+    for pattern in log_files:
+        matched = [path for path in glob.glob(pattern) if os.path.isfile(path)]
+        if not matched:
+            module.warn("No log files match {}".format(pattern))
+        files.update(matched)
+    return sorted(
+        path for path in files
+        if not any(fnmatch.fnmatch(path, ex) for ex in exclude_log_files)
+    )
+
+
+def grep_sources(module, extra_args, log_files, patterns, only_matching):
+    """Search the journal and log_files with a single grep -F run.
+
+    Each result is a (source, text) pair, where source is "journal" or a log
+    file path. With only_matching, returns the set of (source, matched
+    pattern) pairs, otherwise the list of (source, matching line) pairs.
+    """
+    journal_cmd = ["journalctl", "--no-pager"]
     if extra_args:
-        cmd.extend(extra_args.split())
+        journal_cmd.extend(extra_args.split())
+    # -a: never collapse matches into "Binary file matches".
+    # -H/--label: prefix each result with its source; "-" is the journal.
+    grep_cmd = ["grep", "-a", "-F", "-H", "--label=journal"]
+    if only_matching:
+        grep_cmd.append("-o")
+    # Longest first, so a path containing ":" is not split too early.
+    sources = sorted(["journal"] + log_files, key=len, reverse=True)
 
-    try:
-        with open(tmp.name, "w") as fh:
-            result = subprocess.run(
-                cmd,
-                stdout=fh,
-                stderr=subprocess.PIPE,
+    matches = set() if only_matching else []
+
+    # The patterns file holds secret values. NamedTemporaryFile creates it
+    # with mode 0600 and deletes it on close.
+    with tempfile.NamedTemporaryFile(
+        "w", prefix="kolla_password_check_"
+    ) as pattern_file, tempfile.TemporaryFile() as errors:
+        pattern_file.write("\n".join(patterns) + "\n")
+        pattern_file.flush()
+
+        try:
+            journal = subprocess.Popen(
+                journal_cmd, stdout=subprocess.PIPE, stderr=errors)
+            grep = subprocess.Popen(
+                grep_cmd + ["-f", pattern_file.name, "--", "-"] + log_files,
+                stdin=journal.stdout,
+                stdout=subprocess.PIPE,
+                stderr=errors,
             )
-    except OSError as exc:
-        module.fail_json(msg="Failed to run journalctl: {}".format(str(exc)))
+        except OSError as exc:
+            module.fail_json(
+                msg="Failed to run leak scan: {}".format(str(exc)))
+        # Let journalctl receive SIGPIPE if grep exits early.
+        journal.stdout.close()
 
-    if result.returncode != 0:
-        stderr_text = result.stderr.decode("utf-8", errors="replace").strip()
-        module.fail_json(
-            msg="journalctl exited with code {}: {}".format(
-                result.returncode, stderr_text
+        for line in grep.stdout:
+            line = line.decode("utf-8", errors="replace").rstrip("\n")
+            source = next(
+                (s for s in sources if line.startswith(s + ":")), None)
+            if source is None:
+                continue
+            result = (source, line[len(source) + 1:])
+            if only_matching:
+                matches.add(result)
+            else:
+                matches.append(result)
+
+        grep.wait()
+        journal.wait()
+
+        # grep exits 0 = match found, 1 = no match, 2+ = error.
+        if journal.returncode != 0 or grep.returncode > 1:
+            errors.seek(0)
+            module.fail_json(
+                msg="Leak scan failed (journalctl {}, grep {}): {}".format(
+                    journal.returncode,
+                    grep.returncode,
+                    errors.read().decode("utf-8", errors="replace").strip(),
+                )
             )
-        )
 
-    return tmp.name
-
-
-def grep_journal(module, journal_file, value, return_stdout):
-    """Search journal_file for value using grep -F (fixed string).
-
-    Returns (found, matching_lines) where matching_lines is a string of
-    all matching lines (only populated when return_stdout is True).
-    """
-    # -F: fixed string (no regex, no escaping needed)
-    # -q: quiet — exit 0 immediately on first match when return_stdout is False
-    cmd = ["grep", "-F"]
-    if not return_stdout:
-        cmd.append("-q")
-    cmd.extend(["--", value, journal_file])
-
-    try:
-        result = subprocess.run(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-    except OSError as exc:
-        module.fail_json(msg="Failed to run grep: {}".format(str(exc)))
-
-    # grep exits 0 = match found, 1 = no match, 2+ = error.
-    if result.returncode == 0:
-        stdout = result.stdout.decode(
-            "utf-8", errors="replace") if return_stdout else ""
-        return True, stdout
-    elif result.returncode == 1:
-        return False, ""
-    else:
-        stderr_text = result.stderr.decode("utf-8", errors="replace").strip()
-        module.warn(
-            "grep returned exit code {} while checking an entry. "
-            "stderr: {}".format(result.returncode, stderr_text)
-        )
-        return False, ""
-
-
-def _unlink_silent(path):
-    """Delete a file, ignoring errors (used as atexit handler)."""
-    try:
-        os.unlink(path)
-    except OSError:
-        pass
+    return matches
 
 
 def run_module():
@@ -303,6 +374,8 @@ def run_module():
         passwords_file=dict(type="path", required=True),
         min_password_length=dict(type="int", default=8),
         journalctl_args=dict(type="str", default=""),
+        log_files=dict(type="list", elements="str", default=[]),
+        exclude_log_files=dict(type="list", elements="str", default=[]),
         fail_on_leaked=dict(type="bool", default=True),
         return_stdout=dict(type="bool", default=False),
         ignore_keys=dict(type="list", elements="str", default=[]),
@@ -324,19 +397,24 @@ def run_module():
     ignore_keys = set(module.params["ignore_keys"])
 
     passwords = load_passwords(module, passwords_file)
+    log_files = resolve_log_files(
+        module, module.params["log_files"],
+        module.params["exclude_log_files"])
 
     leaked_keys = []
+    base64_leaked_keys = []
+    leaked_sources = {}
     leaked_entries = {}
     ignored_leaked_keys = []
+    ignored_leaked_sources = {}
     checked_count = 0
     skipped_count = 0
 
-    if not module.check_mode:
-        journal_file = dump_journal(module, extra_args)
-
-    for idx, (key, value) in enumerate(passwords.items()):
-        # Skip null, non-string, or suspiciously short values.
-        if not isinstance(value, str):
+    # Map each search string to the (key, is_base64) pairs it came from.
+    patterns = {}
+    for key, value in passwords.items():
+        # Skip null, non-string, multi-line or suspiciously short values.
+        if not isinstance(value, str) or "\n" in value:
             skipped_count += 1
             continue
         if len(value) < min_length:
@@ -344,31 +422,71 @@ def run_module():
             continue
 
         checked_count += 1
+        patterns.setdefault(value, set()).add((key, False))
+        for variant in b64_variants(value):
+            patterns.setdefault(variant, set()).add((key, True))
 
-        # In check mode we report what *would* be checked without hitting
-        # journalctl, since we can't know what the journal contains.
-        if module.check_mode:
+    # In check mode we report what *would* be checked without hitting
+    # journalctl, since we can't know what the journal contains.
+    matched = set()
+    if patterns and not module.check_mode:
+        matched = grep_sources(module, extra_args, log_files, patterns, True)
+
+    # Map each found key to the sources it was found in.
+    found_sources = {}
+    base64_keys = set()
+    for source, match in matched:
+        for key, is_base64 in patterns.get(match, ()):
+            found_sources.setdefault(key, set()).add(source)
+            if is_base64:
+                base64_keys.add(key)
+    found_keys = set(found_sources)
+
+    for key in passwords:
+        if key not in found_keys:
             continue
+        if key in ignore_keys:
+            # Found in journal but explicitly allowed — track separately
+            # for audit purposes but do not treat as a failure.
+            ignored_leaked_keys.append(key)
+            ignored_leaked_sources[key] = sorted(found_sources[key])
+        else:
+            # Only the key name is stored by default — the secret value is
+            # intentionally never written to any Ansible data structure
+            # unless return_stdout is explicitly requested.
+            leaked_keys.append(key)
+            leaked_sources[key] = sorted(found_sources[key])
+            if key in base64_keys:
+                base64_leaked_keys.append(key)
 
-        found, stdout = grep_journal(
-            module, journal_file, value, return_stdout)
-        if found:
-            if key in ignore_keys:
-                # Found in journal but explicitly allowed — track separately
-                # for audit purposes but do not treat as a failure.
-                ignored_leaked_keys.append(key)
-            else:
-                # Only the key name is stored by default — the secret value is
-                # intentionally never written to any Ansible data structure
-                # unless return_stdout is explicitly requested.
-                leaked_keys.append(key)
-                if return_stdout:
-                    leaked_entries[key] = stdout
+    if return_stdout and leaked_keys:
+        # Second pass only for the leaked strings, to collect full lines.
+        leaked_set = set(leaked_keys)
+        wanted = {}
+        for _, match in matched:
+            owners = {k for k, _ in patterns.get(match, ())} & leaked_set
+            if owners:
+                wanted[match] = owners
+        lines = grep_sources(module, extra_args, log_files, wanted, False)
+        for source, line in lines:
+            for match, owners in wanted.items():
+                if match in line:
+                    for key in owners:
+                        leaked_entries.setdefault(key, []).append(
+                            "{}:{}".format(source, line))
+        leaked_entries = {
+            key: "\n".join(lines) + "\n"
+            for key, lines in leaked_entries.items()
+        }
 
+    where = "journal"
+    if log_files:
+        where = "journal or {} log file(s)".format(len(log_files))
     if leaked_keys:
         summary = (
-            "Leaked secrets found in journal for {} variable(s): {}. "
+            "Leaked secrets found in {} for {} variable(s): {}. "
             "Checked {} entries, skipped {}.".format(
+                where,
                 len(leaked_keys),
                 ", ".join(leaked_keys),
                 checked_count,
@@ -377,8 +495,9 @@ def run_module():
         )
     else:
         summary = (
-            "No secrets found in journal. "
+            "No secrets found in {}. "
             "Checked {} entries, skipped {}.""".format(
+                where,
                 checked_count,
                 skipped_count
             )
@@ -392,8 +511,11 @@ def run_module():
     result = dict(
         changed=False,
         leaked_keys=leaked_keys,
+        base64_leaked_keys=base64_leaked_keys,
+        leaked_sources=leaked_sources,
         leaked_entries=leaked_entries,
         ignored_leaked_keys=ignored_leaked_keys,
+        ignored_leaked_sources=ignored_leaked_sources,
         checked_count=checked_count,
         skipped_count=skipped_count,
         msg=summary,

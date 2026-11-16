@@ -107,7 +107,9 @@
   delay: 10
   delegate_to: "{{ groups['opensearch'][0] }}"
   run_once: true
-  when: not ansible_check_mode
+  when:
+    - not ansible_check_mode
+    - enable_opensearch_dashboards | bool
 
 - name: Create OpenSearch Dashboards Index Pattern
   become: true
@@ -135,3 +137,4 @@
   run_once: true
   when:
     - not ansible_check_mode
+    - enable_opensearch_dashboards | bool

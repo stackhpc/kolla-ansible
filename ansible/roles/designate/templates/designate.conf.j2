@@ -60,7 +60,6 @@ endpoint_type = internalURL
 [storage:sqlalchemy]
 connection = mysql+pymysql://{{ designate_database_user }}:{{ designate_database_password }}@{{ designate_database_address }}/{{ designate_database_name }}{{ '?ssl_ca=' ~ openstack_cacert if designate_database_enable_tls_internal | bool }}
 max_retries = 10
-idle_timeout = 3600
 
 {% if service_name == 'designate-sink' and designate_enable_notifications_sink | bool %}
 [service:sink]

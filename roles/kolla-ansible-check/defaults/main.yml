@@ -1,5 +1,11 @@
 ---
 kolla_ansible_check_passwords_file: /etc/kolla/passwords.yml
+# Saved kolla-ansible command output. Test script output is excluded, as
+# those scripts use passwords on purpose.
+kolla_ansible_check_log_files:
+  - /tmp/logs/ansible/*
+kolla_ansible_check_exclude_log_files:
+  - /tmp/logs/ansible/test-*
 kolla_ansible_check_ignore_keys:
   # TODO(mnasiadka): ansible/roles/nova-cell/tasks/external_ceph.yml#L163
   - cinder_rbd_secret_uuid
@@ -19,3 +25,44 @@ kolla_ansible_check_ignore_keys:
   - valkey_master_password
   # TODO(mnasiadka) Fix in ansible/roles/grafana/tasks/post_config.yml#L24
   - prometheus_alertmanager_password
+  # TODO(mnasiadka): Fix service dict loop items (haproxy auth_pass) printed in
+  # ansible/roles/haproxy-config/tasks/main.yml#L21 and other service loops
+  - opensearch_dashboards_password
+  # TODO(mnasiadka): Fix service dict loop items (haproxy backend_http_extra)
+  # printed in ansible/roles/haproxy-config/tasks/main.yml#L21 and other
+  # service loops
+  - prometheus_haproxy_password
+  # TODO(mnasiadka): Fix service dict loop items (haproxy backend_http_extra)
+  # printed in ansible/roles/haproxy-config/tasks/main.yml#L21 and other
+  # service loops
+  - rabbitmq_monitoring_password
+  # TODO(mnasiadka): Fix loop items (with password) printed in results in
+  # ansible/roles/service-ks-register/tasks/main.yml#L92 and #L133
+  - glance_keystone_password
+  # TODO(mnasiadka): Fix loop items (with password) printed in results in
+  # ansible/roles/service-ks-register/tasks/main.yml#L92 and #L133
+  - heat_keystone_password
+  # TODO(mnasiadka): Fix loop items (with password) printed in results in
+  # ansible/roles/service-ks-register/tasks/main.yml#L92 and #L133
+  - neutron_keystone_password
+  # TODO(mnasiadka): Fix loop items (with password) printed in results in
+  # ansible/roles/service-ks-register/tasks/main.yml#L92 and #L133
+  - nova_keystone_password
+  # TODO(mnasiadka): Fix loop items (with password) printed in results in
+  # ansible/roles/service-ks-register/tasks/main.yml#L92 and #L133
+  - placement_keystone_password
+  # TODO(mnasiadka): Fix transport URL in list_cells output printed in
+  # ansible/roles/nova-cell/tasks/get_cell_settings.yml#L2 and #L23
+  - rabbitmq_password
+  # TODO(mnasiadka): Fix loop items (with password) printed in results in
+  # ansible/roles/service-ks-register/tasks/main.yml#L92 and #L133
+  - ironic_keystone_password
+  # TODO(mnasiadka): Fix loop items (with password) printed in results in
+  # ansible/roles/service-ks-register/tasks/main.yml#L92 and #L133
+  - cloudkitty_keystone_password
+  # TODO(mnasiadka): Fix loop items (with password) printed in results in
+  # ansible/roles/service-ks-register/tasks/main.yml#L92 and #L133
+  - masakari_keystone_password
+  # TODO(mnasiadka): Fix loop items (with password) printed in results in
+  # ansible/roles/ironic/tasks/bootstrap.yml#L41
+  - ironic_database_password

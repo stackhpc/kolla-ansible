@@ -1999,3 +1999,94 @@ class TestAttrComp(base.BaseTestCase):
         self.dw = get_DockerWorker(self.fake_data['params'])
         self.assertIsNone(self.dw.parse_healthcheck(
                           self.fake_data['params']['healthcheck']))
+
+
+class TestWaitForHealthy(base.BaseTestCase):
+    def setUp(self):
+        super().setUp()
+
+    def _get_worker(self, extra_params=None):
+        params = {'name': 'my_container', 'client_timeout': 120}
+        if extra_params:
+            params.update(extra_params)
+        return get_DockerWorker(params)
+
+    def test_wait_for_healthy_disabled(self):
+        dw = self._get_worker({'wait_for_healthy': False})
+        dw.get_container_info = mock.Mock()
+        dw.wait_for_healthy()
+        dw.get_container_info.assert_not_called()
+
+    def test_wait_for_healthy_no_healthcheck(self):
+        dw = self._get_worker({'wait_for_healthy': True})
+        dw.get_container_info = mock.Mock(return_value={
+            'Config': {},
+            'State': {}
+        })
+        dw.wait_for_healthy()
+        dw.module.fail_json.assert_not_called()
+
+    def test_wait_for_healthy_none_test(self):
+        dw = self._get_worker({'wait_for_healthy': True})
+        dw.get_container_info = mock.Mock(return_value={
+            'Config': {'Healthcheck': {'Test': ['NONE']}},
+            'State': {}
+        })
+        dw.wait_for_healthy()
+        dw.module.fail_json.assert_not_called()
+
+    @mock.patch('ansible.module_utils.kolla_container_worker.sleep')
+    def test_wait_for_healthy_becomes_healthy(self, mock_sleep):
+        dw = self._get_worker({'wait_for_healthy': True})
+        hc = {'Config': {'Healthcheck': {'Test': ['CMD-SHELL', 'true']}}}
+        dw.get_container_info = mock.Mock(side_effect=[
+            {**hc, 'State': {'Health': {'Status': 'starting'}}},
+            {**hc, 'State': {'Health': {'Status': 'starting'}}},
+            {**hc, 'State': {'Health': {'Status': 'healthy'}}},
+        ])
+        dw.wait_for_healthy()
+        dw.module.fail_json.assert_not_called()
+        self.assertEqual(1, mock_sleep.call_count)
+
+    @mock.patch('ansible.module_utils.kolla_container_worker.sleep')
+    def test_wait_for_healthy_unhealthy(self, mock_sleep):
+        dw = self._get_worker({'wait_for_healthy': True})
+        hc = {'Config': {'Healthcheck': {'Test': ['CMD-SHELL', 'true']}}}
+        dw.module.fail_json.side_effect = SystemExit
+        dw.get_container_info = mock.Mock(side_effect=[
+            {**hc, 'State': {'Health': {'Status': 'starting'}}},
+            {**hc, 'State': {'Health': {'Status': 'unhealthy'}}},
+        ])
+        self.assertRaises(SystemExit, dw.wait_for_healthy)
+        dw.module.fail_json.assert_called_once_with(
+            changed=True,
+            msg="Container my_container reported unhealthy")
+
+    @mock.patch('ansible.module_utils.kolla_container_worker.sleep')
+    def test_wait_for_healthy_timeout(self, mock_sleep):
+        dw = self._get_worker({'wait_for_healthy': True, 'client_timeout': 2})
+        dw.module.fail_json.side_effect = SystemExit
+        dw.get_container_info = mock.Mock(return_value={
+            'Config': {'Healthcheck': {'Test': ['CMD-SHELL', 'true']}},
+            'State': {'Health': {'Status': 'starting'}}
+        })
+        self.assertRaises(SystemExit, dw.wait_for_healthy)
+        dw.module.fail_json.assert_called_once_with(
+            changed=True,
+            msg="Timed out waiting for container my_container to become "
+                "healthy")
+
+    @mock.patch('ansible.module_utils.kolla_container_worker.sleep')
+    def test_wait_for_healthy_container_disappeared(self, mock_sleep):
+        dw = self._get_worker({'wait_for_healthy': True})
+        hc = {'Config': {'Healthcheck': {'Test': ['CMD-SHELL', 'true']}}}
+        dw.module.fail_json.side_effect = SystemExit
+        dw.get_container_info = mock.Mock(side_effect=[
+            {**hc, 'State': {'Health': {'Status': 'starting'}}},
+            None,
+        ])
+        self.assertRaises(SystemExit, dw.wait_for_healthy)
+        dw.module.fail_json.assert_called_once_with(
+            changed=True,
+            msg="Container my_container disappeared while waiting for "
+                "healthy state")

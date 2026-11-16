@@ -242,6 +242,14 @@ options:
     required: False
     default: dict()
     type: dict
+  wait_for_healthy:
+    description:
+      - After starting or restarting, wait for the container to report healthy
+        before returning. Has no effect if the container has no healthcheck
+        configured.
+    required: False
+    default: False
+    type: bool
 author: Sam Yaple
 '''
 
@@ -349,6 +357,7 @@ def generate_module():
         tty=dict(required=False, type='bool', default=False),
         client_timeout=dict(required=False, type='int'),
         ignore_missing=dict(required=False, type='bool', default=False),
+        wait_for_healthy=dict(required=False, type='bool', default=False),
     )
     required_if = [
         ['action', 'pull_image', ['image']],

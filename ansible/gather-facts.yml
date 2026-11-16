@@ -21,8 +21,10 @@
         filter: "{{ kolla_ansible_setup_filter }}"
         gather_subset: "{{ kolla_ansible_setup_gather_subset }}"
       when:
-        # Don't gather if fact caching is in use
-        - not ansible_facts
+        # Don't gather if fact caching is in use. Ignore interpreter
+        # discovery facts, which Ansible stores in the fact cache on the first
+        # module execution, even if facts were never gathered.
+        - ansible_facts.keys() | reject('match', '^discovered_interpreter_') | list | length == 0
   tags: always
 
 # NOTE(pbourke): This case covers deploying subsets of hosts using --limit. The
@@ -57,6 +59,8 @@
         # We gathered facts for all hosts in the batch during the first play.
         # Ensure that we don't try again if they failed.
         - item not in groups["all_using_limit_True"]
-        # Don't gather if fact caching is in use
-        - not hostvars[item].ansible_facts
+        # Don't gather if fact caching is in use. Ignore interpreter
+        # discovery facts, which Ansible stores in the fact cache on the first
+        # module execution, even if facts were never gathered.
+        - hostvars[item].ansible_facts.keys() | reject('match', '^discovered_interpreter_') | list | length == 0
   tags: always

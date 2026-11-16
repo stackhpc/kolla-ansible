@@ -411,6 +411,7 @@ class DockerWorker(ContainerWorker):
                         changed=True,
                         msg="Container timed out",
                         **self.check_container())
+                self.wait_for_healthy()
 
         # We do not want to detach so we wait around for container to exit
         if not self.params.get('detach'):
@@ -478,6 +479,7 @@ class DockerWorker(ContainerWorker):
                         changed=True,
                         msg="Container timed out",
                         **self.check_container())
+                self.wait_for_healthy()
             else:
                 self.dc.stop(name, timeout=graceful_timeout)
                 self.dc.start(name)

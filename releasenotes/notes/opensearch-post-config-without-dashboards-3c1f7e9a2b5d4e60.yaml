@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    Fixes deployment of OpenSearch with ``enable_opensearch_dashboards`` set
+    to ``false``. The OpenSearch post-config tasks no longer wait for the
+    OpenSearch Dashboards API or create its index pattern when Dashboards is
+    disabled.
+    `LP#2173966 <https://launchpad.net/bugs/2173966>`__
