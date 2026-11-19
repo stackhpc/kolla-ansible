@@ -32,7 +32,7 @@ alloy_extra_volumes: "{{ default_extra_volumes }}"
 ####################
 
 loki_port: 3100
-loki_hosts: "{% for host in groups['loki'] %}{{ 'api' | kolla_address(host) }}{% if not loop.last %},{% endif %}{% endfor %}"
+loki_hosts: "{% for host in groups['loki'] | default([]) %}{{ 'api' | kolla_address(host) }}{% if not loop.last %},{% endif %}{% endfor %}"
 
 prometheus_port: 9090
-prometheus_hosts: "{% for host in groups['prometheus'] %}{{ 'api' | kolla_address(host) }}{% if not loop.last %},{% endif %}{% endfor %}"
+prometheus_hosts: "{% for host in groups['prometheus'] | default([]) %}{{ 'api' | kolla_address(host) }}{% if not loop.last %},{% endif %}{% endfor %}"
