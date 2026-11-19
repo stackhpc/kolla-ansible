@@ -1,3 +1,4 @@
+{% if enable_loki %}
 loki.write "local_loki" {
 {% for host in loki_hosts.split(',') %}
     endpoint {
@@ -83,6 +84,8 @@ loki.source.journal "systemd" {
         service_name = "systemd",
     }
 }
+
+{% endif %}
 
 prometheus.remote_write "prometheus" {
   {% for host in prometheus_hosts.split(',') %}
