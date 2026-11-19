@@ -83,3 +83,27 @@ loki.source.journal "systemd" {
         service_name = "systemd",
     }
 }
+
+prometheus.remote_write "prometheus" {
+  {% for host in prometheus_hosts.split(',') %}
+  endpoint {
+    url = "https://{{ host }}:{{ prometheus_port }}/api/v1/push"
+  }
+  {% endfor %}
+}
+
+{% if enable_prometheus_openstack_exporter | bool %}
+prometheus.scrape "openstack_exporter" {
+  scrape_interval = {{ prometheus_openstack_exporter_interval }}
+  scrape_timeout = {{ prometheus_openstack_exporter_timeout }}
+  {% if kolla_enable_tls_internal | bool %}
+  scheme = https
+  {% endif %}
+  honor_labels = true
+  targets = ['{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ prometheus_openstack_exporter_port }}']
+  forward_to = prometheus.remote_write.prometheus.receiver
+  clustering {
+    enabled = true
+  }
+}
+{% endif %}
