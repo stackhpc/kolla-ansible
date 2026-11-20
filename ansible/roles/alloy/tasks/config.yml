@@ -29,9 +29,11 @@
 
 - name: Evaluate shared Prometheus scrape configs
   ansible.builtin.set_fact:
-    # Templates the file, then converts the resulting YAML string into a usable dictionary
     # This allows us to configure scrape targets in one location, and have them consumed by either Alloy or Prometheus
     prometheus_scrape_configs_yaml: "{{ lookup('template', 'templates/prometheus_scrape_configs.yml.j2') | from_yaml }}"
+
+- name: Load Prometheus scrape configs into dict
+  ansible.builtin.set_fact:
     prometheus_scrape_configs: "{{ prometheus_scrape_configs_yaml | from_yaml }}"
 
 - name: Copying over alloy config file
