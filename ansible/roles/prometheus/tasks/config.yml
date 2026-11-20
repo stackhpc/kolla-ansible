@@ -14,6 +14,13 @@
   when:
     - prometheus_copy_certs | bool
 
+- name: Evaluate shared Prometheus scrape configs
+  ansible.builtin.set_fact:
+    # Templates the file, then converts the resulting YAML string into a usable dictionary
+    # This allows us to configure scrape targets in one location, and have them consumed by either Alloy or Prometheus
+    prometheus_scrape_configs_yaml: "{{ lookup('template', 'templates/prometheus_scrape_configs.yml.j2') | from_yaml }}"
+    prometheus_scrape_configs: "{{ prometheus_scrape_configs_yaml | from_yaml }}"
+
 - name: Copying over config.json files
   become: true
   ansible.builtin.template:
