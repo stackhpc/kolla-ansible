@@ -112,3 +112,42 @@ prometheus.scrape "openstack_exporter" {
   }
 }
 {% endif %}
+
+{% for config in prometheus_scrape_configs %}
+prometheus.scrape "{{ config.job_name }}" {
+  {% if config.scrape_interval %}
+  scrape_interval = "{{ config.scrape_interval }}"
+  {% else %}
+  scrape_interval = "{{ prometheus_scrape_interval }}"
+  {% endif %}
+  {% if config.scrape_timeout %}
+  scrape_timeout = "{{ config.scrape_timeout }}"
+  {% else %}
+  scrape_timeout = "{{ prometheus_scrape_timeout }}"
+  {% endif %}
+  {% if config.scheme %}
+  scheme = "{{ config.scheme }}"
+  {% endif %}
+  {% if config.honor_labels %}
+  honor_labels = {{ config.honor_labels }}
+  {% endif %}
+  {% if config.basic_auth %}
+  basic_auth = {{ config.basic_auth }}
+  {% endif %}
+  targets = [
+  {% for static_config in config.static_configs %}
+    {% for target in static_config.targets %}
+    {{ (static_config.labels | from_json ) | combine({"__address__" = "{{ target }}"}) | to_nice_json }}
+    {% endfor %}
+  {% endfor %}
+  ]
+  forward_to = [prometheus.remote_write.prometheus.receiver]
+  clustering {
+    enabled = true
+  }
+}
+{% endfor %}
+
+livedebugging {
+  enabled = true
+}
