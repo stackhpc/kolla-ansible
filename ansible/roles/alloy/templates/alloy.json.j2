@@ -1,5 +1,5 @@
 {
-    "command": "/usr/bin/alloy run /etc/alloy/config.alloy --storage.path=/var/lib/alloy/data --cluster.enabled --cluster.join-addresses={% for host in groups['alloy'] %}{{ 'api' | kolla_address(host) }}:7496{% if not loop.last %},{% endif %}{% endfor %}",
+    "command": "/usr/bin/alloy run /etc/alloy/config.alloy --storage.path=/var/lib/alloy/data --cluster.enabled --cluster.join-addresses={% for host in groups['alloy'] %}{{ 'api' | kolla_address(host) }}:12345{% if not loop.last %},{% endif %}{% endfor %}",
     "config_files": [
         {
             "source": "{{ container_config_directory }}/config.alloy",
