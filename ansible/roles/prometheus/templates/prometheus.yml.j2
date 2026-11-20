@@ -140,7 +140,7 @@ scrape_configs:
 {%     endfor %}
 {% endif %}
 
-{% if enable_prometheus_openstack_exporter | bool %}
+{% if enable_prometheus_openstack_exporter | bool and not (enable_alloy | bool) %}
   - job_name: openstack_exporter
     scrape_interval: {{ prometheus_openstack_exporter_interval }}
     scrape_timeout: {{ prometheus_openstack_exporter_timeout }}
