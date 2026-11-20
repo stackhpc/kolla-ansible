@@ -106,7 +106,7 @@ prometheus.scrape "openstack_exporter" {
   targets = [
     {"__address__" = "{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ prometheus_openstack_exporter_port }}"},
     ]
-  forward_to = prometheus.remote_write.prometheus.receiver
+  forward_to = [prometheus.remote_write.prometheus.receiver]
   clustering {
     enabled = true
   }
