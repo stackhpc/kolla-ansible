@@ -103,7 +103,9 @@ prometheus.scrape "openstack_exporter" {
   scheme = "https"
   {% endif %}
   honor_labels = true
-  targets = ["{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ prometheus_openstack_exporter_port }}"]
+  targets = [
+    {"__address__" = "{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ prometheus_openstack_exporter_port }}"},
+    ]
   forward_to = prometheus.remote_write.prometheus.receiver
   clustering {
     enabled = true
