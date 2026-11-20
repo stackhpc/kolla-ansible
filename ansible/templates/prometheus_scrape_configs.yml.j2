@@ -275,3 +275,4 @@ scrape_configs:
           instance: "{{ hostvars[host].prometheus_instance_label }}"
 {%         endif %}
 {%     endfor %}
+{% endif %}
