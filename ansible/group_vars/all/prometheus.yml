@@ -1,6 +1,11 @@
 ---
 enable_prometheus: false
 
+####################
+# Server
+####################
+enable_prometheus_server_external: false
+
 ############
 # Prometheus
 ############

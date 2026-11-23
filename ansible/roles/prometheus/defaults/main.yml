@@ -146,10 +146,6 @@ prometheus_services:
 prometheus_external_labels:
 #  <labelname>: <labelvalue>
 
-####################
-# Server
-####################
-enable_prometheus_server_external: false
 
 ####################
 # Basic Auth
