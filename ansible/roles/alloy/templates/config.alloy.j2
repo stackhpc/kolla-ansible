@@ -150,7 +150,7 @@ prometheus.scrape "{{ config.job_name }}" {
         "{{ label }}" = "{{ value }}",
             {% endfor %}
         {% endif %}
-    }
+    },
     {% endfor %}
   {% endfor %}
   ]
