@@ -113,7 +113,7 @@ prometheus.scrape "openstack_exporter" {
 }
 {% endif %}
 
-{% for config in prometheus_scrape_configs %}
+{% for config in prometheus_scrape_configs.scrape_configs %}
 prometheus.scrape "{{ config.job_name }}" {
   {% if config.scrape_interval %}
   scrape_interval = "{{ config.scrape_interval }}"
