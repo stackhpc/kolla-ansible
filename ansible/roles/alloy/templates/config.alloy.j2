@@ -149,7 +149,7 @@ prometheus.scrape "{{ config.job_name }}" {
 }
 {% endfor %}
 
-# Define relabel components for any scrape configs with relabel rules
+{# Define relabel components for any scrape configs with relabel rules #}
 {% for config in prometheus_scrape_configs.scrape_configs %}
 {% if config.relabel_configs is defined %}
 prometheus.relabel.{{config.job_name}}_relabel {
@@ -167,7 +167,7 @@ prometheus.relabel.{{config.job_name}}_relabel {
         {% if rule.source_labels is defined %}
         source_labels = [
             {% for label in rule.source_labels %}
-            "{{label}}"
+            "{{label}}",
             {% endfor %}
         ]
         {% endif %}
