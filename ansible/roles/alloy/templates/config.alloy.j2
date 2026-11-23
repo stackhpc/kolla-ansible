@@ -115,23 +115,23 @@ prometheus.scrape "openstack_exporter" {
 
 {% for config in prometheus_scrape_configs.scrape_configs %}
 prometheus.scrape "{{ config.job_name }}" {
-  {% if config.scrape_interval %}
+  {% if config.scrape_interval is defined %}
   scrape_interval = "{{ config.scrape_interval }}"
   {% else %}
   scrape_interval = "{{ prometheus_scrape_interval }}"
   {% endif %}
-  {% if config.scrape_timeout %}
+  {% if config.scrape_timeout is defined %}
   scrape_timeout = "{{ config.scrape_timeout }}"
   {% else %}
   scrape_timeout = "{{ prometheus_scrape_timeout }}"
   {% endif %}
-  {% if config.scheme %}
+  {% if config.scheme is defined %}
   scheme = "{{ config.scheme }}"
   {% endif %}
-  {% if config.honor_labels %}
+  {% if config.honor_labels is defined %}
   honor_labels = {{ config.honor_labels }}
   {% endif %}
-  {% if config.basic_auth %}
+  {% if config.basic_auth is defined %}
   basic_auth = {{ config.basic_auth }}
   {% endif %}
   targets = [
