@@ -138,7 +138,7 @@ prometheus.scrape "{{ config.job_name }}" {
   }
   {% endif %}
   {% if config.metrics_path is defined %}
-  metrics_path = {{ config.metrics_path }}
+  metrics_path = "{{ config.metrics_path }}"
   {% endif %}
   targets = [
   {% for static_config in config.static_configs %}
