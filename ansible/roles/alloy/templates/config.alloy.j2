@@ -139,9 +139,11 @@ prometheus.scrape "{{ config.job_name }}" {
     {% for target in static_config.targets %}
     {
         "__address__" = "{{ target }}",
-        {% for (label, value) in static_config.labels.items() %}
+        {% if static_config.labels is defined %}
+            {% for (label, value) in static_config.labels.items() %}
         "{{ label }}" = "{{ value }}",
-        {% endfor %}
+            {% endfor %}
+        {% endif %}
     }
     {% endfor %}
   {% endfor %}
