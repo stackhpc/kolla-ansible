@@ -44,6 +44,7 @@ prometheus_ceph_mgr_exporter_endpoints: []
 prometheus_openstack_exporter_endpoint_type: "internal"
 prometheus_openstack_exporter_compute_api_version: "latest"
 prometheus_libvirt_exporter_interval: "60s"
+prometheus_openstack_network_exporter_interval: "{{ prometheus_scrape_interval }}"
 
 prometheus_internal_fqdn: "{{ kolla_internal_fqdn }}"
 prometheus_external_fqdn: "{{ kolla_external_fqdn }}"

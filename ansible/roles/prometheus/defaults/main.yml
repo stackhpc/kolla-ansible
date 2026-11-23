@@ -328,11 +328,6 @@ prometheus_openstack_exporter_cmdline_extras: ""
 
 prometheus_alertmanager_external_url: "{{ internal_protocol }}://{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ prometheus_alertmanager_port }}"
 
-############
-# Intervals
-############
-prometheus_openstack_network_exporter_interval: "{{ prometheus_scrape_interval }}"
-
 ###################
 # Copy certificates
 ###################
