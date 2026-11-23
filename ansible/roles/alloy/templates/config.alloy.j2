@@ -1,11 +1,11 @@
 {% if enable_loki %}
 loki.write "local_loki" {
-{% for host in loki_hosts.split(',') %}
+  {% for host in loki_hosts.split(',') %}
     endpoint {
         url = "http://{{ host }}:{{ loki_port }}/loki/api/v1/push"
         batch_size = "1.5MiB"
     }
-{% endfor %}
+  {% endfor %}
 }
 
 local.file_match "kolla_logs" {
@@ -137,7 +137,7 @@ prometheus.scrape "{{ config.job_name }}" {
   targets = [
   {% for static_config in config.static_configs %}
     {% for target in static_config.targets %}
-    {{ (static_config.labels | from_json ) | combine({"__address__" = "{{ target }}"}) | to_nice_json }}
+    {{ (static_config.labels | from_json ) | combine({"__address__": "{{ target }}"}) | to_nice_json }}
     {% endfor %}
   {% endfor %}
   ]
