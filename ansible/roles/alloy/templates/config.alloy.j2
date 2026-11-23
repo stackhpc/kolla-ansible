@@ -95,23 +95,6 @@ prometheus.remote_write "prometheus" {
   {% endfor %}
 }
 
-{% if enable_prometheus_openstack_exporter | bool %}
-prometheus.scrape "openstack_exporter" {
-  scrape_interval = "{{ prometheus_openstack_exporter_interval }}"
-  scrape_timeout = "{{ prometheus_openstack_exporter_timeout }}"
-  {% if kolla_enable_tls_internal | bool %}
-  scheme = "https"
-  {% endif %}
-  honor_labels = true
-  targets = [
-    {"__address__" = "{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ prometheus_openstack_exporter_port }}"},
-    ]
-  forward_to = [prometheus.remote_write.prometheus.receiver]
-  clustering {
-    enabled = true
-  }
-}
-{% endif %}
 
 {% for config in prometheus_scrape_configs.scrape_configs %}
 prometheus.scrape "{{ config.job_name }}" {
@@ -154,11 +137,44 @@ prometheus.scrape "{{ config.job_name }}" {
     {% endfor %}
   {% endfor %}
   ]
+  {#  If we have relabel configs, we forward to a relabel component #}
+  {% if config.relabel_configs is defined %}
+  forward_to = [prometheus.relabel.{{config.job_name}}_relabel.receiver]
+  {% else %} {# Otherwise, we forward straight to Prometheus #}
   forward_to = [prometheus.remote_write.prometheus.receiver]
+  {% endif %}
   clustering {
     enabled = true
   }
 }
+{% endfor %}
+
+# Define relabel components for any scrape configs with relabel rules
+{% for config in prometheus_scrape_configs.scrape_configs %}
+{% if config.relabel_configs is defined %}
+prometheus.relabel.{{config.job_name}}_relabel {
+    forward_to = [prometheus.remote_write.prometheus.receiver]
+
+    {% for rule in config.relabel_configs %}
+    rule {
+        {% if rule.regex is defined %}
+        regex = "{{ rule.regex }}"
+        {% endif %}
+        {% if rule.replacement is defined %}
+        replacement = "{{ rule.replacement }}"
+        {% endif %}
+        target_label = "{{ rule.target_label }}"
+        {% if rule.source_labels is defined %}
+        source_labels = [
+            {% for label in rule.source_labels %}
+            "{{label}}"
+            {% endfor %}
+        ]
+        {% endif %}
+    }
+    {% endfor %}
+}
+{% endif %}
 {% endfor %}
 
 livedebugging {
