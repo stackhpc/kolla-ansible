@@ -112,7 +112,7 @@ prometheus.scrape "{{ config.job_name }}" {
   scheme = "{{ config.scheme }}"
   {% endif %}
   {% if config.honor_labels is defined %}
-  honor_labels = {{ config.honor_labels }}
+  honor_labels = {{ config.honor_labels | string | lower }}
   {% endif %}
   {% if config.basic_auth is defined %}
   basic_auth {
@@ -152,7 +152,7 @@ prometheus.scrape "{{ config.job_name }}" {
 {# Define relabel components for any scrape configs with relabel rules #}
 {% for config in prometheus_scrape_configs.scrape_configs %}
 {% if config.relabel_configs is defined %}
-prometheus.relabel.{{config.job_name}}_relabel {
+prometheus.relabel "{{config.job_name}}_relabel" {
     forward_to = [prometheus.remote_write.prometheus.receiver]
 
     {% for rule in config.relabel_configs %}
