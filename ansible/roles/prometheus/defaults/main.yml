@@ -165,6 +165,9 @@ prometheus_basic_auth_users_default:
   - username: "{{ prometheus_skyline_user }}"
     password: "{{ prometheus_skyline_password }}"
     enabled: "{{ enable_skyline }}"
+  - username: "{{ prometheus_alloy_user }}"
+    password: "{{ prometheus_alloy_password }}"
+    enabled: "{{ enable_alloy }}"
 
 prometheus_basic_auth_users_extra: []
 ####################

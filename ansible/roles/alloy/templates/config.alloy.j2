@@ -93,6 +93,11 @@ prometheus.remote_write "prometheus" {
     url = "http://{{ host }}:{{ prometheus_port }}/api/v1/push"
   }
   {% endfor %}
+
+  basic_auth {
+    username = "{{ prometheus_alloy_user }}"
+    password = "{{ prometheus_alloy_password }}"
+  }
 }
 
 
