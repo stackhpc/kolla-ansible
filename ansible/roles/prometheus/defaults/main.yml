@@ -322,6 +322,7 @@ prometheus_server_command: >-
   --web.listen-address {{ api_interface_address | put_address_in_context('url') }}:{{ prometheus_port }}
   --web.external-url={{ prometheus_public_endpoint if enable_prometheus_server_external else prometheus_internal_endpoint }}
   --storage.tsdb.path /var/lib/prometheus{% if prometheus_cmdline_extras %} {{ prometheus_cmdline_extras }}{% endif %}
+  {% if enable_alloy%}--web.enable-remote-write-receiver{% endif %}
 
 prometheus_blackbox_exporter_cmdline_extras: ""
 prometheus_elasticsearch_exporter_cmdline_extras: ""
