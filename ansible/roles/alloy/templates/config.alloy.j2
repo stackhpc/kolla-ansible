@@ -91,13 +91,13 @@ prometheus.remote_write "prometheus" {
   {% for host in prometheus_hosts.split(',') %}
   endpoint {
     url = "http://{{ host }}:{{ prometheus_port }}/api/v1/push"
+    basic_auth {
+      username = "{{ prometheus_alloy_user }}"
+      password = "{{ prometheus_alloy_password }}"
+    }
   }
   {% endfor %}
 
-  basic_auth {
-    username = "{{ prometheus_alloy_user }}"
-    password = "{{ prometheus_alloy_password }}"
-  }
 }
 
 
