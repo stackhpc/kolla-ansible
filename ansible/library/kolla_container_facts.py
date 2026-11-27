@@ -156,7 +156,7 @@ class ContainerFactsWorker():
 
     def get_containers_names(self):
         """Handles when module is called with action get_containers_names"""
-        containers = self.client.containers.list()
+        containers = self.client.containers.list(ignore_removed=True)
         names = [cont.name for cont in containers]
         self.result['container_names'] = names
 
@@ -167,11 +167,19 @@ class ContainerFactsWorker():
         get_all_containers = args.get('get_all_containers', False)
         self.result['containers'] = dict()
 
-        containers = self.client.containers.list(all=get_all_containers)
+        # NOTE: ignore_removed skips containers removed while they are
+        # listed, e.g. a short-lived container started with --rm.
+        containers = self.client.containers.list(all=get_all_containers,
+                                                 ignore_removed=True)
         for container in containers:
-            container.reload()
             container_name = container.name
             if names and container_name not in names:
+                continue
+            try:
+                container.reload()
+            except self.containerError.NotFound:
+                # NOTE: The container was removed after it was listed,
+                # e.g. a short-lived container started with --rm.
                 continue
             # NOTE(r-krcek): For performance reasons don't include
             # healthcheck logs. It can contain MBs worth of data!
@@ -290,8 +298,8 @@ def main():
         result = bool(getattr(cfw, module.params.get('action'))())
         module.exit_json(result=result, **cfw.result)
     except Exception:
-        module.fail_json(changed=True, msg=repr(format_exc()),
-                         **getattr(cfw, 'result', {}))
+        result = dict(getattr(cfw, 'result', {}), changed=True)
+        module.fail_json(msg=repr(format_exc()), **result)
 
 
 if __name__ == "__main__":

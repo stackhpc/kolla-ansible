@@ -154,7 +154,8 @@ class TestContainerFacts(base.BaseTestCase):
         self.assertDictEqual(
             self.fake_data['containers'][0],
             self.dfw.result['containers']['my_container'])
-        self.dfw.client.containers.list.assert_called_once_with(all=False)
+        self.dfw.client.containers.list.assert_called_once_with(
+            all=False, ignore_removed=True)
 
     def test_get_containers_multi(self):
         self.dfw = get_DockerFactsWorker(
@@ -168,7 +169,8 @@ class TestContainerFacts(base.BaseTestCase):
         self.assertIn('my_container', self.dfw.result['containers'])
         self.assertNotIn('my_container', self.dfw.result)
         self.assertNotIn('exited_container', self.dfw.result['containers'])
-        self.dfw.client.containers.list.assert_called_once_with(all=False)
+        self.dfw.client.containers.list.assert_called_once_with(
+            all=False, ignore_removed=True)
 
     def test_get_containers_all_running(self):
         self.dfw = get_DockerFactsWorker({'name': [],
@@ -181,7 +183,8 @@ class TestContainerFacts(base.BaseTestCase):
         self.assertIn('my_container', self.dfw.result['containers'])
         self.assertNotIn('my_container', self.dfw.result)
         self.assertNotIn('exited_container', self.dfw.result['containers'])
-        self.dfw.client.containers.list.assert_called_once_with(all=False)
+        self.dfw.client.containers.list.assert_called_once_with(
+            all=False, ignore_removed=True)
 
     def test_get_containers_all_including_stopped(self):
         self.dfw = get_DockerFactsWorker({'name': [],
@@ -195,7 +198,55 @@ class TestContainerFacts(base.BaseTestCase):
         self.assertFalse(self.dfw.result['changed'])
         self.assertIn('my_container', self.dfw.result['containers'])
         self.assertIn('exited_container', self.dfw.result['containers'])
-        self.dfw.client.containers.list.assert_called_once_with(all=True)
+        self.dfw.client.containers.list.assert_called_once_with(
+            all=True, ignore_removed=True)
+
+    def test_get_containers_disappeared(self):
+        # A container removed after it was listed (e.g. a short-lived
+        # container started with --rm) is skipped.
+        self.dfw = get_DockerFactsWorker({'name': [],
+                                          'action': 'get_containers',
+                                          'args': {
+                                              'get_all_containers': True}})
+        all_containers = get_containers(self.fake_data['containers'], all=True)
+        all_containers[1].reload.side_effect = docker_error.NotFound(
+            "not found")
+        self.dfw.client.containers.list.return_value = all_containers
+        self.dfw.get_containers()
+
+        self.assertIn('my_container', self.dfw.result['containers'])
+        self.assertNotIn('exited_container', self.dfw.result['containers'])
+
+    def test_get_containers_not_requested_not_reloaded(self):
+        self.dfw = get_DockerFactsWorker({'name': ['my_container'],
+                                          'action': 'get_containers',
+                                          'args': {
+                                              'get_all_containers': True}})
+        all_containers = get_containers(self.fake_data['containers'], all=True)
+        all_containers[1].reload.side_effect = docker_error.NotFound(
+            "not found")
+        self.dfw.client.containers.list.return_value = all_containers
+        self.dfw.get_containers()
+
+        self.assertEqual(['my_container'],
+                         list(self.dfw.result['containers']))
+        all_containers[0].reload.assert_called_once_with()
+        all_containers[1].reload.assert_not_called()
+
+    @mock.patch.object(kcf, 'DockerFactsWorker')
+    @mock.patch.object(kcf, 'AnsibleModule')
+    def test_main_failure(self, mock_module, mock_worker):
+        module = mock_module.return_value
+        module.params = {'container_engine': 'docker',
+                         'action': 'get_containers'}
+        mock_worker.return_value.result = {'changed': False}
+        mock_worker.return_value.get_containers.side_effect = Exception(
+            'failure')
+        kcf.main()
+
+        module.fail_json.assert_called_once_with(changed=True,
+                                                 msg=mock.ANY)
+        self.assertIn('failure', module.fail_json.call_args[1]['msg'])
 
     def test_get_containers_env(self):
         fake_env = dict(KOLLA_BASE_DISTRO='ubuntu',
@@ -352,6 +403,8 @@ class TestContainerFacts(base.BaseTestCase):
         self.assertFalse(self.dfw.result['changed'])
         self.assertIn('container_names', self.dfw.result)
         self.assertEqual(self.dfw.result['container_names'], expected_names)
+        self.dfw.client.containers.list.assert_called_once_with(
+            ignore_removed=True)
 
     def test_get_containers_names_no_containers(self):
         """Test fetching container names when no containers exist"""
